@@ -50,7 +50,6 @@ export const CtaSection: React.FC<CtaSectionProps> = ({ onOpenContact }) => {
             {/* Primary Action */}
             <button
               onClick={onOpenContact}
-              data-cursor="CONTACT"
               className="w-full sm:w-auto px-7 py-3.5 rounded-full bg-white text-black font-semibold text-sm tracking-normal hover:bg-slate-100 transition-all duration-200 shadow-[0_0_24px_rgba(255,255,255,0.2)] hover:shadow-[0_0_32px_rgba(255,255,255,0.35)] flex items-center justify-center gap-2 group active:scale-95"
             >
               <span>Start a Conversation</span>
@@ -60,7 +59,6 @@ export const CtaSection: React.FC<CtaSectionProps> = ({ onOpenContact }) => {
             {/* Secondary Action */}
             <button
               onClick={scrollToTop}
-              data-cursor="TOP"
               className="w-full sm:w-auto px-7 py-3.5 rounded-full bg-white/[0.04] hover:bg-white/[0.08] text-slate-200 hover:text-white border border-white/15 backdrop-blur-md font-semibold text-sm tracking-normal transition-all duration-200 flex items-center justify-center gap-2 group active:scale-95"
             >
               <span>Back to Top</span>

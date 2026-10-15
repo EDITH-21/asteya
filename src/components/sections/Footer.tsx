@@ -50,7 +50,6 @@ export const Footer: React.FC<FooterProps> = ({ onOpenContact }) => {
           {/* Scroll To Top */}
           <button
             onClick={scrollToTop}
-            data-cursor="TOP"
             className="w-9 h-9 rounded-full bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-300 hover:text-white hover:border-indigo-400/50 hover:bg-white/[0.08] transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
             aria-label="Scroll back to top"
           >

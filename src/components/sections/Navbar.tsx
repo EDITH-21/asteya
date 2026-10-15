@@ -87,7 +87,6 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenContact }) => {
             {/* Logo Brand Anchor */}
             <a
               href="#"
-              data-cursor="ASTEYA"
               aria-label="Asteya Home"
               className="group flex items-center gap-2 flex-shrink-0"
             >
@@ -106,7 +105,6 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenContact }) => {
                     key={item.name}
                     href={item.href}
                     onClick={(e) => handleNavClick(e, item.href)}
-                    data-cursor={item.name}
                     className={`relative px-3 py-1.5 text-xs font-sans font-medium tracking-normal transition-colors duration-200 rounded-full ${
                       isActive
                         ? "text-white font-semibold"
@@ -130,7 +128,6 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenContact }) => {
             <div className="flex items-center gap-2.5 sm:gap-3 flex-shrink-0">
               <button
                 onClick={onOpenContact}
-                data-cursor="TALK"
                 className="group inline-flex items-center gap-2 px-4 sm:px-5 py-2 rounded-full text-xs font-sans font-semibold tracking-wide text-white bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-500 hover:to-indigo-600 border border-indigo-400/30 transition-all duration-200 shadow-[0_2px_12px_rgba(99,102,241,0.25)] hover:shadow-[0_4px_20px_rgba(99,102,241,0.4)] active:scale-95"
               >
                 <span>Let&apos;s Talk</span>

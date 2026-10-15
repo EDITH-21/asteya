@@ -256,7 +256,6 @@ export const Hero: React.FC<HeroProps> = () => {
           {/* Primary CTA */}
           <button
             onClick={scrollToAbout}
-            data-cursor="EXPLORE"
             className="w-full sm:w-auto px-7 py-3 rounded-full bg-white text-black font-semibold text-sm tracking-normal hover:bg-slate-100 transition-all duration-200 shadow-[0_0_24px_rgba(255,255,255,0.2)] hover:shadow-[0_0_32px_rgba(255,255,255,0.35)] flex items-center justify-center gap-2 group active:scale-95"
           >
             <span>Explore Asteya</span>
@@ -266,7 +265,6 @@ export const Hero: React.FC<HeroProps> = () => {
           {/* Secondary CTA */}
           <button
             onClick={scrollToServices}
-            data-cursor="SERVICES"
             className="w-full sm:w-auto px-7 py-3 rounded-full bg-white/[0.04] hover:bg-white/[0.08] text-slate-200 hover:text-white border border-white/15 backdrop-blur-md font-semibold text-sm tracking-normal transition-all duration-200 flex items-center justify-center gap-2 group active:scale-95"
           >
             <span>View Our Work</span>

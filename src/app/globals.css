@@ -105,14 +105,7 @@ body {
   background: radial-gradient(circle at 50% 50%, rgba(99, 102, 241, 0.08) 0%, transparent 70%);
 }
 
-/* Hide cursor on touch devices or when custom cursor is active */
-@media (hover: hover) and (pointer: fine) {
-  body.has-custom-cursor,
-  body.has-custom-cursor a,
-  body.has-custom-cursor button {
-    cursor: none !important;
-  }
-}
+
 
 /* Respect reduced motion */
 @media (prefers-reduced-motion: reduce) {

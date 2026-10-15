@@ -67,7 +67,6 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onOpenContact 
                 viewport={{ once: true, amount: 0.15 }}
                 transition={{ duration: 0.5, delay: index * 0.06 }}
                 onClick={onOpenContact}
-                data-cursor="DISCUSS"
                 className="group relative rounded-2xl bg-gradient-to-b from-white/[0.04] to-white/[0.01] border border-white/[0.08] hover:border-indigo-500/40 p-7 flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_16px_36px_-12px_rgba(99,102,241,0.22)] cursor-pointer overflow-hidden"
               >
                 {/* Subtle dynamic background gradient on hover */}

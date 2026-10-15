@@ -19,6 +19,7 @@ export const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) =
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   // Close on Escape key
   useEffect(() => {
@@ -43,17 +44,35 @@ export const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) =
     };
   }, [isOpen]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    setTimeout(() => {
+    setErrorMessage("");
+
+    try {
+      const res = await fetch("/api/enquiries", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setErrorMessage(data.error || "Unable to submit your message. Please try again.");
+      } else {
+        setIsSubmitted(true);
+      }
+    } catch {
+      setErrorMessage("Network connection error. Please try again.");
+    } finally {
       setIsSubmitting(false);
-      setIsSubmitted(true);
-    }, 1000);
+    }
   };
 
   const handleReset = () => {
     setIsSubmitted(false);
+    setErrorMessage("");
     setFormData({ name: "", email: "", type: "Digital Product / Web", message: "" });
     onClose();
   };
@@ -116,6 +135,12 @@ export const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) =
                 <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
                   Tell us about your venture, product vision, or technical requirements. Our engineering leadership will get back to you within 24 hours.
                 </p>
+
+                {errorMessage && (
+                  <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-xs text-red-300 leading-relaxed">
+                    {errorMessage}
+                  </div>
+                )}
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                   <div>

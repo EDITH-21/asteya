@@ -6,7 +6,8 @@
     "dev": "next dev --webpack",
     "build": "next build --webpack",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "admin:seed": "node scripts/seed-admin.mjs"
   },
   "dependencies": {
     "@types/canvas-confetti": "^1.9.0",

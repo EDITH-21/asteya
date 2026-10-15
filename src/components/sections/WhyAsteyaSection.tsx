@@ -49,7 +49,6 @@ export const WhyAsteyaSection: React.FC = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.2 }}
                 transition={{ duration: 0.5, delay: index * 0.08 }}
-                data-cursor="CORE"
                 className="group relative rounded-2xl bg-gradient-to-b from-white/[0.04] to-white/[0.01] border border-white/[0.08] hover:border-indigo-500/40 p-7 sm:p-8 transition-all duration-300 hover:shadow-[0_12px_32px_-10px_rgba(99,102,241,0.18)]"
               >
                 <div className="flex items-start justify-between mb-3">

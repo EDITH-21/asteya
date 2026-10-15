@@ -65,7 +65,6 @@ export const ApproachSection: React.FC = () => {
             <button
               key={stage.number}
               onClick={() => setActiveStage(idx)}
-              data-cursor={`STAGE ${stage.number}`}
               className={`flex items-center gap-2 px-4 sm:px-5 py-2 rounded-full font-sans text-xs sm:text-sm tracking-normal transition-all duration-200 border ${
                 activeStage === idx
                   ? "bg-white/10 border-indigo-400/50 text-white font-medium shadow-[0_0_16px_rgba(99,102,241,0.2)]"
