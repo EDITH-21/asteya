@@ -12,16 +12,16 @@ export const CustomCursor: React.FC = () => {
   const mouseX = useMotionValue(-100);
   const mouseY = useMotionValue(-100);
 
-  const springConfig = { damping: 28, stiffness: 350, mass: 0.5 };
+  const springConfig = { damping: 30, stiffness: 320, mass: 0.4 };
   const cursorX = useSpring(mouseX, springConfig);
   const cursorY = useSpring(mouseY, springConfig);
 
-  const dotConfig = { damping: 40, stiffness: 900 };
+  const dotConfig = { damping: 40, stiffness: 850 };
   const dotX = useSpring(mouseX, dotConfig);
   const dotY = useSpring(mouseY, dotConfig);
 
   useEffect(() => {
-    // Check touch screen or reduced motion
+    // Disable on touch devices or prefers-reduced-motion
     const isTouch = "ontouchstart" in window || navigator.maxTouchPoints > 0;
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -29,8 +29,10 @@ export const CustomCursor: React.FC = () => {
       return;
     }
 
-    setIsEnabled(true);
-    document.body.classList.add("has-custom-cursor");
+    const rafId = requestAnimationFrame(() => {
+      setIsEnabled(true);
+      document.body.classList.add("has-custom-cursor");
+    });
 
     const moveMouse = (e: MouseEvent) => {
       mouseX.set(e.clientX);
@@ -44,15 +46,13 @@ export const CustomCursor: React.FC = () => {
       const target = e.target as HTMLElement | null;
       if (!target) return;
 
-      const interactive = target.closest("a, button, [data-cursor], input, textarea, [role='button']");
+      const interactive = target.closest("a, button, [data-cursor], input, textarea, select, [role='button']");
       if (interactive) {
         setIsHovered(true);
         const customText = interactive.getAttribute("data-cursor");
         if (customText) {
           setCursorText(customText);
-        } else if (interactive.tagName === "BUTTON" || interactive.closest("button")) {
-          setCursorText("");
-        } else if (interactive.tagName === "A") {
+        } else {
           setCursorText("");
         }
       } else {
@@ -67,6 +67,7 @@ export const CustomCursor: React.FC = () => {
     document.addEventListener("mouseover", handleMouseOver);
 
     return () => {
+      cancelAnimationFrame(rafId);
       document.body.classList.remove("has-custom-cursor");
       window.removeEventListener("mousemove", moveMouse);
       window.removeEventListener("mousedown", handleMouseDown);
@@ -88,17 +89,17 @@ export const CustomCursor: React.FC = () => {
           translateY: "-50%",
         }}
         animate={{
-          width: cursorText ? 80 : isHovered ? 48 : 28,
-          height: cursorText ? 80 : isHovered ? 48 : 28,
-          borderColor: isHovered ? "rgba(129, 140, 248, 0.8)" : "rgba(255, 255, 255, 0.25)",
-          backgroundColor: isHovered ? "rgba(99, 102, 241, 0.12)" : "rgba(255, 255, 255, 0.02)",
-          scale: isClicking ? 0.85 : 1,
+          width: cursorText ? 64 : isHovered ? 40 : 24,
+          height: cursorText ? 64 : isHovered ? 40 : 24,
+          borderColor: isHovered ? "rgba(129, 140, 248, 0.7)" : "rgba(255, 255, 255, 0.2)",
+          backgroundColor: isHovered ? "rgba(99, 102, 241, 0.08)" : "rgba(255, 255, 255, 0.015)",
+          scale: isClicking ? 0.88 : 1,
         }}
-        transition={{ type: "spring", stiffness: 350, damping: 25 }}
-        className="rounded-full border backdrop-blur-[1px] flex items-center justify-center text-center shadow-[0_0_20px_rgba(99,102,241,0.2)]"
+        transition={{ type: "spring", stiffness: 350, damping: 26 }}
+        className="rounded-full border backdrop-blur-[1px] flex items-center justify-center text-center shadow-[0_0_16px_rgba(99,102,241,0.18)]"
       >
         {cursorText && (
-          <span className="text-[10px] font-mono tracking-widest uppercase font-bold text-indigo-200">
+          <span className="text-[9px] font-sans tracking-wider uppercase font-semibold text-indigo-200">
             {cursorText}
           </span>
         )}
@@ -113,7 +114,7 @@ export const CustomCursor: React.FC = () => {
           translateY: "-50%",
         }}
         animate={{
-          scale: isClicking ? 1.5 : isHovered ? 0 : 1,
+          scale: isClicking ? 1.4 : isHovered ? 0 : 1,
           opacity: isHovered ? 0 : 1,
         }}
         className="w-1.5 h-1.5 rounded-full bg-indigo-400 shadow-[0_0_8px_#818cf8]"

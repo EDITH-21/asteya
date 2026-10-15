@@ -2,12 +2,12 @@
 
 import React, { useEffect, useRef } from "react";
 import { motion, useInView } from "framer-motion";
-import { Cpu, ShieldCheck, Zap, Layers, Sparkles } from "lucide-react";
+import { Cpu, Zap } from "lucide-react";
 
 export const AboutSection: React.FC = () => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const isInView = useInView(containerRef, { once: false, amount: 0.25 });
+  const isInView = useInView(containerRef, { once: false, amount: 0.2 });
 
   // Interactive Digital Architecture Canvas
   useEffect(() => {
@@ -28,7 +28,6 @@ export const AboutSection: React.FC = () => {
 
     window.addEventListener("resize", handleResize);
 
-    // Nodes for abstract digital architecture
     interface Node {
       x: number;
       y: number;
@@ -53,20 +52,19 @@ export const AboutSection: React.FC = () => {
         const cy = height / 2 + Math.sin(angle) * (radiusDist * 0.7);
 
         nodes.push({
-          x: cx + (Math.random() - 0.5) * 40,
-          y: cy + (Math.random() - 0.5) * 40,
+          x: cx + (Math.random() - 0.5) * 35,
+          y: cy + (Math.random() - 0.5) * 35,
           targetX: cx,
           targetY: cy,
-          vx: (Math.random() - 0.5) * 0.4,
-          vy: (Math.random() - 0.5) * 0.4,
-          radius: l === 0 ? 3.5 : l === 1 ? 2.5 : 2,
+          vx: (Math.random() - 0.5) * 0.3,
+          vy: (Math.random() - 0.5) * 0.3,
+          radius: l === 0 ? 3.2 : l === 1 ? 2.4 : 1.8,
           layer: l,
           pulse: Math.random() * Math.PI * 2,
         });
       }
     }
 
-    // Interactive pointer
     let pointer = { x: width / 2, y: height / 2, active: false };
     const handlePointerMove = (e: MouseEvent) => {
       const rect = canvas.getBoundingClientRect();
@@ -95,22 +93,21 @@ export const AboutSection: React.FC = () => {
         0,
         width / 2,
         height / 2,
-        180
+        170
       );
-      coreGrad.addColorStop(0, "rgba(99, 102, 241, 0.15)");
-      coreGrad.addColorStop(0.5, "rgba(6, 182, 212, 0.05)");
+      coreGrad.addColorStop(0, "rgba(99, 102, 241, 0.12)");
+      coreGrad.addColorStop(0.5, "rgba(6, 182, 212, 0.04)");
       coreGrad.addColorStop(1, "transparent");
       ctx.fillStyle = coreGrad;
       ctx.beginPath();
-      ctx.arc(width / 2, height / 2, 180, 0, Math.PI * 2);
+      ctx.arc(width / 2, height / 2, 170, 0, Math.PI * 2);
       ctx.fill();
 
       // Update and draw connections
       for (let i = 0; i < nodes.length; i++) {
         const n1 = nodes[i];
-        n1.pulse += 0.03;
+        n1.pulse += 0.025;
 
-        // Drift slowly around origin
         n1.x += n1.vx;
         n1.y += n1.vy;
 
@@ -124,8 +121,8 @@ export const AboutSection: React.FC = () => {
           const pdy = pointer.y - n1.y;
           const pdist = Math.sqrt(pdx * pdx + pdy * pdy);
           if (pdist < 100) {
-            n1.x -= (pdx / pdist) * 2;
-            n1.y -= (pdy / pdist) * 2;
+            n1.x -= (pdx / pdist) * 1.8;
+            n1.y -= (pdy / pdist) * 1.8;
           }
         }
 
@@ -137,7 +134,7 @@ export const AboutSection: React.FC = () => {
           const dist = Math.sqrt(dx * dx + dy * dy);
 
           if (dist < 110) {
-            const alpha = (1 - dist / 110) * (n1.layer === n2.layer ? 0.35 : 0.18);
+            const alpha = (1 - dist / 110) * (n1.layer === n2.layer ? 0.3 : 0.15);
             ctx.strokeStyle =
               n1.layer === 0
                 ? `rgba(129, 140, 248, ${alpha})`
@@ -150,36 +147,33 @@ export const AboutSection: React.FC = () => {
             ctx.lineTo(n2.x, n2.y);
             ctx.stroke();
 
-            // Energy packet running down line occasionally
-            if ((frame + i * 7) % 180 < 30) {
-              const progress = ((frame + i * 7) % 180) / 30;
+            // Subtle data impulse
+            if ((frame + i * 7) % 200 < 25) {
+              const progress = ((frame + i * 7) % 200) / 25;
               const px = n1.x + (n2.x - n1.x) * progress;
               const py = n1.y + (n2.y - n1.y) * progress;
               ctx.fillStyle = "#ffffff";
               ctx.beginPath();
-              ctx.arc(px, py, 1.5, 0, Math.PI * 2);
+              ctx.arc(px, py, 1.2, 0, Math.PI * 2);
               ctx.fill();
             }
           }
         }
 
         // Draw node
-        const currentRadius = n1.radius + Math.sin(n1.pulse) * 0.6;
+        const currentRadius = n1.radius + Math.sin(n1.pulse) * 0.5;
         ctx.fillStyle = n1.layer === 0 ? "#818cf8" : n1.layer === 1 ? "#38bdf8" : "#c084fc";
-        ctx.shadowColor = ctx.fillStyle;
-        ctx.shadowBlur = 8;
         ctx.beginPath();
         ctx.arc(n1.x, n1.y, Math.max(1, currentRadius), 0, Math.PI * 2);
         ctx.fill();
-        ctx.shadowBlur = 0;
       }
 
-      // Draw central ring structure
-      ctx.strokeStyle = "rgba(255, 255, 255, 0.08)";
+      // Central reference ring
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.06)";
       ctx.lineWidth = 1;
       ctx.setLineDash([4, 6]);
       ctx.beginPath();
-      ctx.arc(width / 2, height / 2, 70, 0, Math.PI * 2);
+      ctx.arc(width / 2, height / 2, 68, 0, Math.PI * 2);
       ctx.stroke();
       ctx.setLineDash([]);
 
@@ -200,28 +194,28 @@ export const AboutSection: React.FC = () => {
     <section
       id="about"
       ref={containerRef}
-      className="relative w-full py-28 sm:py-36 bg-[#07090e] border-t border-white/5 overflow-hidden"
+      className="relative w-full py-24 sm:py-32 bg-[#07090e] border-t border-white/[0.08] overflow-hidden scroll-mt-24"
     >
       {/* Background Ambient Glow */}
-      <div className="absolute top-1/2 left-0 -translate-y-1/2 w-96 h-96 bg-indigo-600/10 rounded-full blur-[150px] pointer-events-none" />
+      <div className="absolute top-1/2 left-0 -translate-y-1/2 w-96 h-96 bg-indigo-600/10 rounded-full blur-[140px] pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
           {/* Left Column: Editorial Content */}
           <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -30 }}
-            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-            className="lg:col-span-7 space-y-8"
+            initial={{ opacity: 0, x: -24 }}
+            animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -24 }}
+            transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+            className="lg:col-span-7 space-y-7"
           >
             {/* Section Tag */}
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.03] border border-white/10 text-indigo-300 font-mono text-xs tracking-widest uppercase">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] border border-white/10 text-indigo-300 font-sans text-xs font-medium tracking-wide">
               <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
-              <span>01 / ABOUT</span>
+              <span>01 &bull; About Asteya</span>
             </div>
 
             {/* Headline */}
-            <h2 className="text-3xl sm:text-5xl md:text-6xl font-bold tracking-tight text-white leading-[1.15]">
+            <h2 className="text-3xl sm:text-5xl md:text-6xl font-bold tracking-tight text-white leading-[1.12]">
               Technology should move humanity{" "}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-300 via-purple-200 to-cyan-300">
                 forward.
@@ -229,28 +223,28 @@ export const AboutSection: React.FC = () => {
             </h2>
 
             {/* Paragraph */}
-            <p className="text-base sm:text-lg text-slate-300 font-normal leading-relaxed">
+            <p className="text-base sm:text-lg text-slate-300 font-normal leading-relaxed max-w-2xl">
               Asteya exists to transform ideas into meaningful digital experiences, products, and technology ventures. We combine engineering, design, automation, and emerging technologies to build solutions that are useful today and ready for tomorrow.
             </p>
 
             {/* Value Pillars List */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4">
-              <div className="p-4 rounded-xl bg-white/[0.02] border border-white/5 backdrop-blur-sm space-y-1">
-                <div className="flex items-center gap-2 text-indigo-400 font-mono text-xs font-semibold uppercase tracking-wider">
-                  <Cpu className="w-4 h-4" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+              <div className="p-5 rounded-xl bg-white/[0.02] border border-white/[0.08] backdrop-blur-sm space-y-1.5 hover:border-indigo-500/25 transition-colors">
+                <div className="flex items-center gap-2 text-indigo-300 font-sans text-sm font-semibold">
+                  <Cpu strokeWidth={1.75} className="w-4 h-4 text-indigo-400" />
                   <span>Precision Engineering</span>
                 </div>
-                <p className="text-xs text-slate-400 leading-normal">
+                <p className="text-xs text-slate-400 leading-relaxed">
                   High-speed, scalable, modern architectural foundations built for longevity.
                 </p>
               </div>
 
-              <div className="p-4 rounded-xl bg-white/[0.02] border border-white/5 backdrop-blur-sm space-y-1">
-                <div className="flex items-center gap-2 text-cyan-400 font-mono text-xs font-semibold uppercase tracking-wider">
-                  <Zap className="w-4 h-4" />
+              <div className="p-5 rounded-xl bg-white/[0.02] border border-white/[0.08] backdrop-blur-sm space-y-1.5 hover:border-cyan-500/25 transition-colors">
+                <div className="flex items-center gap-2 text-cyan-300 font-sans text-sm font-semibold">
+                  <Zap strokeWidth={1.75} className="w-4 h-4 text-cyan-400" />
                   <span>Intelligent Velocity</span>
                 </div>
-                <p className="text-xs text-slate-400 leading-normal">
+                <p className="text-xs text-slate-400 leading-relaxed">
                   Autonomous automation and rapid continuous product deployment loops.
                 </p>
               </div>
@@ -259,19 +253,19 @@ export const AboutSection: React.FC = () => {
 
           {/* Right Column: Abstract Digital Architecture Visual System */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.9 }}
-            transition={{ duration: 0.9, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+            initial={{ opacity: 0, scale: 0.94 }}
+            animate={isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.94 }}
+            transition={{ duration: 0.8, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
             className="lg:col-span-5 relative"
           >
-            <div className="relative w-full aspect-square max-w-[480px] mx-auto rounded-2xl bg-gradient-to-b from-white/[0.04] to-white/[0.01] border border-white/10 backdrop-blur-xl p-4 overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] group">
-              {/* Header Telemetry Badge */}
-              <div className="absolute top-4 left-4 right-4 flex items-center justify-between text-[10px] font-mono text-slate-400 z-10">
+            <div className="relative w-full aspect-square max-w-[460px] mx-auto rounded-2xl bg-gradient-to-b from-white/[0.04] to-white/[0.01] border border-white/[0.08] backdrop-blur-xl p-4 overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
+              {/* Header Label */}
+              <div className="absolute top-4 left-4 right-4 flex items-center justify-between text-xs font-sans text-slate-400 z-10">
                 <div className="flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
-                  <span>SYSTEM // ARCH_GRID</span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
+                  <span className="font-medium text-slate-300">Digital Architecture Mesh</span>
                 </div>
-                <div>NODES: 30 / ACTIVE</div>
+                <span className="text-[11px] text-slate-500">Interactive topology</span>
               </div>
 
               {/* Dynamic Interactive Canvas */}
@@ -280,10 +274,10 @@ export const AboutSection: React.FC = () => {
                 className="w-full h-full cursor-crosshair relative z-0"
               />
 
-              {/* Bottom Telemetry Info */}
-              <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between text-[9px] font-mono text-slate-500 z-10 border-t border-white/5 pt-2">
-                <span>ASTEYA DIGITAL MESH</span>
-                <span>LATENCY: &lt;1.4ms</span>
+              {/* Bottom Subtle Note */}
+              <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between text-[11px] font-sans text-slate-500 z-10 border-t border-white/[0.06] pt-2">
+                <span>Asteya Systems Architecture</span>
+                <span>Self-building nodes</span>
               </div>
             </div>
           </motion.div>
