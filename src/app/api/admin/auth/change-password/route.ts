@@ -1,7 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { ChangePasswordSchema } from "@/lib/server/validations";
-import { getAuthenticatedAdmin, createAdminSession, SESSION_COOKIE_NAME, SESSION_MAX_AGE_SECONDS } from "@/lib/server/auth";
-import { getAdminById, updateAdminPassword } from "@/lib/server/db";
+import {
+  getAuthenticatedAdmin,
+  createAdminSession,
+  getClientIp,
+  SESSION_COOKIE_NAME,
+  SESSION_MAX_AGE_SECONDS,
+} from "@/lib/server/auth";
+import {
+  getAdminById,
+  updateAdminPassword,
+  checkRateLimit,
+  recordFailedLogin,
+  resetLoginAttempts,
+} from "@/lib/server/db";
 import { verifyPassword, hashPassword } from "@/lib/server/crypto";
 
 export async function POST(req: NextRequest) {
@@ -29,6 +41,17 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
+    const ip = getClientIp(req);
+    const rateCheck = checkRateLimit(ip, admin.email);
+    if (!rateCheck.allowed) {
+      return NextResponse.json(
+        {
+          error: `Too many failed attempts. Operation locked. Please try again in ${rateCheck.retryAfterSeconds} seconds.`,
+        },
+        { status: 429 }
+      );
+    }
+
     // Verify current password
     const isCurrentValid = await verifyPassword(
       currentPassword,
@@ -37,11 +60,15 @@ export async function POST(req: NextRequest) {
     );
 
     if (!isCurrentValid) {
+      recordFailedLogin(ip, admin.email);
       return NextResponse.json(
         { error: "Current password does not match" },
         { status: 400 }
       );
     }
+
+    // Reset attempts on successful verification
+    resetLoginAttempts(ip, admin.email);
 
     // Hash new password
     const { hash, salt } = await hashPassword(newPassword);

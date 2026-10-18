@@ -16,6 +16,28 @@ export function middleware(request: NextRequest) {
 
   // Protect /api/admin endpoints (except /api/admin/auth/login)
   if (pathname.startsWith("/api/admin") && pathname !== "/api/admin/auth/login") {
+    // Defense-in-depth CSRF check: verify Origin matches Host on state-changing requests
+    if (["POST", "PATCH", "DELETE"].includes(request.method)) {
+      const origin = request.headers.get("origin");
+      const host = request.headers.get("host");
+      if (origin && host) {
+        try {
+          const originHost = new URL(origin).host;
+          if (originHost !== host) {
+            return NextResponse.json(
+              { error: "Cross-origin request rejected." },
+              { status: 403 }
+            );
+          }
+        } catch {
+          return NextResponse.json(
+            { error: "Invalid origin header." },
+            { status: 403 }
+          );
+        }
+      }
+    }
+
     const sessionCookie = request.cookies.get("asteya_admin_session");
     if (!sessionCookie || !sessionCookie.value) {
       return NextResponse.json(
