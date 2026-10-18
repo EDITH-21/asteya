@@ -97,23 +97,30 @@ function getDatabasePath(): string {
 }
 
 let inMemoryDb: DatabaseSchema | null = null;
+let lastLoadedTime = 0;
 
 function loadDatabase(): DatabaseSchema {
+  const dbPath = getDatabasePath();
+  try {
+    if (fs.existsSync(dbPath)) {
+      const stats = fs.statSync(dbPath);
+      if (inMemoryDb && stats.mtimeMs <= lastLoadedTime) {
+        if (!inMemoryDb.telemetry) inMemoryDb.telemetry = [];
+        return inMemoryDb;
+      }
+      const raw = fs.readFileSync(dbPath, "utf-8");
+      inMemoryDb = JSON.parse(raw);
+      lastLoadedTime = stats.mtimeMs;
+      if (!inMemoryDb!.telemetry) inMemoryDb!.telemetry = [];
+      return inMemoryDb!;
+    }
+  } catch (err) {
+    console.error("[DB] Error reading database file, using fallback:", err);
+  }
+
   if (inMemoryDb) {
     if (!inMemoryDb.telemetry) inMemoryDb.telemetry = [];
     return inMemoryDb;
-  }
-
-  const dbPath = getDatabasePath();
-  if (fs.existsSync(dbPath)) {
-    try {
-      const raw = fs.readFileSync(dbPath, "utf-8");
-      inMemoryDb = JSON.parse(raw);
-      if (!inMemoryDb!.telemetry) inMemoryDb!.telemetry = [];
-      return inMemoryDb!;
-    } catch (err) {
-      console.error("[DB] Error reading database file, creating fresh store:", err);
-    }
   }
 
   // Initial structure
@@ -138,6 +145,11 @@ function saveDatabase(data: DatabaseSchema): void {
   try {
     fs.writeFileSync(tempPath, JSON.stringify(data, null, 2), "utf-8");
     fs.renameSync(tempPath, dbPath);
+    try {
+      lastLoadedTime = fs.statSync(dbPath).mtimeMs;
+    } catch {
+      lastLoadedTime = Date.now();
+    }
   } catch (err) {
     console.error("[DB] Error saving database file:", err);
     try {
