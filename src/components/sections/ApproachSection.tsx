@@ -24,7 +24,7 @@ export const ApproachSection: React.FC = () => {
   return (
     <section
       id="approach"
-      className="relative w-full py-24 sm:py-32 bg-[#07090e] border-t border-white/[0.08] overflow-hidden scroll-mt-24"
+      className="relative w-full py-20 sm:py-28 bg-[#07090e] border-t border-white/[0.08] overflow-hidden scroll-mt-24"
     >
       {/* Dynamic Background Glow */}
       <div
@@ -39,7 +39,7 @@ export const ApproachSection: React.FC = () => {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto mb-14 space-y-4">
+        <div className="text-center max-w-3xl mx-auto mb-10 sm:mb-12 space-y-4">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] border border-white/10 text-indigo-300 font-sans text-xs font-medium tracking-wide">
             <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
             <span>02 &bull; Our Methodology</span>
@@ -90,7 +90,7 @@ export const ApproachSection: React.FC = () => {
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: idx * 0.08 }}
                 onClick={() => setActiveStage(idx)}
-                className={`relative rounded-2xl p-7 sm:p-8 cursor-pointer transition-all duration-300 border flex flex-col justify-between overflow-hidden ${
+                className={`relative rounded-2xl p-6 sm:p-7 cursor-pointer transition-all duration-300 border flex flex-col justify-between overflow-hidden ${
                   isActive
                     ? "bg-gradient-to-b from-[#111728] to-[#0a0f1d] border-indigo-500/40 shadow-[0_16px_40px_-10px_rgba(99,102,241,0.2)] scale-[1.01]"
                     : "bg-white/[0.02] border-white/[0.06] opacity-75 hover:opacity-100 hover:border-white/15"

@@ -14,17 +14,17 @@ export const CtaSection: React.FC<CtaSectionProps> = ({ onOpenContact }) => {
   };
 
   return (
-    <section className="relative w-full py-24 sm:py-32 bg-[#05070b] border-t border-white/[0.08] overflow-hidden">
+    <section className="relative w-full py-20 sm:py-28 bg-[#05070b] border-t border-white/[0.08] overflow-hidden">
       {/* Background Glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[650px] h-[380px] bg-indigo-600/12 rounded-full blur-[160px] pointer-events-none" />
 
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.7 }}
-          className="rounded-3xl bg-gradient-to-b from-white/[0.05] to-white/[0.01] border border-white/[0.1] p-8 sm:p-14 backdrop-blur-2xl shadow-2xl relative overflow-hidden"
+          className="max-w-5xl mx-auto rounded-3xl bg-gradient-to-b from-white/[0.05] to-white/[0.01] border border-white/[0.1] p-6 sm:p-10 lg:p-12 backdrop-blur-2xl shadow-2xl relative overflow-hidden"
         >
           {/* Subtle Ambient Accent */}
           <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-96 h-96 bg-indigo-500/15 rounded-full blur-3xl pointer-events-none" />

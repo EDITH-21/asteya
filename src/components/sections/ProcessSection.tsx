@@ -17,14 +17,14 @@ export const ProcessSection: React.FC = () => {
     <section
       id="process"
       ref={containerRef}
-      className="relative w-full py-24 sm:py-32 bg-[#07090e] border-t border-white/[0.08] overflow-hidden scroll-mt-24"
+      className="relative w-full py-20 sm:py-28 bg-[#07090e] border-t border-white/[0.08] overflow-hidden scroll-mt-24"
     >
       {/* Background Subtle Gradient */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[500px] bg-indigo-600/10 rounded-full blur-[180px] pointer-events-none" />
 
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Section Header */}
-        <div className="text-center max-w-2xl mx-auto mb-16 space-y-4">
+        <div className="text-center max-w-2xl mx-auto mb-12 sm:mb-14 space-y-4">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] border border-white/10 text-indigo-300 font-sans text-xs font-medium tracking-wide">
             <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
             <span>06 &bull; Execution Process</span>
@@ -40,7 +40,7 @@ export const ProcessSection: React.FC = () => {
         </div>
 
         {/* Vertical Timeline Structure */}
-        <div className="relative">
+        <div className="relative max-w-4xl mx-auto">
           {/* Static Background Rail Line */}
           <div className="absolute top-0 bottom-0 left-6 sm:left-1/2 -translate-x-1/2 w-0.5 bg-white/[0.08]" />
 

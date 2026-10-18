@@ -18,12 +18,12 @@ export const PhilosophySection: React.FC = () => {
   return (
     <section
       ref={containerRef}
-      className="relative w-full min-h-[85vh] sm:min-h-screen flex items-center justify-center bg-[#030508] border-t border-white/[0.08] overflow-hidden py-24 sm:py-32"
+      className="relative w-full min-h-[85vh] sm:min-h-screen flex items-center justify-center bg-[#030508] border-t border-white/[0.08] overflow-hidden py-20 sm:py-28"
     >
       {/* Slow Cosmic Glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[650px] sm:w-[850px] h-[450px] bg-gradient-to-tr from-indigo-900/15 via-purple-900/15 to-cyan-900/12 rounded-full blur-[170px] pointer-events-none" />
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10 space-y-8 sm:space-y-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10 space-y-8 sm:space-y-12">
         {/* Statement Label */}
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] border border-white/10 text-indigo-300 font-sans text-xs font-medium tracking-wide">
           <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" />

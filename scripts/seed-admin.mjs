@@ -10,7 +10,15 @@ const dbDir = path.join(rootDir, "data");
 const dbPath = path.join(dbDir, "asteya-db.json");
 
 const email = (process.argv[2] || process.env.ADMIN_EMAIL || "admin@asteya.tech").toLowerCase().trim();
-const password = process.argv[3] || process.env.ADMIN_INITIAL_PASSWORD || "Asteya#Secure2026!";
+const password = process.argv[3] || process.env.ADMIN_INITIAL_PASSWORD;
+
+if (!password || password.length < 10) {
+  console.error("\n[Asteya Admin Bootstrap ERROR] Explicit password is required.");
+  console.error("Password must be at least 10 characters long.");
+  console.error("Usage: node scripts/seed-admin.mjs <email> <password>");
+  console.error("   OR: Set ADMIN_INITIAL_PASSWORD environment variable.\n");
+  process.exit(1);
+}
 
 async function hashPassword(pwd) {
   const salt = crypto.randomBytes(32).toString("hex");
@@ -39,11 +47,13 @@ async function run() {
     enquiries: [],
     services: [],
     failedLogins: [],
+    telemetry: [],
   };
 
   if (fs.existsSync(dbPath)) {
     try {
       db = JSON.parse(fs.readFileSync(dbPath, "utf-8"));
+      if (!db.telemetry) db.telemetry = [];
     } catch {
       console.warn("Could not parse existing DB, creating fresh store.");
     }
@@ -81,7 +91,7 @@ async function run() {
 
   console.log(`[Asteya Admin Bootstrap] SUCCESS! Admin account is ready.`);
   console.log(`Email:    ${email}`);
-  console.log(`Password: ${password}`);
+  console.log(`Password: [CONFIGURED - HIDDEN FOR SECURITY]`);
   console.log(`Login at: http://localhost:3000/admin/login`);
 }
 

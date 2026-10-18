@@ -13,14 +13,14 @@ export const TechnologySection: React.FC = () => {
   return (
     <section
       id="technology"
-      className="relative w-full py-24 sm:py-32 bg-[#07090e] border-t border-white/[0.08] overflow-hidden scroll-mt-24"
+      className="relative w-full py-20 sm:py-28 bg-[#07090e] border-t border-white/[0.08] overflow-hidden scroll-mt-24"
     >
       {/* Background Ambient Glow */}
       <div className="absolute top-1/2 right-10 w-[500px] h-[500px] bg-cyan-600/10 rounded-full blur-[160px] pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
+        <div className="text-center max-w-3xl mx-auto mb-12 sm:mb-14 space-y-4">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] border border-white/10 text-indigo-300 font-sans text-xs font-medium tracking-wide">
             <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
             <span>04 &bull; Technology Foundation</span>

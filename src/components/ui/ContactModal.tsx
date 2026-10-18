@@ -2,8 +2,9 @@
 
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, CheckCircle2, ShieldCheck, ArrowRight } from "lucide-react";
+import { X, CheckCircle2, ShieldCheck, ArrowRight, Mail } from "lucide-react";
 import { AsteyaLogo } from "./AsteyaLogo";
+import { CONTACT_CONFIG } from "@/lib/constants";
 
 interface ContactModalProps {
   isOpen: boolean;
@@ -224,6 +225,17 @@ export const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) =
                       </>
                     )}
                   </button>
+                </div>
+
+                <div className="pt-3 border-t border-white/[0.08] flex flex-wrap items-center justify-between gap-2 text-xs text-slate-400">
+                  <span>Direct inquiries:</span>
+                  <a
+                    href={`mailto:${CONTACT_CONFIG.email}`}
+                    className="inline-flex items-center gap-1.5 text-indigo-300 hover:text-white transition-colors"
+                  >
+                    <Mail strokeWidth={1.75} className="w-3.5 h-3.5 text-indigo-400" />
+                    <span>{CONTACT_CONFIG.email}</span>
+                  </a>
                 </div>
               </form>
             ) : (

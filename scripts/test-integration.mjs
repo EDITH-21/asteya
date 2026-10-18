@@ -51,6 +51,42 @@ async function runTests() {
     }
   }
 
+  // 2b. Test public telemetry specification endpoint
+  console.log("\n2b. Testing Public Telemetry Specification (GET /api/telemetry)...");
+  {
+    const res = await fetch(`${BASE_URL}/api/telemetry`);
+    const data = await res.json();
+    if (res.status === 200 && data.service && data.documentation) {
+      console.log(`   [PASS] Telemetry specification retrieved successfully.`);
+    } else {
+      console.error(`   [FAIL] Failed to retrieve telemetry specification:`, res.status, data);
+      process.exit(1);
+    }
+  }
+
+  // 2c. Test public telemetry ingestion
+  console.log("\n2c. Testing Public Telemetry Ingestion (POST /api/telemetry)...");
+  {
+    const res = await fetch(`${BASE_URL}/api/telemetry`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        extension: "attenza",
+        version: "1.0.0",
+        eventType: "install",
+        anonymousId: "anon-device-hash-test-848201",
+        metadata: { client: "chrome-extension", os: "windows" },
+      }),
+    });
+    const data = await res.json();
+    if (res.status === 201 && data.success && data.id) {
+      console.log(`   [PASS] Telemetry install event recorded successfully (Event ID: ${data.id}).`);
+    } else {
+      console.error(`   [FAIL] Telemetry ingestion failed:`, res.status, data);
+      process.exit(1);
+    }
+  }
+
   // 3. Test unauthorized access to protected endpoints
   console.log("\n3. Testing Unauthorized Access to Protected Endpoints...");
   {
@@ -91,6 +127,8 @@ async function runTests() {
     }
   }
 
+const ADMIN_PASSWORD = process.env.ADMIN_INITIAL_PASSWORD || process.env.TEST_ADMIN_PASSWORD || "TestAdmin#DevPass2026!";
+
   // 5. Test valid admin login
   console.log("\n5. Testing Valid Admin Login...");
   {
@@ -99,7 +137,7 @@ async function runTests() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         email: "admin@asteya.tech",
-        password: "Asteya#Secure2026!",
+        password: ADMIN_PASSWORD,
       }),
     });
     const data = await res.json();

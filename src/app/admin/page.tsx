@@ -23,6 +23,10 @@ import {
   Calendar,
   Save,
   Check,
+  Activity,
+  Radio,
+  Users,
+  Terminal,
 } from "lucide-react";
 
 interface AdminUser {
@@ -68,6 +72,18 @@ interface StatsData {
   totalServices: number;
   activeServices: number;
   recentEnquiries: Enquiry[];
+  registeredAdmins?: number;
+  attenzaStats?: {
+    extensionName: string;
+    totalRecords: number;
+    uniqueDevices: number;
+    totalInstalls: number;
+    activeToday: number;
+    activeThisWeek: number;
+    totalPings: number;
+    lastReportedAt: string | null;
+    hasLiveTelemetry: boolean;
+  };
 }
 
 export default function AdminDashboardPage() {
@@ -597,6 +613,115 @@ export default function AdminDashboardPage() {
                   No enquiries received yet.
                 </div>
               )}
+            </div>
+
+            {/* Venture Telemetry & Product Instrumentation (Attenza) */}
+            <div className="bg-[#090d16] border border-white/[0.08] rounded-2xl p-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-base font-bold text-white">Venture Telemetry &amp; Extension Analytics</h3>
+                    <span className="text-[10px] font-sans px-2 py-0.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 font-medium">
+                      Attenza Focus Engine
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-400 mt-1">
+                    Grounded client instrumentation. Asteya does not fabricate metrics or conflate website visitors with installed users.
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-2 shrink-0">
+                  <span
+                    className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-sans font-medium border ${
+                      stats?.attenzaStats?.hasLiveTelemetry
+                        ? "bg-emerald-500/10 text-emerald-300 border-emerald-500/20"
+                        : "bg-slate-500/10 text-slate-400 border-slate-500/20"
+                    }`}
+                  >
+                    <span
+                      className={`w-1.5 h-1.5 rounded-full ${
+                        stats?.attenzaStats?.hasLiveTelemetry ? "bg-emerald-400 animate-pulse" : "bg-slate-500"
+                      }`}
+                    />
+                    <span>
+                      {stats?.attenzaStats?.hasLiveTelemetry
+                        ? `Live (Last: ${new Date(stats.attenzaStats.lastReportedAt!).toLocaleTimeString()})`
+                        : "Endpoint Active \u2022 Awaiting Client Events"}
+                    </span>
+                  </span>
+                </div>
+              </div>
+
+              {/* Telemetry Metric Cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.06]">
+                  <div className="flex items-center justify-between text-xs text-slate-400 mb-1">
+                    <span>Admin Accounts</span>
+                    <Users strokeWidth={1.75} className="w-4 h-4 text-indigo-400" />
+                  </div>
+                  <div className="text-2xl font-bold font-mono text-white">
+                    {stats?.registeredAdmins ?? 1}
+                  </div>
+                  <div className="text-[10px] text-slate-400 mt-1">Authorized operations personnel</div>
+                </div>
+
+                <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.06]">
+                  <div className="flex items-center justify-between text-xs text-slate-400 mb-1">
+                    <span>Verified Installs</span>
+                    <Radio strokeWidth={1.75} className="w-4 h-4 text-emerald-400" />
+                  </div>
+                  <div className="text-2xl font-bold font-mono text-emerald-400">
+                    {stats?.attenzaStats?.uniqueDevices ?? 0}
+                  </div>
+                  <div className="text-[10px] text-slate-400 mt-1">Unique client hardware IDs</div>
+                </div>
+
+                <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.06]">
+                  <div className="flex items-center justify-between text-xs text-slate-400 mb-1">
+                    <span>Active Today (24h)</span>
+                    <Activity strokeWidth={1.75} className="w-4 h-4 text-amber-400" />
+                  </div>
+                  <div className="text-2xl font-bold font-mono text-amber-300">
+                    {stats?.attenzaStats?.activeToday ?? 0}
+                  </div>
+                  <div className="text-[10px] text-slate-400 mt-1">Unique clients pinged in 24h</div>
+                </div>
+
+                <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.06]">
+                  <div className="flex items-center justify-between text-xs text-slate-400 mb-1">
+                    <span>Telemetry Events</span>
+                    <Terminal strokeWidth={1.75} className="w-4 h-4 text-cyan-400" />
+                  </div>
+                  <div className="text-2xl font-bold font-mono text-cyan-300">
+                    {stats?.attenzaStats?.totalRecords ?? 0}
+                  </div>
+                  <div className="text-[10px] text-slate-400 mt-1">Recorded audit events</div>
+                </div>
+              </div>
+
+              {/* Developer Integration Note */}
+              <div className="p-4 rounded-xl bg-[#05070b]/60 border border-white/[0.06] flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="text-xs text-slate-300 space-y-1">
+                  <div className="font-semibold text-white flex items-center gap-2">
+                    <span>Attenza Extension Telemetry Webhook</span>
+                    <code className="text-[11px] font-mono text-indigo-300 bg-indigo-500/10 px-2 py-0.5 rounded border border-indigo-500/20">
+                      POST /api/telemetry
+                    </code>
+                  </div>
+                  <p className="text-slate-400 text-[11px]">
+                    To record install or usage pings from the Attenza browser/desktop client, dispatch anonymous payloads with: <code className="text-slate-300 font-mono">eventType: &quot;install&quot; | &quot;ping&quot;</code> and SHA-256 hashed device IDs.
+                  </p>
+                </div>
+                <a
+                  href="/api/telemetry"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-sans text-indigo-300 hover:text-white bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/20 transition-colors"
+                >
+                  <span>API Specification</span>
+                  <ExternalLink strokeWidth={1.75} className="w-3.5 h-3.5" />
+                </a>
+              </div>
             </div>
           </div>
         )}

@@ -54,6 +54,16 @@ export interface ServiceRecord {
   updatedAt: string;
 }
 
+export interface ExtensionTelemetry {
+  id: string;
+  extensionName: string;
+  version: string;
+  eventType: "install" | "ping" | "session_start" | "feature_use";
+  anonymousId: string;
+  timestamp: string;
+  metadata?: Record<string, string | number | boolean>;
+}
+
 interface FailedLoginAttempt {
   key: string;
   count: number;
@@ -68,6 +78,7 @@ interface DatabaseSchema {
   enquiries: Enquiry[];
   services: ServiceRecord[];
   failedLogins: FailedLoginAttempt[];
+  telemetry?: ExtensionTelemetry[];
 }
 
 function getDatabasePath(): string {
@@ -89,6 +100,7 @@ let inMemoryDb: DatabaseSchema | null = null;
 
 function loadDatabase(): DatabaseSchema {
   if (inMemoryDb) {
+    if (!inMemoryDb.telemetry) inMemoryDb.telemetry = [];
     return inMemoryDb;
   }
 
@@ -97,6 +109,7 @@ function loadDatabase(): DatabaseSchema {
     try {
       const raw = fs.readFileSync(dbPath, "utf-8");
       inMemoryDb = JSON.parse(raw);
+      if (!inMemoryDb!.telemetry) inMemoryDb!.telemetry = [];
       return inMemoryDb!;
     } catch (err) {
       console.error("[DB] Error reading database file, creating fresh store:", err);
@@ -111,6 +124,7 @@ function loadDatabase(): DatabaseSchema {
     enquiries: [],
     services: [],
     failedLogins: [],
+    telemetry: [],
   };
 
   saveDatabase(inMemoryDb);
@@ -137,30 +151,38 @@ function saveDatabase(data: DatabaseSchema): void {
 }
 
 /**
- * Initialize database with default admin user and service records if empty.
+ * Initialize database with admin user and service records if empty.
+ * Never uses a hardcoded fallback password.
  */
 export async function initializeDatabase(): Promise<void> {
   const db = loadDatabase();
 
-  // 1. Seed admin if no users exist
+  // 1. Seed admin if no users exist AND explicit password is provided in env
   if (db.users.length === 0) {
     const adminEmail = process.env.ADMIN_EMAIL || "admin@asteya.tech";
-    const initialPassword = process.env.ADMIN_INITIAL_PASSWORD || "Asteya#Secure2026!";
-    const { hash, salt } = await hashPassword(initialPassword);
+    const initialPassword = process.env.ADMIN_INITIAL_PASSWORD;
 
-    const defaultAdmin: AdminUser = {
-      id: crypto.randomUUID(),
-      email: adminEmail.toLowerCase().trim(),
-      username: "Asteya Admin",
-      passwordHash: hash,
-      passwordSalt: salt,
-      role: "admin",
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
+    if (initialPassword && initialPassword.length >= 10) {
+      const { hash, salt } = await hashPassword(initialPassword);
 
-    db.users.push(defaultAdmin);
-    console.log(`[DB] Initialized default admin account: ${adminEmail}`);
+      const defaultAdmin: AdminUser = {
+        id: crypto.randomUUID(),
+        email: adminEmail.toLowerCase().trim(),
+        username: "Asteya Admin",
+        passwordHash: hash,
+        passwordSalt: salt,
+        role: "admin",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      db.users.push(defaultAdmin);
+      console.log(`[DB] Initialized default admin account from ADMIN_INITIAL_PASSWORD: ${adminEmail}`);
+    } else {
+      console.warn(
+        `[DB] No administrator accounts registered. Set ADMIN_INITIAL_PASSWORD (min 10 chars) or execute 'npm run seed:admin <email> <password>' to securely configure credentials.`
+      );
+    }
   }
 
   // 2. Seed services if none exist
@@ -171,21 +193,6 @@ export async function initializeDatabase(): Promise<void> {
       updatedAt: new Date().toISOString(),
     }));
     db.services = defaultServices;
-  }
-
-  // 3. Seed demo initial inquiry for operational testing if empty
-  if (db.enquiries.length === 0) {
-    db.enquiries.push({
-      id: crypto.randomUUID(),
-      name: "Marcus Aurelius",
-      email: "marcus@stoictechnologies.io",
-      type: "Digital Solutions",
-      message: "Looking for an intelligent data pipeline and dashboard for real-time risk assessment across our distributed supply network.",
-      status: "new",
-      notes: "Lead sourced from direct referral. Priority evaluation.",
-      createdAt: new Date(Date.now() - 3600000 * 4).toISOString(),
-      updatedAt: new Date(Date.now() - 3600000 * 4).toISOString(),
-    });
   }
 
   saveDatabase(db);
@@ -469,6 +476,83 @@ export function updateServiceRecord(
 }
 
 // ========================
+// Telemetry & Extension Usage Tracking
+// ========================
+export function recordTelemetry(data: {
+  extensionName: string;
+  version: string;
+  eventType: "install" | "ping" | "session_start" | "feature_use";
+  anonymousId: string;
+  metadata?: Record<string, string | number | boolean>;
+}): ExtensionTelemetry {
+  const db = loadDatabase();
+  if (!db.telemetry) {
+    db.telemetry = [];
+  }
+
+  const record: ExtensionTelemetry = {
+    id: crypto.randomUUID(),
+    extensionName: (data.extensionName || "attenza").toLowerCase().trim(),
+    version: data.version || "1.0.0",
+    eventType: data.eventType,
+    anonymousId: data.anonymousId,
+    timestamp: new Date().toISOString(),
+    metadata: data.metadata,
+  };
+
+  db.telemetry.push(record);
+
+  // Keep a sliding window of recent telemetry (capped at 5,000 events to avoid unbounded file growth)
+  if (db.telemetry.length > 5000) {
+    db.telemetry = db.telemetry.slice(-5000);
+  }
+
+  saveDatabase(db);
+  return record;
+}
+
+export function getTelemetryStats(extensionName = "attenza") {
+  const db = loadDatabase();
+  const records = (db.telemetry || []).filter(
+    (t) => t.extensionName === extensionName.toLowerCase().trim()
+  );
+
+  const uniqueDevices = new Set(records.map((r) => r.anonymousId)).size;
+
+  const now = Date.now();
+  const oneDayAgo = now - 24 * 60 * 60 * 1000;
+  const sevenDaysAgo = now - 7 * 24 * 60 * 60 * 1000;
+
+  const activeToday = new Set(
+    records
+      .filter((r) => new Date(r.timestamp).getTime() >= oneDayAgo)
+      .map((r) => r.anonymousId)
+  ).size;
+
+  const activeThisWeek = new Set(
+    records
+      .filter((r) => new Date(r.timestamp).getTime() >= sevenDaysAgo)
+      .map((r) => r.anonymousId)
+  ).size;
+
+  const totalInstalls = records.filter((r) => r.eventType === "install").length;
+  const totalPings = records.filter((r) => r.eventType === "ping").length;
+  const lastReportedAt = records.length > 0 ? records[records.length - 1].timestamp : null;
+
+  return {
+    extensionName,
+    totalRecords: records.length,
+    uniqueDevices,
+    totalInstalls,
+    activeToday,
+    activeThisWeek,
+    totalPings,
+    lastReportedAt,
+    hasLiveTelemetry: records.length > 0,
+  };
+}
+
+// ========================
 // Dashboard Statistics
 // ========================
 export function getDashboardStats() {
@@ -483,6 +567,8 @@ export function getDashboardStats() {
   const activeServices = db.services.filter((s) => s.active).length;
 
   const recentEnquiries = db.enquiries.slice(0, 5);
+  const registeredAdmins = db.users.length;
+  const attenzaStats = getTelemetryStats("attenza");
 
   return {
     totalEnquiries,
@@ -493,5 +579,7 @@ export function getDashboardStats() {
     totalServices,
     activeServices,
     recentEnquiries,
+    registeredAdmins,
+    attenzaStats,
   };
 }

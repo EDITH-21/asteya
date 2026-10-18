@@ -3,6 +3,17 @@ export interface NavItem {
   href: string;
 }
 
+/**
+ * Centralized Contact and Social Channels
+ * Replace LinkedIn URL here when the company page is finalized.
+ */
+export const CONTACT_CONFIG = {
+  email: "asteyatech2@gmail.com",
+  instagram: "https://www.instagram.com/asteya.tech/?hl=en",
+  // Temporary LinkedIn URL - easily updated from this single location:
+  linkedin: "https://www.linkedin.com/",
+};
+
 export const NAV_ITEMS: NavItem[] = [
   { name: "About", href: "#about" },
   { name: "Services", href: "#services" },

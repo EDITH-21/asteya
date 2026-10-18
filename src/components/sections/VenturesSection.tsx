@@ -8,7 +8,7 @@ export const VenturesSection: React.FC = () => {
   return (
     <section
       id="ventures"
-      className="relative w-full py-24 sm:py-32 bg-[#05070b] border-t border-white/[0.08] overflow-hidden scroll-mt-24"
+      className="relative w-full py-20 sm:py-28 bg-[#05070b] border-t border-white/[0.08] overflow-hidden scroll-mt-24"
     >
       {/* Ambient Lighting */}
       <div className="absolute top-1/4 left-1/4 w-[600px] h-[400px] bg-indigo-600/10 rounded-full blur-[170px] pointer-events-none" />
@@ -16,7 +16,7 @@ export const VenturesSection: React.FC = () => {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="max-w-3xl mb-16 space-y-4">
+        <div className="max-w-3xl mb-12 sm:mb-14 space-y-4">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] border border-white/10 text-indigo-300 font-sans text-xs font-medium tracking-wide">
             <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
             <span>03 &bull; Future Ventures</span>
@@ -37,12 +37,12 @@ export const VenturesSection: React.FC = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.7 }}
-          className="relative rounded-3xl bg-gradient-to-b from-white/[0.05] via-[#0b101d] to-[#070a14] border border-white/[0.12] p-7 sm:p-12 overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.6)]"
+          className="relative rounded-3xl bg-gradient-to-b from-white/[0.05] via-[#0b101d] to-[#070a14] border border-white/[0.12] p-6 sm:p-8 lg:p-10 overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.6)]"
         >
           {/* Subtle Corner Glow */}
           <div className="absolute -top-32 -right-32 w-80 h-80 bg-indigo-500/15 rounded-full blur-3xl pointer-events-none" />
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
             {/* Left Info Column */}
             <div className="lg:col-span-6 space-y-6">
               {/* Status Badge */}

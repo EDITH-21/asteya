@@ -8,13 +8,13 @@ export const WhyAsteyaSection: React.FC = () => {
   return (
     <section
       id="why-asteya"
-      className="relative w-full py-24 sm:py-32 bg-[#05070b] border-t border-white/[0.08] overflow-hidden scroll-mt-24"
+      className="relative w-full py-20 sm:py-28 bg-[#05070b] border-t border-white/[0.08] overflow-hidden scroll-mt-24"
     >
       {/* Ambient Lighting */}
       <div className="absolute top-1/3 left-0 w-[500px] h-[500px] bg-indigo-600/10 rounded-full blur-[170px] pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
           {/* Left Column: Title & Mission */}
           <div className="lg:col-span-5 space-y-6 lg:sticky lg:top-32 self-start">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] border border-white/10 text-indigo-300 font-sans text-xs font-medium tracking-wide">
@@ -49,7 +49,7 @@ export const WhyAsteyaSection: React.FC = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.2 }}
                 transition={{ duration: 0.5, delay: index * 0.08 }}
-                className="group relative rounded-2xl bg-gradient-to-b from-white/[0.04] to-white/[0.01] border border-white/[0.08] hover:border-indigo-500/40 p-7 sm:p-8 transition-all duration-300 hover:shadow-[0_12px_32px_-10px_rgba(99,102,241,0.18)]"
+                className="group relative rounded-2xl bg-gradient-to-b from-white/[0.04] to-white/[0.01] border border-white/[0.08] hover:border-indigo-500/40 p-6 sm:p-7 transition-all duration-300 hover:shadow-[0_12px_32px_-10px_rgba(99,102,241,0.18)]"
               >
                 <div className="flex items-start justify-between mb-3">
                   <span className="text-xs font-sans text-indigo-400 font-medium">

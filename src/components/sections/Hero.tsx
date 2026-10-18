@@ -195,7 +195,7 @@ export const Hero: React.FC<HeroProps> = () => {
       {/* Main Content Container with Subtle Parallax */}
       <motion.div
         style={{ x: textParallaxX, y: textParallaxY }}
-        className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center flex flex-col items-center"
+        className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center flex flex-col items-center"
       >
         {/* Status Indicator */}
         <motion.div

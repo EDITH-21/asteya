@@ -194,13 +194,13 @@ export const AboutSection: React.FC = () => {
     <section
       id="about"
       ref={containerRef}
-      className="relative w-full py-24 sm:py-32 bg-[#07090e] border-t border-white/[0.08] overflow-hidden scroll-mt-24"
+      className="relative w-full py-20 sm:py-28 bg-[#07090e] border-t border-white/[0.08] overflow-hidden scroll-mt-24"
     >
       {/* Background Ambient Glow */}
       <div className="absolute top-1/2 left-0 -translate-y-1/2 w-96 h-96 bg-indigo-600/10 rounded-full blur-[140px] pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
           {/* Left Column: Editorial Content */}
           <motion.div
             initial={{ opacity: 0, x: -24 }}
