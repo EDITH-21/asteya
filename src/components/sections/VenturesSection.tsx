@@ -8,15 +8,15 @@ export const VenturesSection: React.FC = () => {
   return (
     <section
       id="ventures"
-      className="relative w-full py-20 sm:py-28 bg-[#05070b] border-t border-white/[0.08] overflow-hidden scroll-mt-24"
+      className="relative w-full py-10 sm:py-14 lg:py-16 bg-[#05070b] border-t border-white/[0.08] overflow-hidden scroll-mt-[68px]"
     >
       {/* Ambient Lighting */}
-      <div className="absolute top-1/4 left-1/4 w-[600px] h-[400px] bg-indigo-600/10 rounded-full blur-[170px] pointer-events-none" />
-      <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[400px] bg-cyan-600/10 rounded-full blur-[160px] pointer-events-none" />
+      <div className="absolute top-1/4 left-1/4 w-[340px] sm:w-[600px] h-[300px] sm:h-[400px] bg-indigo-600/10 rounded-full blur-2xl sm:blur-[120px] pointer-events-none" />
+      <div className="hidden sm:block absolute bottom-1/4 right-1/4 w-[500px] h-[400px] bg-cyan-600/10 rounded-full blur-2xl sm:blur-[120px] pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="max-w-3xl mb-12 sm:mb-14 space-y-4">
+        <div className="max-w-3xl mb-8 sm:mb-10 space-y-3">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] border border-white/10 text-indigo-300 font-sans text-xs font-medium tracking-wide">
             <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
             <span>03 &bull; Future Ventures</span>

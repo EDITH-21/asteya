@@ -21,7 +21,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenContact }) => {
 
       // Track active section with balanced offset
       const sections = NAV_ITEMS.map((item) => item.href.substring(1));
-      const scrollPos = window.scrollY + 180;
+      const scrollPos = window.scrollY + 100;
 
       for (const sectionId of sections) {
         const el = document.getElementById(sectionId);

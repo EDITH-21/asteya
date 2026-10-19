@@ -65,7 +65,7 @@ export const CtaSection: React.FC<CtaSectionProps> = () => {
   return (
     <section
       id="contact"
-      className="relative w-full py-20 sm:py-28 bg-[#05070b] border-t border-white/[0.08] overflow-hidden scroll-mt-24"
+      className="relative w-full py-10 sm:py-14 lg:py-16 bg-[#05070b] border-t border-white/[0.08] overflow-hidden scroll-mt-[68px]"
     >
       {/* Background Lighting (optimized) */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[340px] sm:w-[650px] h-[300px] sm:h-[450px] bg-indigo-600/10 rounded-full blur-2xl sm:blur-[140px] pointer-events-none" />
@@ -76,10 +76,10 @@ export const CtaSection: React.FC<CtaSectionProps> = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="max-w-4xl mx-auto rounded-3xl bg-gradient-to-b from-white/[0.05] to-white/[0.01] border border-white/[0.1] p-6 sm:p-10 lg:p-12 backdrop-blur-xl shadow-2xl relative overflow-hidden"
+          className="max-w-4xl mx-auto rounded-3xl bg-gradient-to-b from-white/[0.05] to-white/[0.01] border border-white/[0.1] p-6 sm:p-8 lg:p-10 backdrop-blur-xl shadow-2xl relative overflow-hidden"
         >
           {/* Label */}
-          <div className="text-center mb-8">
+          <div className="text-center mb-6 sm:mb-8">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] border border-white/10 text-indigo-300 font-sans text-xs font-medium tracking-wide mb-4">
               <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
               <span>Connect with Asteya</span>

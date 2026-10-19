@@ -8,15 +8,15 @@ export const WhyAsteyaSection: React.FC = () => {
   return (
     <section
       id="why-asteya"
-      className="relative w-full py-20 sm:py-28 bg-[#05070b] border-t border-white/[0.08] overflow-hidden scroll-mt-24"
+      className="relative w-full py-10 sm:py-14 lg:py-16 bg-[#05070b] border-t border-white/[0.08] overflow-hidden scroll-mt-[68px]"
     >
       {/* Ambient Lighting */}
-      <div className="absolute top-1/3 left-0 w-[500px] h-[500px] bg-indigo-600/10 rounded-full blur-[170px] pointer-events-none" />
+      <div className="absolute top-1/3 left-0 w-[340px] sm:w-[500px] h-[340px] sm:h-[500px] bg-indigo-600/10 rounded-full blur-2xl sm:blur-[120px] pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
           {/* Left Column: Title & Mission */}
-          <div className="lg:col-span-5 space-y-6 lg:sticky lg:top-32 self-start">
+          <div className="lg:col-span-5 space-y-6 lg:sticky lg:top-24 self-start">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] border border-white/10 text-indigo-300 font-sans text-xs font-medium tracking-wide">
               <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
               <span>05 &bull; The Asteya Advantage</span>

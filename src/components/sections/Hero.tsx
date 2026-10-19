@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { AsteyaLogo } from "../ui/AsteyaLogo";
-import { ArrowDown, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 interface HeroProps {
   onOpenContact?: () => void;
@@ -245,7 +245,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenContact }) => {
   return (
     <section
       ref={sectionRef}
-      className="relative w-full min-h-[100svh] flex items-center justify-center overflow-hidden bg-[#05070b] pt-24 sm:pt-28 pb-16"
+      className="relative w-full min-h-[100svh] flex items-center justify-center overflow-hidden bg-[#05070b] pt-20 sm:pt-24 pb-12 sm:pb-14"
     >
       {/* Background Interactive Canvas (hidden on touch/mobile for performance) */}
       <canvas
@@ -343,22 +343,6 @@ export const Hero: React.FC<HeroProps> = ({ onOpenContact }) => {
           </button>
         </motion.div>
       </motion.div>
-
-      {/* Scroll Down Indicator */}
-      <motion.button
-        onClick={scrollToAbout}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1, y: [0, 6, 0] }}
-        transition={{
-          opacity: { delay: 0.8, duration: 0.5 },
-          y: { repeat: Infinity, duration: 2.4, ease: "easeInOut" },
-        }}
-        className="absolute bottom-6 left-1/2 -translate-x-1/2 text-slate-500 hover:text-slate-300 transition-colors p-2 z-20 flex flex-col items-center gap-1.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 rounded-lg min-h-[44px] min-w-[44px] justify-center"
-        aria-label="Scroll to About section"
-      >
-        <span className="text-[11px] font-sans tracking-wide text-slate-400">Scroll</span>
-        <ArrowDown strokeWidth={1.5} className="w-3.5 h-3.5 text-slate-400" />
-      </motion.button>
     </section>
   );
 };
