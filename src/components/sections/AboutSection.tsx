@@ -7,26 +7,34 @@ import { Cpu, Zap } from "lucide-react";
 export const AboutSection: React.FC = () => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const isInView = useInView(containerRef, { once: false, amount: 0.2 });
+  const isInView = useInView(containerRef, { once: false, amount: 0.15 });
 
-  // Interactive Digital Architecture Canvas
+  // Interactive Digital Architecture Canvas (paused when off-screen or on mobile)
   useEffect(() => {
+    // Check reduced motion or small mobile screens
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (prefersReducedMotion) return;
+
+    if (window.innerWidth < 768 || window.matchMedia("(pointer: coarse)").matches) {
+      return;
+    }
+
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    let animId: number;
+    let animId: number = 0;
     let width = (canvas.width = canvas.parentElement?.clientWidth || 500);
     let height = (canvas.height = canvas.parentElement?.clientHeight || 450);
 
     const handleResize = () => {
-      if (!canvas) return;
-      width = canvas.width = canvas.parentElement?.clientWidth || 500;
-      height = canvas.height = canvas.parentElement?.clientHeight || 450;
+      if (!canvas || !canvas.parentElement) return;
+      width = canvas.width = canvas.parentElement.clientWidth || 500;
+      height = canvas.height = canvas.parentElement.clientHeight || 450;
     };
 
-    window.addEventListener("resize", handleResize);
+    window.addEventListener("resize", handleResize, { passive: true });
 
     interface Node {
       x: number;
@@ -42,23 +50,23 @@ export const AboutSection: React.FC = () => {
 
     const nodes: Node[] = [];
     const layers = 3;
-    const nodesPerLayer = 10;
+    const nodesPerLayer = 8; // Restrained node count for high FPS
 
     for (let l = 0; l < layers; l++) {
       for (let i = 0; i < nodesPerLayer; i++) {
         const angle = (i / nodesPerLayer) * Math.PI * 2 + l * 0.5;
-        const radiusDist = 60 + l * 55;
+        const radiusDist = 55 + l * 50;
         const cx = width / 2 + Math.cos(angle) * radiusDist;
         const cy = height / 2 + Math.sin(angle) * (radiusDist * 0.7);
 
         nodes.push({
-          x: cx + (Math.random() - 0.5) * 35,
-          y: cy + (Math.random() - 0.5) * 35,
+          x: cx + (Math.random() - 0.5) * 30,
+          y: cy + (Math.random() - 0.5) * 30,
           targetX: cx,
           targetY: cy,
-          vx: (Math.random() - 0.5) * 0.3,
-          vy: (Math.random() - 0.5) * 0.3,
-          radius: l === 0 ? 3.2 : l === 1 ? 2.4 : 1.8,
+          vx: (Math.random() - 0.5) * 0.25,
+          vy: (Math.random() - 0.5) * 0.25,
+          radius: l === 0 ? 3 : l === 1 ? 2.2 : 1.6,
           layer: l,
           pulse: Math.random() * Math.PI * 2,
         });
@@ -78,11 +86,16 @@ export const AboutSection: React.FC = () => {
       pointer.active = false;
     };
 
-    canvas.addEventListener("mousemove", handlePointerMove);
+    canvas.addEventListener("mousemove", handlePointerMove, { passive: true });
     canvas.addEventListener("mouseleave", handlePointerLeave);
 
     let frame = 0;
     const draw = () => {
+      if (!isInView || document.hidden) {
+        animId = 0;
+        return;
+      }
+
       frame++;
       ctx.clearRect(0, 0, width, height);
 
@@ -93,14 +106,14 @@ export const AboutSection: React.FC = () => {
         0,
         width / 2,
         height / 2,
-        170
+        160
       );
       coreGrad.addColorStop(0, "rgba(99, 102, 241, 0.12)");
-      coreGrad.addColorStop(0.5, "rgba(6, 182, 212, 0.04)");
+      coreGrad.addColorStop(0.5, "rgba(6, 182, 212, 0.03)");
       coreGrad.addColorStop(1, "transparent");
       ctx.fillStyle = coreGrad;
       ctx.beginPath();
-      ctx.arc(width / 2, height / 2, 170, 0, Math.PI * 2);
+      ctx.arc(width / 2, height / 2, 160, 0, Math.PI * 2);
       ctx.fill();
 
       // Update and draw connections
@@ -120,9 +133,9 @@ export const AboutSection: React.FC = () => {
           const pdx = pointer.x - n1.x;
           const pdy = pointer.y - n1.y;
           const pdist = Math.sqrt(pdx * pdx + pdy * pdy);
-          if (pdist < 100) {
-            n1.x -= (pdx / pdist) * 1.8;
-            n1.y -= (pdy / pdist) * 1.8;
+          if (pdist < 90) {
+            n1.x -= (pdx / pdist) * 1.5;
+            n1.y -= (pdy / pdist) * 1.5;
           }
         }
 
@@ -133,8 +146,8 @@ export const AboutSection: React.FC = () => {
           const dy = n1.y - n2.y;
           const dist = Math.sqrt(dx * dx + dy * dy);
 
-          if (dist < 110) {
-            const alpha = (1 - dist / 110) * (n1.layer === n2.layer ? 0.3 : 0.15);
+          if (dist < 100) {
+            const alpha = (1 - dist / 100) * (n1.layer === n2.layer ? 0.25 : 0.12);
             ctx.strokeStyle =
               n1.layer === 0
                 ? `rgba(129, 140, 248, ${alpha})`
@@ -148,8 +161,8 @@ export const AboutSection: React.FC = () => {
             ctx.stroke();
 
             // Subtle data impulse
-            if ((frame + i * 7) % 200 < 25) {
-              const progress = ((frame + i * 7) % 200) / 25;
+            if ((frame + i * 7) % 200 < 20) {
+              const progress = ((frame + i * 7) % 200) / 20;
               const px = n1.x + (n2.x - n1.x) * progress;
               const py = n1.y + (n2.y - n1.y) * progress;
               ctx.fillStyle = "#ffffff";
@@ -161,7 +174,7 @@ export const AboutSection: React.FC = () => {
         }
 
         // Draw node
-        const currentRadius = n1.radius + Math.sin(n1.pulse) * 0.5;
+        const currentRadius = n1.radius + Math.sin(n1.pulse) * 0.4;
         ctx.fillStyle = n1.layer === 0 ? "#818cf8" : n1.layer === 1 ? "#38bdf8" : "#c084fc";
         ctx.beginPath();
         ctx.arc(n1.x, n1.y, Math.max(1, currentRadius), 0, Math.PI * 2);
@@ -169,26 +182,39 @@ export const AboutSection: React.FC = () => {
       }
 
       // Central reference ring
-      ctx.strokeStyle = "rgba(255, 255, 255, 0.06)";
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.05)";
       ctx.lineWidth = 1;
       ctx.setLineDash([4, 6]);
       ctx.beginPath();
-      ctx.arc(width / 2, height / 2, 68, 0, Math.PI * 2);
+      ctx.arc(width / 2, height / 2, 64, 0, Math.PI * 2);
       ctx.stroke();
       ctx.setLineDash([]);
 
       animId = requestAnimationFrame(draw);
     };
 
-    draw();
+    if (isInView) {
+      animId = requestAnimationFrame(draw);
+    }
+
+    const handleVisibility = () => {
+      if (document.hidden) {
+        cancelAnimationFrame(animId);
+        animId = 0;
+      } else if (isInView && !animId) {
+        animId = requestAnimationFrame(draw);
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
 
     return () => {
       cancelAnimationFrame(animId);
+      document.removeEventListener("visibilitychange", handleVisibility);
       window.removeEventListener("resize", handleResize);
       canvas.removeEventListener("mousemove", handlePointerMove);
       canvas.removeEventListener("mouseleave", handlePointerLeave);
     };
-  }, []);
+  }, [isInView]);
 
   return (
     <section
@@ -196,16 +222,16 @@ export const AboutSection: React.FC = () => {
       ref={containerRef}
       className="relative w-full py-20 sm:py-28 bg-[#07090e] border-t border-white/[0.08] overflow-hidden scroll-mt-24"
     >
-      {/* Background Ambient Glow */}
-      <div className="absolute top-1/2 left-0 -translate-y-1/2 w-96 h-96 bg-indigo-600/10 rounded-full blur-[140px] pointer-events-none" />
+      {/* Background Ambient Glow (optimized) */}
+      <div className="absolute top-1/2 left-0 -translate-y-1/2 w-72 sm:w-96 h-72 sm:h-96 bg-indigo-600/10 rounded-full blur-2xl sm:blur-[120px] pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
           {/* Left Column: Editorial Content */}
           <motion.div
-            initial={{ opacity: 0, x: -24 }}
-            animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -24 }}
-            transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+            initial={{ opacity: 0, x: -20 }}
+            animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -20 }}
+            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
             className="lg:col-span-7 space-y-7"
           >
             {/* Section Tag */}
@@ -245,7 +271,7 @@ export const AboutSection: React.FC = () => {
                   <span>Intelligent Velocity</span>
                 </div>
                 <p className="text-xs text-slate-400 leading-relaxed">
-                  Autonomous automation and rapid continuous product deployment loops.
+                  Autonomous workflows and rapid continuous product deployment loops.
                 </p>
               </div>
             </div>
@@ -253,9 +279,9 @@ export const AboutSection: React.FC = () => {
 
           {/* Right Column: Abstract Digital Architecture Visual System */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.94 }}
-            animate={isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.94 }}
-            transition={{ duration: 0.8, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
+            initial={{ opacity: 0, scale: 0.96 }}
+            animate={isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.96 }}
+            transition={{ duration: 0.7, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
             className="lg:col-span-5 relative"
           >
             <div className="relative w-full aspect-square max-w-[460px] mx-auto rounded-2xl bg-gradient-to-b from-white/[0.04] to-white/[0.01] border border-white/[0.08] backdrop-blur-xl p-4 overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
@@ -268,16 +294,27 @@ export const AboutSection: React.FC = () => {
                 <span className="text-[11px] text-slate-500">Interactive topology</span>
               </div>
 
-              {/* Dynamic Interactive Canvas */}
+              {/* Dynamic Interactive Canvas (hidden on mobile) */}
               <canvas
                 ref={canvasRef}
-                className="w-full h-full cursor-crosshair relative z-0"
+                className="hidden md:block w-full h-full cursor-crosshair relative z-0"
               />
+
+              {/* Mobile Fallback: Elegant Static Radial Grid */}
+              <div className="md:hidden w-full h-full flex items-center justify-center relative">
+                <div className="w-48 h-48 rounded-full border border-indigo-500/20 flex items-center justify-center animate-pulse">
+                  <div className="w-32 h-32 rounded-full border border-dashed border-cyan-400/25 flex items-center justify-center">
+                    <div className="w-16 h-16 rounded-full bg-indigo-500/10 border border-white/10 flex items-center justify-center">
+                      <div className="w-3 h-3 rounded-full bg-indigo-400" />
+                    </div>
+                  </div>
+                </div>
+              </div>
 
               {/* Bottom Subtle Note */}
               <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between text-[11px] font-sans text-slate-500 z-10 border-t border-white/[0.06] pt-2">
                 <span>Asteya Systems Architecture</span>
-                <span>Self-building nodes</span>
+                <span>Modular Core</span>
               </div>
             </div>
           </motion.div>

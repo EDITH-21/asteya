@@ -21,6 +21,7 @@ export const EnquiryCreateSchema = z.object({
     .trim()
     .min(10, "Message must be at least 10 characters")
     .max(3000, "Message cannot exceed 3000 characters"),
+  _hp: z.string().max(0, "Automated submission rejected").optional().or(z.literal("")),
 });
 
 export const AdminLoginSchema = z.object({

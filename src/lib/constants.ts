@@ -5,23 +5,21 @@ export interface NavItem {
 
 /**
  * Centralized Contact and Social Channels
- * Replace LinkedIn URL here when the company page is finalized.
+ * Replace LinkedIn URL via NEXT_PUBLIC_LINKEDIN_URL or directly here.
  */
 export const CONTACT_CONFIG = {
-  email: "asteyatech2@gmail.com",
-  instagram: "https://www.instagram.com/asteya.tech/?hl=en",
-  // Temporary LinkedIn URL - easily updated from this single location:
-  linkedin: "https://www.linkedin.com/",
+  email: process.env.NEXT_PUBLIC_CONTACT_EMAIL || "hello@asteya.tech",
+  instagram: "https://www.instagram.com/asteya.tech/",
+  linkedin: process.env.NEXT_PUBLIC_LINKEDIN_URL || "https://www.linkedin.com/company/asteya",
 };
 
 export const NAV_ITEMS: NavItem[] = [
   { name: "About", href: "#about" },
   { name: "Services", href: "#services" },
-  { name: "Approach", href: "#approach" },
   { name: "Ventures", href: "#ventures" },
+  { name: "Process", href: "#process" },
   { name: "Technology", href: "#technology" },
   { name: "Why Asteya", href: "#why-asteya" },
-  { name: "Process", href: "#process" },
 ];
 
 export interface ServiceItem {
@@ -42,7 +40,7 @@ export const SERVICES: ServiceItem[] = [
     title: "WEB DEVELOPMENT",
     tagline: "High-performance architecture",
     description: "Modern, responsive, scalable websites and web applications built with cutting-edge frameworks, robust infrastructure, and seamless user experiences.",
-    capabilities: ["Full-Stack Next.js / React", "Ultra-low Latency APIs", "Edge Infrastructure", "Scalable Cloud Architecture"],
+    capabilities: ["Full-Stack Next.js / React", "Low-Latency APIs", "Edge Infrastructure", "Scalable Cloud Architecture"],
     gradient: "from-indigo-500/20 via-purple-500/10 to-transparent",
     iconName: "Globe",
   },
@@ -52,7 +50,7 @@ export const SERVICES: ServiceItem[] = [
     title: "DIGITAL SOLUTIONS",
     tagline: "Targeted problem solving",
     description: "Technology-driven solutions designed around real business problems, transforming complex operational hurdles into intuitive digital ecosystems.",
-    capabilities: ["Custom Enterprise Software", "API Integrations", "Data Pipeline Systems", "Real-time Operations Dashboards"],
+    capabilities: ["Custom Enterprise Software", "API Integrations", "Data Pipeline Systems", "Real-Time Operations Dashboards"],
     gradient: "from-cyan-500/20 via-blue-500/10 to-transparent",
     iconName: "Cpu",
   },
@@ -98,50 +96,6 @@ export const SERVICES: ServiceItem[] = [
   },
 ];
 
-export interface ApproachStage {
-  number: string;
-  title: string;
-  subtitle: string;
-  description: string;
-  metrics: { label: string; value: string }[];
-}
-
-export const APPROACH_STAGES: ApproachStage[] = [
-  {
-    number: "01",
-    title: "IDEA",
-    subtitle: "Understand the problem. Define the opportunity.",
-    description: "We deconstruct domain complexity, analyze behavioral patterns, identify bottlenecks, and formulate razor-sharp technical and design hypotheses.",
-    metrics: [
-      { label: "Phase", value: "Discovery & Strategy" },
-      { label: "Focus", value: "Problem Architecture" },
-      { label: "Output", value: "Defined Blueprint" },
-    ],
-  },
-  {
-    number: "02",
-    title: "BUILD",
-    subtitle: "Design, engineer, test, and launch the solution.",
-    description: "Using modern stacks and precision engineering, we turn blueprints into robust, scalable software with pixel-perfect interfaces and airtight code.",
-    metrics: [
-      { label: "Phase", value: "Engineering & QA" },
-      { label: "Focus", value: "Precision Execution" },
-      { label: "Output", value: "Live Production System" },
-    ],
-  },
-  {
-    number: "03",
-    title: "EVOLVE",
-    subtitle: "Improve continuously using data, technology, and feedback.",
-    description: "Launch is day one. We monitor telemetry, analyze real-world usage patterns, iterate on feedback, and scale systems gracefully into the future.",
-    metrics: [
-      { label: "Phase", value: "Optimization & Growth" },
-      { label: "Focus", value: "Continuous Enhancement" },
-      { label: "Output", value: "Compounding Value" },
-    ],
-  },
-];
-
 export interface WhyAsteyaItem {
   number: string;
   title: string;
@@ -174,16 +128,6 @@ export const WHY_ASTEYA_ITEMS: WhyAsteyaItem[] = [
     description: "We continuously explore emerging technologies and new possibilities, ensuring your products are ready for the shifts of tomorrow.",
     badge: "NEXT-GEN READY",
   },
-];
-
-export const PROCESS_STAGES = [
-  { id: "01", name: "DISCOVER", detail: "Deep exploration of requirements, pain points, and target outcome" },
-  { id: "02", name: "DEFINE", detail: "System architecture, scope definition, and technological foundation" },
-  { id: "03", name: "DESIGN", detail: "High-fidelity interfaces, interactive flow diagrams, and design systems" },
-  { id: "04", name: "DEVELOP", detail: "Clean, performant, type-safe full-stack implementation" },
-  { id: "05", name: "TEST", detail: "Rigorous automated testing, security validation, and cross-platform QA" },
-  { id: "06", name: "LAUNCH", detail: "Zero-downtime deployment, infrastructure verification, and telemetry active" },
-  { id: "07", name: "EVOLVE", detail: "Continuous observability, iterative feature delivery, and performance tuning" },
 ];
 
 export const TECH_DOMAINS = [

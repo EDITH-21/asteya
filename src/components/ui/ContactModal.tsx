@@ -17,6 +17,7 @@ export const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) =
     email: "",
     type: "Digital Product / Web",
     message: "",
+    _hp: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -74,7 +75,7 @@ export const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) =
   const handleReset = () => {
     setIsSubmitted(false);
     setErrorMessage("");
-    setFormData({ name: "", email: "", type: "Digital Product / Web", message: "" });
+    setFormData({ name: "", email: "", type: "Digital Product / Web", message: "", _hp: "" });
     onClose();
   };
 
@@ -202,6 +203,18 @@ export const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) =
                     onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                     placeholder="Describe what you want to build, key goals, timeline, or objectives..."
                     className="w-full px-3.5 py-2.5 bg-black/40 border border-white/10 rounded-lg text-sm text-white placeholder:text-slate-600 focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20 transition-all resize-none"
+                  />
+                </div>
+
+                {/* Bot protection honeypot */}
+                <div className="hidden" aria-hidden="true">
+                  <input
+                    type="text"
+                    name="_hp"
+                    tabIndex={-1}
+                    autoComplete="off"
+                    value={formData._hp}
+                    onChange={(e) => setFormData({ ...formData, _hp: e.target.value })}
                   />
                 </div>
 

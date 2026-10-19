@@ -20,6 +20,55 @@ function checkSubmissionRateLimit(ip: string): boolean {
   return true;
 }
 
+async function sendResendNotification(enquiry: {
+  name: string;
+  email: string;
+  type: string;
+  message: string;
+}) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) return;
+
+  const recipient = process.env.CONTACT_NOTIFICATION_EMAIL || process.env.NEXT_PUBLIC_CONTACT_EMAIL || "hello@asteya.tech";
+  const fromEmail = process.env.RESEND_FROM_EMAIL || "Asteya Inquiries <onboarding@resend.dev>";
+
+  try {
+    const res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        from: fromEmail,
+        to: recipient,
+        reply_to: enquiry.email,
+        subject: `[Asteya Project Brief] ${enquiry.type} - ${enquiry.name}`,
+        html: `
+          <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #1e293b;">
+            <h2 style="color: #4338ca; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px;">New Asteya Inquiry</h2>
+            <p><strong>Name:</strong> ${enquiry.name}</p>
+            <p><strong>Email:</strong> <a href="mailto:${enquiry.email}">${enquiry.email}</a></p>
+            <p><strong>Engagement Domain:</strong> ${enquiry.type}</p>
+            <div style="margin-top: 20px; padding: 15px; background: #f8fafc; border-radius: 8px; border-left: 4px solid #6366f1;">
+              <strong>Project Overview / Message:</strong>
+              <p style="white-space: pre-wrap; margin-top: 8px;">${enquiry.message}</p>
+            </div>
+            <p style="font-size: 12px; color: #64748b; margin-top: 30px;">This notification was dispatched via Asteya contact systems.</p>
+          </div>
+        `,
+      }),
+    });
+
+    if (!res.ok) {
+      const errText = await res.text();
+      console.warn("[Resend] Email dispatch warning:", errText);
+    }
+  } catch (resendError) {
+    console.error("[Resend] Network error sending notification:", resendError);
+  }
+}
+
 export async function POST(req: NextRequest) {
   try {
     await initializeDatabase();
@@ -33,6 +82,18 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
+
+    // Honeypot check: If the hidden honeypot field is filled by a bot, silently accept without storing
+    if (body._hp && typeof body._hp === "string" && body._hp.trim().length > 0) {
+      return NextResponse.json(
+        {
+          success: true,
+          message: "Enquiry submitted successfully.",
+        },
+        { status: 201 }
+      );
+    }
+
     const result = EnquiryCreateSchema.safeParse(body);
 
     if (!result.success) {
@@ -48,6 +109,9 @@ export async function POST(req: NextRequest) {
       message,
       ipAddress: ip,
     });
+
+    // Optionally dispatch via Resend if configured
+    await sendResendNotification({ name, email, type, message });
 
     return NextResponse.json(
       {

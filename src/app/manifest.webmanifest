@@ -1,0 +1,21 @@
+{
+  "name": "Asteya — Building What's Next",
+  "short_name": "Asteya",
+  "description": "Technology company creating digital products, intelligent solutions, and ventures designed for the future.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#05070b",
+  "theme_color": "#05070b",
+  "icons": [
+    {
+      "src": "/asteya-logo-original.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg"
+    },
+    {
+      "src": "/asteya-logo-original.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg"
+    }
+  ]
+}

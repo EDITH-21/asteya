@@ -1,16 +1,16 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import { motion } from "framer-motion";
 import { SERVICES } from "@/lib/constants";
-import { Globe, Cpu, Layers, Zap, Sparkles, Compass, ArrowRight } from "lucide-react";
+import { Globe, Cpu, Layers, Zap, Sparkles, Compass, ArrowRight, ArrowUpRight } from "lucide-react";
 
 interface ServicesSectionProps {
   onOpenContact: () => void;
 }
 
 export const ServicesSection: React.FC<ServicesSectionProps> = ({ onOpenContact }) => {
-
   const getIcon = (name: string) => {
     switch (name) {
       case "Globe":
@@ -35,9 +35,9 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onOpenContact 
       id="services"
       className="relative w-full py-20 sm:py-28 bg-[#05070b] border-t border-white/[0.08] overflow-hidden scroll-mt-24"
     >
-      {/* Background Lighting */}
-      <div className="absolute top-1/3 right-0 w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-[160px] pointer-events-none" />
-      <div className="absolute bottom-10 left-10 w-[400px] h-[400px] bg-indigo-600/10 rounded-full blur-[140px] pointer-events-none" />
+      {/* Background Lighting (optimized for mobile) */}
+      <div className="absolute top-1/3 right-0 w-72 sm:w-[500px] h-72 sm:h-[500px] bg-purple-600/10 rounded-full blur-2xl sm:blur-[140px] pointer-events-none" />
+      <div className="hidden sm:block absolute bottom-10 left-10 w-[400px] h-[400px] bg-indigo-600/10 rounded-full blur-2xl sm:blur-[120px] pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
@@ -56,18 +56,17 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onOpenContact 
           </p>
         </div>
 
-        {/* 6 Interactive Service Panels */}
+        {/* 6 Interactive Service Panels Linking to Dedicated Service Routes */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {SERVICES.map((service, index) => {
             return (
               <motion.div
                 key={service.id}
-                initial={{ opacity: 0, y: 24 }}
+                initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.15 }}
-                transition={{ duration: 0.5, delay: index * 0.06 }}
-                onClick={onOpenContact}
-                className="group relative rounded-2xl bg-gradient-to-b from-white/[0.04] to-white/[0.01] border border-white/[0.08] hover:border-indigo-500/40 p-7 flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_16px_36px_-12px_rgba(99,102,241,0.22)] cursor-pointer overflow-hidden"
+                transition={{ duration: 0.5, delay: index * 0.05 }}
+                className="group relative rounded-2xl bg-gradient-to-b from-white/[0.04] to-white/[0.01] border border-white/[0.08] hover:border-indigo-500/40 p-7 flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_16px_36px_-12px_rgba(99,102,241,0.22)] overflow-hidden"
               >
                 {/* Subtle dynamic background gradient on hover */}
                 <div
@@ -91,7 +90,12 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onOpenContact 
                       {service.tagline}
                     </div>
                     <h3 className="text-xl font-bold tracking-tight text-white group-hover:text-white transition-colors">
-                      {service.title}
+                      <Link
+                        href={`/services/${service.id}`}
+                        className="hover:text-indigo-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 rounded"
+                      >
+                        {service.title}
+                      </Link>
                     </h3>
                   </div>
 
@@ -101,8 +105,8 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onOpenContact 
                   </p>
                 </div>
 
-                {/* Capabilities Badges */}
-                <div className="relative z-10 pt-4 border-t border-white/[0.06] space-y-2.5">
+                {/* Capabilities Badges & Dedicated Page Link */}
+                <div className="relative z-10 pt-4 border-t border-white/[0.06] space-y-3">
                   <div className="text-[11px] font-sans text-slate-400 font-medium">
                     Key Deliverables
                   </div>
@@ -116,6 +120,16 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onOpenContact 
                       </span>
                     ))}
                   </div>
+
+                  <div className="pt-2">
+                    <Link
+                      href={`/services/${service.id}`}
+                      className="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-300 hover:text-white transition-colors group/link focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 rounded py-1"
+                    >
+                      <span>Explore {service.title.toLowerCase()}</span>
+                      <ArrowUpRight strokeWidth={2} className="w-3.5 h-3.5 transition-transform duration-200 group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5" />
+                    </Link>
+                  </div>
                 </div>
               </motion.div>
             );
@@ -127,7 +141,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onOpenContact 
           initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.2 }}
+          transition={{ duration: 0.6, delay: 0.15 }}
           className="mt-12 p-6 sm:p-8 rounded-2xl bg-white/[0.02] border border-white/[0.08] flex flex-col sm:flex-row items-center justify-between gap-6"
         >
           <div>
@@ -140,7 +154,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onOpenContact 
           </div>
           <button
             onClick={onOpenContact}
-            className="group flex-shrink-0 inline-flex items-center gap-2 px-6 py-2.5 rounded-full text-xs sm:text-sm font-semibold text-white bg-white/[0.06] hover:bg-white/[0.12] border border-white/15 transition-all duration-200 active:scale-95"
+            className="group flex-shrink-0 inline-flex items-center gap-2 min-h-[44px] px-6 py-2.5 rounded-full text-xs sm:text-sm font-semibold text-white bg-white/[0.06] hover:bg-white/[0.12] border border-white/15 transition-all duration-200 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400"
           >
             <span>Discuss Your Project</span>
             <ArrowRight strokeWidth={1.75} className="w-4 h-4 text-indigo-300 transition-transform duration-200 group-hover:translate-x-0.5" />
