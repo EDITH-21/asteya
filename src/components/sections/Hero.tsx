@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
-import { AsteyaLogo } from "../ui/AsteyaLogo";
+import { AadrutLogo } from "../ui/AadrutLogo";
 import { ArrowRight } from "lucide-react";
 
 interface HeroProps {
@@ -284,14 +284,14 @@ export const Hero: React.FC<HeroProps> = ({ onOpenContact }) => {
           </span>
         </motion.div>
 
-        {/* ASTEYA Emblem Reveal */}
+        {/* AADRUT Emblem Reveal */}
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.7, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
           className="mb-6 flex flex-col items-center"
         >
-          <AsteyaLogo size={54} showText={false} />
+          <AadrutLogo heightClass="h-[54px]" />
         </motion.div>
 
         {/* Hero Headline */}
@@ -314,7 +314,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenContact }) => {
           transition={{ duration: 0.7, delay: 0.45, ease: "easeOut" }}
           className="mt-6 text-base sm:text-lg md:text-xl text-slate-300 max-w-2xl font-normal leading-relaxed text-balance"
         >
-          Asteya is a technology company creating digital products, intelligent solutions, and ventures designed for the future.
+          Aadrut is a technology company creating digital products, intelligent solutions, and ventures designed for the future.
         </motion.p>
 
         {/* Call to Actions - "View Our Work" replaced with "Start a Conversation" to #contact */}
@@ -329,7 +329,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenContact }) => {
             onClick={scrollToAbout}
             className="w-full sm:w-auto min-h-[44px] px-7 py-3 rounded-full bg-white text-black font-semibold text-sm tracking-normal hover:bg-slate-100 transition-all duration-200 shadow-[0_0_24px_rgba(255,255,255,0.2)] hover:shadow-[0_0_32px_rgba(255,255,255,0.35)] flex items-center justify-center gap-2 group active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400"
           >
-            <span>Explore Asteya</span>
+            <span>Explore Aadrut</span>
             <ArrowRight strokeWidth={1.75} className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-1" />
           </button>
 

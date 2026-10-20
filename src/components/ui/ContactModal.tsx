@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, CheckCircle2, ShieldCheck, ArrowRight, Mail } from "lucide-react";
-import { AsteyaLogo } from "./AsteyaLogo";
+import { AadrutLogo } from "./AadrutLogo";
 import { CONTACT_CONFIG } from "@/lib/constants";
 
 interface ContactModalProps {
@@ -112,13 +112,13 @@ export const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) =
             {/* Header */}
             <div className="flex items-center justify-between pb-4 border-b border-white/[0.08]">
               <div className="flex items-center gap-3">
-                <AsteyaLogo size={30} showText={false} />
+                <AadrutLogo heightClass="h-[36px]" />
                 <div>
                   <h3 id="contact-modal-title" className="text-lg font-bold text-white tracking-tight">
                     Start a Conversation
                   </h3>
                   <div className="text-xs text-slate-400 font-sans">
-                    Asteya Technology &amp; Ventures
+                    Aadrut Technology &amp; Ventures
                   </div>
                 </div>
               </div>

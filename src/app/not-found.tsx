@@ -1,6 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import { AsteyaLogo } from "@/components/ui/AsteyaLogo";
+import { AadrutLogo } from "@/components/ui/AadrutLogo";
 import { ArrowLeft, Home, Compass } from "lucide-react";
 
 export default function NotFound() {
@@ -9,13 +9,13 @@ export default function NotFound() {
       {/* Top Header */}
       <header className="w-full border-b border-white/[0.08] bg-[#05070b]/80 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-3">
-            <AsteyaLogo size={36} showText={true} />
+          <Link href="/" aria-label="Aadrut Home" className="flex items-center focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 rounded-lg">
+            <AadrutLogo heightClass="h-[40px] sm:h-[46px]" />
           </Link>
 
           <Link
             href="/"
-            className="inline-flex items-center gap-1.5 text-xs sm:text-sm text-slate-300 hover:text-white transition-colors"
+            className="inline-flex items-center gap-1.5 text-xs sm:text-sm text-slate-300 hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 rounded px-2 py-1"
           >
             <ArrowLeft className="w-4 h-4 text-indigo-400" />
             <span>Return to Safety</span>
@@ -68,7 +68,7 @@ export default function NotFound() {
 
       {/* Footer */}
       <footer className="w-full border-t border-white/[0.08] py-6 text-center text-xs font-sans text-slate-500">
-        &copy; 2026 Asteya. All rights reserved.
+        &copy; 2026 Aadrut. All rights reserved.
       </footer>
     </div>
   );

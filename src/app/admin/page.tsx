@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { AsteyaLogo } from "@/components/ui/AsteyaLogo";
+import { AadrutLogo } from "@/components/ui/AadrutLogo";
 import {
   Inbox,
   LayoutDashboard,
@@ -464,7 +464,7 @@ export default function AdminDashboardPage() {
       <header className="border-b border-white/[0.08] bg-[#090d16]/80 backdrop-blur-md sticky top-0 z-30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <AsteyaLogo size={32} showText={true} />
+            <AadrutLogo heightClass="h-[36px]" />
             <span className="hidden sm:inline-block text-[11px] font-sans px-2.5 py-0.5 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 font-medium">
               Operations Control
             </span>
@@ -695,7 +695,7 @@ export default function AdminDashboardPage() {
                     </span>
                   </div>
                   <p className="text-xs text-slate-400 mt-1">
-                    Grounded client instrumentation. Asteya does not fabricate metrics or conflate website visitors with installed users.
+                    Grounded client instrumentation. Aadrut does not fabricate metrics or conflate website visitors with installed users.
                   </p>
                 </div>
 
@@ -952,7 +952,7 @@ export default function AdminDashboardPage() {
                     <label className="text-[11px] font-sans text-slate-400 uppercase font-medium">Client Info</label>
                     <div className="text-sm font-bold text-white mt-0.5">{selectedEnquiry.name}</div>
                     <a
-                      href={`mailto:${selectedEnquiry.email}?subject=Asteya%20Project%20Enquiry`}
+                      href={`mailto:${selectedEnquiry.email}?subject=Aadrut%20Project%20Enquiry`}
                       className="inline-flex items-center gap-1.5 text-xs text-indigo-400 hover:text-indigo-300 mt-0.5"
                     >
                       <Mail strokeWidth={1.75} className="w-3.5 h-3.5" />
@@ -1326,7 +1326,7 @@ export default function AdminDashboardPage() {
               ) : !mfaSetupData ? (
                 <div className="space-y-3">
                   <p className="text-xs text-slate-400 leading-relaxed">
-                    Add an extra layer of defense to the Asteya Operations Control panel using Google Authenticator, 1Password, or any RFC 6238 compliant TOTP application.
+                    Add an extra layer of defense to the Aadrut Operations Control panel using Google Authenticator, 1Password, or any RFC 6238 compliant TOTP application.
                   </p>
                   <button
                     type="button"

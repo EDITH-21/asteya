@@ -200,7 +200,7 @@ export async function initializeDatabase(): Promise<void> {
         const newAdmin: AdminUser = {
           id: crypto.randomUUID(),
           email: adminEmail.toLowerCase().trim(),
-          username: "Asteya Admin",
+          username: "Aadrut Admin",
           passwordHash: hash,
           passwordSalt: salt,
           role: "admin",
@@ -233,7 +233,7 @@ export async function initializeDatabase(): Promise<void> {
       const defaultAdmin: AdminUser = {
         id: crypto.randomUUID(),
         email: adminEmail.toLowerCase().trim(),
-        username: "Asteya Admin",
+        username: "Aadrut Admin",
         passwordHash: hash,
         passwordSalt: salt,
         role: "admin",

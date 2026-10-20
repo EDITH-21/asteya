@@ -237,7 +237,7 @@ export const AboutSection: React.FC = () => {
             {/* Section Tag */}
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] border border-white/10 text-indigo-300 font-sans text-xs font-medium tracking-wide">
               <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
-              <span>01 &bull; About Asteya</span>
+              <span>01 &bull; About Aadrut</span>
             </div>
 
             {/* Headline */}
@@ -250,7 +250,7 @@ export const AboutSection: React.FC = () => {
 
             {/* Paragraph */}
             <p className="text-base sm:text-lg text-slate-300 font-normal leading-relaxed max-w-2xl">
-              Asteya exists to transform ideas into meaningful digital experiences, products, and technology ventures. We combine engineering, design, automation, and emerging technologies to build solutions that are useful today and ready for tomorrow.
+              Aadrut exists to transform ideas into meaningful digital experiences, products, and technology ventures. We combine engineering, design, automation, and emerging technologies to build solutions that are useful today and ready for tomorrow.
             </p>
 
             {/* Value Pillars List */}
@@ -313,7 +313,7 @@ export const AboutSection: React.FC = () => {
 
               {/* Bottom Subtle Note */}
               <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between text-[11px] font-sans text-slate-500 z-10 border-t border-white/[0.06] pt-2">
-                <span>Asteya Systems Architecture</span>
+                <span>Aadrut Systems Architecture</span>
                 <span>Modular Core</span>
               </div>
             </div>

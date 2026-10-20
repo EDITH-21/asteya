@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
     }
 
     const secret = generateTotpSecret();
-    const otpauthUri = generateTotpUri(secret, auth.user.email, "Asteya");
+    const otpauthUri = generateTotpUri(secret, auth.user.email, "Aadrut");
     const { plaintextCodes, hashedCodes } = generateRecoveryCodes(8);
 
     return NextResponse.json({

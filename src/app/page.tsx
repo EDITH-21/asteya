@@ -24,8 +24,8 @@ const TechnologySection = dynamic(
   { ssr: true }
 );
 
-const WhyAsteyaSection = dynamic(
-  () => import("@/components/sections/WhyAsteyaSection").then((mod) => mod.WhyAsteyaSection),
+const WhyAadrutSection = dynamic(
+  () => import("@/components/sections/WhyAsteyaSection").then((mod) => mod.WhyAadrutSection),
   { ssr: true }
 );
 
@@ -81,8 +81,8 @@ export default function Home() {
       {/* 6. Built For The Future: Interactive Technology System */}
       <TechnologySection />
 
-      {/* 7. Why Asteya: Purpose-Driven Architecture */}
-      <WhyAsteyaSection />
+      {/* 7. Why Aadrut: Purpose-Driven Architecture */}
+      <WhyAadrutSection />
 
       {/* 8. Minimalist Philosophy Climax Statement */}
       <PhilosophySection />

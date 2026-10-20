@@ -27,8 +27,13 @@ export function isAllowedOrigin(originHeader: string | null, hostHeader: string 
       }
     }
 
-    // 2. Primary Asteya production domains
-    if (originHostname === "asteya.tech" || originHostname.endsWith(".asteya.tech")) {
+    // 2. Primary Production domains (Aadrut and Asteya transition)
+    if (
+      originHostname === "aadrut.tech" ||
+      originHostname.endsWith(".aadrut.tech") ||
+      originHostname === "asteya.tech" ||
+      originHostname.endsWith(".asteya.tech")
+    ) {
       return true;
     }
 
@@ -57,7 +62,9 @@ export function isAllowedOrigin(originHeader: string | null, hostHeader: string 
     if (hostHeader) {
       const hostClean = hostHeader.split(":")[0].toLowerCase();
       if (
-        (hostClean === "asteya.tech" ||
+        (hostClean === "aadrut.tech" ||
+          hostClean.endsWith(".aadrut.tech") ||
+          hostClean === "asteya.tech" ||
           hostClean.endsWith(".asteya.tech") ||
           hostClean.endsWith(".vercel.app") ||
           hostClean === "localhost" ||

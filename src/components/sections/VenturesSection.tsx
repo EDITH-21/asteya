@@ -92,7 +92,7 @@ export const VenturesSection: React.FC = () => {
                   <span>In Active Development</span>
                 </span>
                 <span>&bull;</span>
-                <span>Asteya Venture Labs</span>
+                <span>Aadrut Venture Labs</span>
               </div>
             </div>
 
@@ -184,7 +184,7 @@ export const VenturesSection: React.FC = () => {
 
           <div className="flex items-center gap-2 text-xs font-sans text-slate-400">
             <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
-            <span>Incubating &bull; Asteya Roadmap</span>
+            <span>Incubating &bull; Aadrut Roadmap</span>
           </div>
         </motion.div>
       </div>

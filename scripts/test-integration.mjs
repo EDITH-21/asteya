@@ -1,7 +1,7 @@
 const BASE_URL = process.env.BASE_URL || "http://localhost:3000";
 
 async function runTests() {
-  console.log("=== ASTEYA INTEGRATION TEST SUITE ===");
+  console.log("=== AADRUT INTEGRATION TEST SUITE ===");
   console.log(`Target: ${BASE_URL}\n`);
 
   let cookie = "";

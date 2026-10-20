@@ -82,7 +82,7 @@ export const CtaSection: React.FC<CtaSectionProps> = () => {
           <div className="text-center mb-6 sm:mb-8">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] border border-white/10 text-indigo-300 font-sans text-xs font-medium tracking-wide mb-4">
               <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
-              <span>Connect with Asteya</span>
+              <span>Connect with Aadrut</span>
             </div>
 
             <h2 className="text-3xl sm:text-5xl md:text-6xl font-bold tracking-tight text-white uppercase leading-[1.1] mb-3">

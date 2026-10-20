@@ -13,7 +13,7 @@ const email = (process.argv[2] || process.env.ADMIN_EMAIL || "admin@asteya.tech"
 const password = process.argv[3] || process.env.ADMIN_INITIAL_PASSWORD;
 
 if (!password || password.length < 10) {
-  console.error("\n[Asteya Admin Bootstrap ERROR] Explicit password is required.");
+  console.error("\n[Aadrut Admin Bootstrap ERROR] Explicit password is required.");
   console.error("Password must be at least 10 characters long.");
   console.error("Usage: node scripts/seed-admin.mjs <email> <password>");
   console.error("   OR: Set ADMIN_INITIAL_PASSWORD environment variable.\n");
@@ -34,7 +34,7 @@ async function hashPassword(pwd) {
 }
 
 async function run() {
-  console.log(`[Asteya Admin Bootstrap] Provisioning administrator for: ${email}`);
+  console.log(`[Aadrut Admin Bootstrap] Provisioning administrator for: ${email}`);
 
   if (!fs.existsSync(dbDir)) {
     fs.mkdirSync(dbDir, { recursive: true });
@@ -66,19 +66,19 @@ async function run() {
     db.users[existingIdx].passwordHash = hash;
     db.users[existingIdx].passwordSalt = salt;
     db.users[existingIdx].updatedAt = new Date().toISOString();
-    console.log(`[Asteya Admin Bootstrap] Updated existing admin user password.`);
+    console.log(`[Aadrut Admin Bootstrap] Updated existing admin user password.`);
   } else {
     db.users.push({
       id: crypto.randomUUID(),
       email,
-      username: "Asteya Admin",
+      username: "Aadrut Admin",
       passwordHash: hash,
       passwordSalt: salt,
       role: "admin",
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     });
-    console.log(`[Asteya Admin Bootstrap] Created new admin user.`);
+    console.log(`[Aadrut Admin Bootstrap] Created new admin user.`);
   }
 
   // Clear any active sessions and lockout records for this email
@@ -89,7 +89,7 @@ async function run() {
   fs.writeFileSync(tmpPath, JSON.stringify(db, null, 2), "utf-8");
   fs.renameSync(tmpPath, dbPath);
 
-  console.log(`[Asteya Admin Bootstrap] SUCCESS! Admin account is ready.`);
+  console.log(`[Aadrut Admin Bootstrap] SUCCESS! Admin account is ready.`);
   console.log(`Email:    ${email}`);
   console.log(`Password: [CONFIGURED - HIDDEN FOR SECURITY]`);
   console.log(`Login at: http://localhost:3000/admin/login`);

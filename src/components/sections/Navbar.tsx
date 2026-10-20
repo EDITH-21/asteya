@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { AsteyaLogo } from "../ui/AsteyaLogo";
+import { AadrutLogo } from "../ui/AadrutLogo";
 import { NAV_ITEMS } from "@/lib/constants";
 import { Menu, X, ArrowUpRight } from "lucide-react";
 
@@ -28,7 +28,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenContact }) => {
       const windowHeight = window.innerHeight;
       const docHeight = document.documentElement.scrollHeight;
 
-      // 1. Near the bottom of the page, the last link (Why Asteya) must become active
+      // 1. Near the bottom of the page, the last link (Why Aadrut) must become active
       if (windowHeight + scrollY >= docHeight - 80) {
         setActiveSection(sectionIds[sectionIds.length - 1]);
         return;
@@ -170,10 +170,10 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenContact }) => {
             {/* Logo Brand Anchor */}
             <a
               href="#"
-              aria-label="Asteya Home"
-              className="group flex items-center gap-2 flex-shrink-0"
+              aria-label="Aadrut Home"
+              className="group flex items-center flex-shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 rounded-lg"
             >
-              <AsteyaLogo size={34} showText={true} />
+              <AadrutLogo priority heightClass="h-[44px] md:h-[52px]" />
             </a>
 
             {/* Desktop Navigation - Switches cleanly to mobile drawer on viewports < 1180px to guarantee zero collision */}
@@ -247,7 +247,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenContact }) => {
             <div className="max-w-md mx-auto w-full pt-4 space-y-6">
               <div className="flex items-center justify-between pb-3 border-b border-white/10 text-xs font-sans tracking-wide text-slate-400 font-medium">
                 <span>Navigation</span>
-                <span>Asteya</span>
+                <span>Aadrut</span>
               </div>
 
               <div className="flex flex-col space-y-1">
@@ -297,7 +297,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenContact }) => {
               </button>
 
               <div className="text-center text-xs font-sans text-slate-500">
-                &copy; 2026 Asteya. All rights reserved.
+                &copy; 2026 Aadrut. All rights reserved.
               </div>
             </div>
           </motion.div>

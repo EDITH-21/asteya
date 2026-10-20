@@ -129,7 +129,7 @@ export const TechnologySection: React.FC = () => {
               </div>
 
               <div className="pt-1 flex items-center justify-between text-xs text-slate-400">
-                <span>Integrated into all Asteya solutions</span>
+                <span>Integrated into all Aadrut solutions</span>
                 <span className="text-indigo-400 font-medium">Built for tomorrow</span>
               </div>
             </motion.div>

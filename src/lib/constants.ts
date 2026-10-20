@@ -19,7 +19,7 @@ export const NAV_ITEMS: NavItem[] = [
   { name: "Ventures", href: "#ventures" },
   { name: "Process", href: "#process" },
   { name: "Technology", href: "#technology" },
-  { name: "Why Asteya", href: "#why-asteya" },
+  { name: "Why Aadrut", href: "#why-aadrut" },
 ];
 
 export interface ServiceItem {
@@ -96,14 +96,16 @@ export const SERVICES: ServiceItem[] = [
   },
 ];
 
-export interface WhyAsteyaItem {
+export interface WhyAadrutItem {
   number: string;
   title: string;
   description: string;
   badge: string;
 }
 
-export const WHY_ASTEYA_ITEMS: WhyAsteyaItem[] = [
+export type WhyAsteyaItem = WhyAadrutItem;
+
+export const WHY_AADRUT_ITEMS: WhyAadrutItem[] = [
   {
     number: "01",
     title: "PROBLEM FIRST",
@@ -129,6 +131,8 @@ export const WHY_ASTEYA_ITEMS: WhyAsteyaItem[] = [
     badge: "NEXT-GEN READY",
   },
 ];
+
+export const WHY_ASTEYA_ITEMS = WHY_AADRUT_ITEMS;
 
 export const TECH_DOMAINS = [
   { id: "ai", label: "AI", desc: "Machine intelligence & neural automation models", color: "#818cf8" },

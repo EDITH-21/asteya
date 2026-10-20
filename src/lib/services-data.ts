@@ -20,8 +20,8 @@ export const DETAILED_SERVICES: Record<string, DetailedService> = {
     title: "Web Development",
     h1: "High-Performance Web Development & Platform Architecture",
     tagline: "Modern, responsive, and scalable web platforms engineered for longevity.",
-    metaTitle: "Web Development Services | Asteya",
-    metaDescription: "Asteya builds high-performance Next.js websites, web apps, and low-latency API architectures with edge infrastructure and resilient design.",
+    metaTitle: "Web Development Services | Aadrut",
+    metaDescription: "Aadrut builds high-performance Next.js websites, web apps, and low-latency API architectures with edge infrastructure and resilient design.",
     overview: [
       "We build modern, type-safe web applications designed to load instantly, convert visitors, and scale reliably as traffic expands. Our engineering approach balances visual polish with deep technical rigor.",
       "By leveraging contemporary frameworks like Next.js, React, and TypeScript alongside edge networks, we deliver fluid user experiences with minimal latency and maximal responsiveness.",
@@ -68,10 +68,10 @@ export const DETAILED_SERVICES: Record<string, DetailedService> = {
     title: "Digital Solutions",
     h1: "Tailored Digital Solutions & Enterprise Systems",
     tagline: "Targeted engineering resolving complex operational bottlenecks.",
-    metaTitle: "Digital Solutions & Software Engineering | Asteya",
-    metaDescription: "Transform operational challenges into intuitive software systems with Asteya's custom digital solutions and software engineering services.",
+    metaTitle: "Digital Solutions & Software Engineering | Aadrut",
+    metaDescription: "Transform operational challenges into intuitive software systems with Aadrut's custom digital solutions and software engineering services.",
     overview: [
-      "Every organization faces friction points where generic off-the-shelf software falls short. Asteya architects custom digital solutions built specifically around your workflows, data structures, and operational objectives.",
+      "Every organization faces friction points where generic off-the-shelf software falls short. Aadrut architects custom digital solutions built specifically around your workflows, data structures, and operational objectives.",
       "From unifying fragmented back-office systems to creating real-time operations dashboards, we engineer tools that give leadership total clarity and empower teams to do their best work.",
     ],
     benefits: [
@@ -116,10 +116,10 @@ export const DETAILED_SERVICES: Record<string, DetailedService> = {
     title: "Brand & Design",
     h1: "Visual Precision, Brand Identity & Interface Systems",
     tagline: "Enduring digital identities and design systems engineered for clarity.",
-    metaTitle: "Brand & UI/UX Design Systems | Asteya",
-    metaDescription: "Elevate your digital presence with Asteya's modern brand identities, design systems, UI/UX architecture, and interactive product design.",
+    metaTitle: "Brand & UI/UX Design Systems | Aadrut",
+    metaDescription: "Elevate your digital presence with Aadrut's modern brand identities, design systems, UI/UX architecture, and interactive product design.",
     overview: [
-      "Brand identity is more than a logo—it is the unified aesthetic, tone, and tactile feel of every digital touchpoint. Asteya creates modern, minimalist visual systems that build immediate trust.",
+      "Brand identity is more than a logo—it is the unified aesthetic, tone, and tactile feel of every digital touchpoint. Aadrut creates modern, minimalist visual systems that build immediate trust.",
       "We bridge the gap between design and engineering, crafting cohesive design systems and component libraries that maintain visual consistency while accelerating frontend feature delivery.",
     ],
     benefits: [
@@ -164,10 +164,10 @@ export const DETAILED_SERVICES: Record<string, DetailedService> = {
     title: "Business Automation",
     h1: "Autonomous Business Automation & Workflow Engineering",
     tagline: "Automate repetitive tasks, connect tools, and multiply team productivity.",
-    metaTitle: "Business Automation & Workflow Engineering | Asteya",
-    metaDescription: "Streamline operations with Asteya's business automation services. Connect CRMs, automate repetitive tasks, and deploy smart workflows.",
+    metaTitle: "Business Automation & Workflow Engineering | Aadrut",
+    metaDescription: "Streamline operations with Aadrut's business automation services. Connect CRMs, automate repetitive tasks, and deploy smart workflows.",
     overview: [
-      "High-performing teams should focus on strategic growth, not copying data between spreadsheets. Asteya engineers autonomous workflows that bridge software gaps, automate notifications, and keep data synchronized.",
+      "High-performing teams should focus on strategic growth, not copying data between spreadsheets. Aadrut engineers autonomous workflows that bridge software gaps, automate notifications, and keep data synchronized.",
       "From lead qualification and contract generation to multi-step invoice processing and customer onboarding, we build reliable automated pipelines that run silently in the background 24/7.",
     ],
     benefits: [
@@ -212,10 +212,10 @@ export const DETAILED_SERVICES: Record<string, DetailedService> = {
     title: "Digital Presence",
     h1: "Modern Digital Presence & Interactive Customer Touchpoints",
     tagline: "Engaging digital tools and interactive touchpoints that turn visitors into customers.",
-    metaTitle: "Digital Presence & Interactive Experiences | Asteya",
-    metaDescription: "Build modern digital touchpoints with Asteya: interactive profiles, dynamic QR experiences, mobile-first portals, and fast landing pages.",
+    metaTitle: "Digital Presence & Interactive Experiences | Aadrut",
+    metaDescription: "Build modern digital touchpoints with Aadrut: interactive profiles, dynamic QR experiences, mobile-first portals, and fast landing pages.",
     overview: [
-      "In a crowded digital landscape, your first impression determines customer trust. Asteya develops modern digital presence solutions that capture attention, convey credibility, and drive conversions.",
+      "In a crowded digital landscape, your first impression determines customer trust. Aadrut develops modern digital presence solutions that capture attention, convey credibility, and drive conversions.",
       "From mobile-first smart profiles and dynamic QR menu systems to high-speed campaign landing pages, we build experiences that load in milliseconds and delight users across all screen sizes.",
     ],
     benefits: [
@@ -260,10 +260,10 @@ export const DETAILED_SERVICES: Record<string, DetailedService> = {
     title: "Technology Consulting",
     h1: "Strategic Technology Consulting & Architecture Advisory",
     tagline: "Clear engineering roadmaps, architecture auditing, and modernization strategies.",
-    metaTitle: "Technology Consulting & Architecture Strategy | Asteya",
-    metaDescription: "Navigate complex technical decisions with Asteya's technology consulting: tech stack modernization, security audits, and cloud roadmaps.",
+    metaTitle: "Technology Consulting & Architecture Strategy | Aadrut",
+    metaDescription: "Navigate complex technical decisions with Aadrut's technology consulting: tech stack modernization, security audits, and cloud roadmaps.",
     overview: [
-      "Choosing the right technology stack and architectural foundation can make or break a company's ability to scale. Asteya provides pragmatic, battle-hardened technical guidance to business founders and executives.",
+      "Choosing the right technology stack and architectural foundation can make or break a company's ability to scale. Aadrut provides pragmatic, battle-hardened technical guidance to business founders and executives.",
       "We evaluate your current codebase, infrastructure, and team capabilities to design actionable roadmaps that cut technical debt, improve security, and accelerate time-to-market.",
     ],
     benefits: [

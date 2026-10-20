@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { DETAILED_SERVICES } from "@/lib/services-data";
 import { CONTACT_CONFIG } from "@/lib/constants";
-import { AsteyaLogo } from "@/components/ui/AsteyaLogo";
+import { AadrutLogo } from "@/components/ui/AadrutLogo";
 import {
   ArrowLeft,
   ArrowRight,
@@ -30,7 +30,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   if (!service) {
     return {
-      title: "Service Not Found | Asteya",
+      title: "Service Not Found | Aadrut",
     };
   }
 
@@ -47,7 +47,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       title: service.metaTitle,
       description: service.metaDescription,
       url: url,
-      siteName: "Asteya",
+      siteName: "Aadrut",
       type: "website",
     },
     twitter: {
@@ -75,10 +75,10 @@ export default async function ServicePage({ params }: PageProps) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between">
           <Link
             href="/"
-            className="flex items-center gap-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 rounded-lg p-1"
-            aria-label="Return to Asteya homepage"
+            className="flex items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 rounded-lg p-1"
+            aria-label="Return to Aadrut homepage"
           >
-            <AsteyaLogo size={36} showText={true} />
+            <AadrutLogo heightClass="h-[40px] sm:h-[46px]" />
           </Link>
 
           <div className="flex items-center gap-3 sm:gap-4">
@@ -108,7 +108,7 @@ export default async function ServicePage({ params }: PageProps) {
           <div className="space-y-4">
             <div className="flex items-center gap-2 text-xs font-sans text-slate-400">
               <Link href="/" className="hover:text-white transition-colors">
-                Asteya
+                Aadrut
               </Link>
               <span>/</span>
               <Link href="/#services" className="hover:text-white transition-colors">
@@ -120,7 +120,7 @@ export default async function ServicePage({ params }: PageProps) {
 
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] border border-white/10 text-indigo-300 font-sans text-xs font-medium tracking-wide">
               <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
-              <span>Service {service.number} &bull; Asteya Capabilities</span>
+              <span>Service {service.number} &bull; Aadrut Capabilities</span>
             </div>
 
             {/* Single Semantic H1 */}
@@ -149,7 +149,7 @@ export default async function ServicePage({ params }: PageProps) {
           {/* Core Benefits */}
           <section aria-labelledby="service-benefits" className="space-y-6">
             <h2 id="service-benefits" className="text-xl sm:text-2xl font-bold text-white tracking-tight">
-              Why Partner With Asteya
+              Why Partner With Aadrut
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
               {service.benefits.map((benefit, idx) => (
@@ -245,7 +245,7 @@ export default async function ServicePage({ params }: PageProps) {
             </h2>
 
             <p className="text-slate-300 text-sm sm:text-base max-w-xl mx-auto leading-relaxed">
-              Partner with Asteya to architect, engineer, and deploy resilient digital systems built for modern velocity.
+              Partner with Aadrut to architect, engineer, and deploy resilient digital systems built for modern velocity.
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
@@ -305,7 +305,7 @@ export default async function ServicePage({ params }: PageProps) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <Link href="/" className="hover:text-white transition-colors">
-              &copy; 2026 Asteya. All rights reserved.
+              &copy; 2026 Aadrut. All rights reserved.
             </Link>
           </div>
           <div className="flex items-center gap-6">

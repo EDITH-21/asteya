@@ -63,7 +63,7 @@ export function generateTotpSecret(): string {
 /**
  * Generate an otpauth:// URI for authenticator applications (Google Authenticator, 1Password, etc.).
  */
-export function generateTotpUri(secret: string, email: string, issuer = "Asteya"): string {
+export function generateTotpUri(secret: string, email: string, issuer = "Aadrut"): string {
   const encodedIssuer = encodeURIComponent(issuer);
   const encodedAccount = encodeURIComponent(email);
   return `otpauth://totp/${encodedIssuer}:${encodedAccount}?secret=${secret}&issuer=${encodedIssuer}&algorithm=SHA1&digits=6&period=30`;
@@ -178,7 +178,7 @@ export function createMfaPreAuthToken(userId: string, email: string): string {
   const payloadBase64 = Buffer.from(payload).toString("base64url");
 
   // Sign using a deterministic internal server seed derived from machine/runtime environment
-  const seed = process.env.ADMIN_INITIAL_PASSWORD || process.env.RESEND_API_KEY || "asteya_mfa_sign_seed_2026";
+  const seed = process.env.ADMIN_INITIAL_PASSWORD || process.env.RESEND_API_KEY || "aadrut_mfa_sign_seed_2026";
   const signature = crypto.createHmac("sha256", seed).update(payloadBase64).digest("base64url");
 
   return `${payloadBase64}.${signature}`;
@@ -192,7 +192,7 @@ export function verifyMfaPreAuthToken(token: string): { userId: string; email: s
     const [payloadBase64, signature] = token.split(".");
     if (!payloadBase64 || !signature) return null;
 
-    const seed = process.env.ADMIN_INITIAL_PASSWORD || process.env.RESEND_API_KEY || "asteya_mfa_sign_seed_2026";
+    const seed = process.env.ADMIN_INITIAL_PASSWORD || process.env.RESEND_API_KEY || "aadrut_mfa_sign_seed_2026";
     const expectedSig = crypto.createHmac("sha256", seed).update(payloadBase64).digest("base64url");
 
     if (!crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSig))) {

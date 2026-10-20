@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { AsteyaLogo } from "@/components/ui/AsteyaLogo";
+import { AadrutLogo } from "@/components/ui/AadrutLogo";
 import {
   Lock,
   Mail,
@@ -145,7 +145,7 @@ export default function AdminLoginPage() {
           className="inline-flex items-center gap-2 text-xs font-sans text-slate-400 hover:text-white transition-colors py-1.5 px-3 rounded-lg hover:bg-white/[0.04]"
         >
           <ArrowLeft strokeWidth={1.75} className="w-4 h-4" />
-          <span>Return to Asteya Website</span>
+          <span>Return to Aadrut Website</span>
         </Link>
       </div>
 
@@ -155,7 +155,7 @@ export default function AdminLoginPage() {
           {/* Logo & Heading */}
           <div className="text-center pb-6 border-b border-white/[0.08]">
             <div className="flex justify-center mb-4">
-              <AsteyaLogo size={42} showText={false} />
+              <AadrutLogo heightClass="h-[46px]" />
             </div>
             <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
               {isMfaStep ? "Two-Factor Verification" : "Operations Control"}
@@ -331,7 +331,7 @@ export default function AdminLoginPage() {
 
       {/* Footer info */}
       <div className="max-w-md w-full mx-auto pb-4 text-center text-[11px] text-slate-400 font-sans">
-        Asteya Internal Operations &bull; Strictly Confidential
+        Aadrut Internal Operations &bull; Strictly Confidential
       </div>
     </div>
   );

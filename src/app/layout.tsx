@@ -20,14 +20,14 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://asteya.tech";
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "Asteya | Web Development, Business Automation & Digital Solutions",
-    template: "%s | Asteya",
+    default: "Aadrut | Digital Products, Intelligent Solutions & Future Ventures",
+    template: "%s | Aadrut",
   },
   description:
-    "Asteya builds high-performance web applications, custom digital solutions, brand design systems, and intelligent business automations for high-growth enterprises.",
-  authors: [{ name: "Asteya", url: siteUrl }],
-  creator: "Asteya",
-  publisher: "Asteya",
+    "Aadrut builds high-performance web applications, custom digital solutions, brand design systems, and intelligent business automations for high-growth enterprises.",
+  authors: [{ name: "Aadrut", url: siteUrl }],
+  creator: "Aadrut",
+  publisher: "Aadrut",
   formatDetection: {
     email: false,
     address: false,
@@ -37,29 +37,29 @@ export const metadata: Metadata = {
     canonical: siteUrl,
   },
   openGraph: {
-    title: "Asteya | Web Development, Business Automation & Digital Solutions",
+    title: "Aadrut | Digital Products, Intelligent Solutions & Future Ventures",
     description:
-      "Asteya builds high-performance web applications, custom digital solutions, brand design systems, and intelligent business automations for high-growth enterprises.",
+      "Aadrut builds high-performance web applications, custom digital solutions, brand design systems, and intelligent business automations for high-growth enterprises.",
     url: siteUrl,
-    siteName: "Asteya",
+    siteName: "Aadrut",
     locale: "en_US",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Asteya | Web Development, Business Automation & Digital Solutions",
+    title: "Aadrut | Digital Products, Intelligent Solutions & Future Ventures",
     description:
-      "Asteya builds high-performance web applications, custom digital solutions, brand design systems, and intelligent business automations for high-growth enterprises.",
-    creator: "@asteya",
+      "Aadrut builds high-performance web applications, custom digital solutions, brand design systems, and intelligent business automations for high-growth enterprises.",
+    creator: "@aadrut",
   },
   manifest: "/manifest.webmanifest",
   icons: {
     icon: [
-      { url: "/asteya-logo.svg", type: "image/svg+xml" },
+      { url: "/icon.png", sizes: "32x32", type: "image/png" },
       { url: "/favicon.ico", sizes: "any" },
     ],
     apple: [
-      { url: "/asteya-logo-original.jpg", sizes: "180x180", type: "image/jpeg" },
+      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
     ],
   },
 };
@@ -77,13 +77,13 @@ const jsonLd = {
     {
       "@type": "Organization",
       "@id": `${siteUrl}/#organization`,
-      "name": "Asteya",
+      "name": "Aadrut",
       "url": siteUrl,
       "logo": {
         "@type": "ImageObject",
-        "url": `${siteUrl}/asteya-logo.svg`,
-        "width": "736",
-        "height": "736",
+        "url": `${siteUrl}/aadrut-logo.png`,
+        "width": "272",
+        "height": "339",
       },
       "sameAs": [
         "https://www.instagram.com/asteya.tech/",
@@ -99,8 +99,8 @@ const jsonLd = {
       "@type": "WebSite",
       "@id": `${siteUrl}/#website`,
       "url": siteUrl,
-      "name": "Asteya",
-      "description": "Web Development, Business Automation & Digital Solutions",
+      "name": "Aadrut",
+      "description": "Digital Products, Intelligent Solutions & Future Ventures",
       "publisher": {
         "@id": `${siteUrl}/#organization`,
       },

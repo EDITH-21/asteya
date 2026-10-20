@@ -1,13 +1,13 @@
 import React from "react";
 import Link from "next/link";
 import type { Metadata } from "next";
-import { AsteyaLogo } from "@/components/ui/AsteyaLogo";
+import { AadrutLogo } from "@/components/ui/AadrutLogo";
 import { ArrowLeft } from "lucide-react";
 import { CONTACT_CONFIG } from "@/lib/constants";
 
 export const metadata: Metadata = {
-  title: "Terms of Service | Asteya",
-  description: "Asteya's terms and conditions governing the use of our website, consulting services, and digital products.",
+  title: "Terms of Service | Aadrut",
+  description: "Aadrut's terms and conditions governing the use of our website, consulting services, and digital products.",
   alternates: {
     canonical: "https://asteya.tech/terms",
   },
@@ -21,10 +21,10 @@ export default function TermsPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between">
           <Link
             href="/"
-            className="flex items-center gap-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 rounded-lg p-1"
-            aria-label="Return to Asteya homepage"
+            className="flex items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 rounded-lg p-1"
+            aria-label="Return to Aadrut homepage"
           >
-            <AsteyaLogo size={36} showText={true} />
+            <AadrutLogo heightClass="h-[40px] sm:h-[46px]" />
           </Link>
 
           <Link
@@ -56,28 +56,28 @@ export default function TermsPage() {
             <section className="space-y-3">
               <h2 className="text-xl font-bold text-white tracking-tight">1. Acceptance of Terms</h2>
               <p>
-                By accessing and utilizing the Asteya website or engaging our technology consulting and software engineering services, you agree to comply with and be bound by these Terms of Service.
+                By accessing and utilizing the Aadrut website or engaging our technology consulting and software engineering services, you agree to comply with and be bound by these Terms of Service.
               </p>
             </section>
 
             <section className="space-y-3">
               <h2 className="text-xl font-bold text-white tracking-tight">2. Intellectual Property</h2>
               <p>
-                All original materials, codebases, design assets, and brand marks created by Asteya prior to or independently of specific client engagements remain the intellectual property of Asteya. Client deliverables are governed under individual Master Services Agreements (MSAs) or Statements of Work (SOWs).
+                All original materials, codebases, design assets, and brand marks created by Aadrut prior to or independently of specific client engagements remain the intellectual property of Aadrut. Client deliverables are governed under individual Master Services Agreements (MSAs) or Statements of Work (SOWs).
               </p>
             </section>
 
             <section className="space-y-3">
               <h2 className="text-xl font-bold text-white tracking-tight">3. Client Engagements &amp; Deliverables</h2>
               <p>
-                Specific scopes of work, milestones, payment schedules, and deliverable specifications are established in dedicated project agreements executed between Asteya and the client.
+                Specific scopes of work, milestones, payment schedules, and deliverable specifications are established in dedicated project agreements executed between Aadrut and the client.
               </p>
             </section>
 
             <section className="space-y-3">
               <h2 className="text-xl font-bold text-white tracking-tight">4. Limitation of Liability</h2>
               <p>
-                To the fullest extent permitted by law, Asteya shall not be liable for indirect, incidental, special, consequential, or punitive damages resulting from the use of our website or software beyond the explicit terms outlined in active client contracts.
+                To the fullest extent permitted by law, Aadrut shall not be liable for indirect, incidental, special, consequential, or punitive damages resulting from the use of our website or software beyond the explicit terms outlined in active client contracts.
               </p>
             </section>
 
@@ -97,7 +97,7 @@ export default function TermsPage() {
       {/* Footer */}
       <footer className="w-full bg-[#030508] border-t border-white/[0.08] py-8 text-slate-400 text-xs font-sans">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div>&copy; 2026 Asteya. All rights reserved.</div>
+          <div>&copy; 2026 Aadrut. All rights reserved.</div>
           <div className="flex items-center gap-6">
             <Link href="/" className="hover:text-white transition-colors">Home</Link>
             <Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>

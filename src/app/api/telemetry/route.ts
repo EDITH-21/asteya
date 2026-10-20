@@ -23,12 +23,12 @@ function checkTelemetryRateLimit(ip: string): boolean {
 
 export async function GET() {
   return NextResponse.json({
-    service: "Asteya Attenza Telemetry Ingestion Service",
+    service: "Aadrut Attenza Telemetry Ingestion Service",
     status: "operational",
     version: "1.0.0",
     documentation: {
       description:
-        "Public endpoint for anonymous product usage & install telemetry from Asteya ventures (such as the Attenza desktop/browser extension).",
+        "Public endpoint for anonymous product usage & install telemetry from Aadrut ventures (such as the Attenza desktop/browser extension).",
       endpoint: "/api/telemetry",
       method: "POST",
       headers: { "Content-Type": "application/json" },

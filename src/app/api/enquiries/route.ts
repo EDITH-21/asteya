@@ -48,13 +48,13 @@ async function sendResendNotification(enquiry: {
     process.env.CONTACT_NOTIFICATION_EMAIL ||
     process.env.NEXT_PUBLIC_CONTACT_EMAIL ||
     "hello@asteya.tech";
-  const fromEmail = process.env.RESEND_FROM_EMAIL || "Asteya Inquiries <onboarding@resend.dev>";
+  const fromEmail = process.env.RESEND_FROM_EMAIL || "Aadrut Inquiries <onboarding@resend.dev>";
 
   // Strip CRLF to block header injection in Subject and Reply-To
   const sanitizedName = enquiry.name.replace(/[\r\n]+/g, " ").trim();
   const sanitizedType = enquiry.type.replace(/[\r\n]+/g, " ").trim();
   const sanitizedEmail = enquiry.email.replace(/[\r\n]+/g, "").trim();
-  const safeSubject = `[Asteya Project Brief] ${sanitizedType} - ${sanitizedName}`;
+  const safeSubject = `[Aadrut Project Brief] ${sanitizedType} - ${sanitizedName}`;
 
   const safeHtmlName = escapeHtml(sanitizedName);
   const safeHtmlEmail = escapeHtml(sanitizedEmail);
@@ -62,7 +62,7 @@ async function sendResendNotification(enquiry: {
   const safeHtmlMessage = escapeHtml(enquiry.message);
 
   const plainTextMessage = [
-    "New Asteya Project Brief",
+    "New Aadrut Project Brief",
     "------------------------",
     `Name: ${sanitizedName}`,
     `Email: ${sanitizedEmail}`,
@@ -71,7 +71,7 @@ async function sendResendNotification(enquiry: {
     "Project Overview / Message:",
     enquiry.message,
     "",
-    "This notification was dispatched via Asteya contact systems.",
+    "This notification was dispatched via Aadrut contact systems.",
   ].join("\n");
 
   try {
@@ -89,7 +89,7 @@ async function sendResendNotification(enquiry: {
         text: plainTextMessage,
         html: `
           <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #1e293b; background: #ffffff;">
-            <h2 style="color: #4338ca; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; margin-top: 0;">New Asteya Inquiry</h2>
+            <h2 style="color: #4338ca; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; margin-top: 0;">New Aadrut Inquiry</h2>
             <p><strong>Name:</strong> ${safeHtmlName}</p>
             <p><strong>Email:</strong> <a href="mailto:${safeHtmlEmail}" style="color: #6366f1;">${safeHtmlEmail}</a></p>
             <p><strong>Engagement Domain:</strong> ${safeHtmlType}</p>
@@ -97,7 +97,7 @@ async function sendResendNotification(enquiry: {
               <strong style="color: #0f172a;">Project Overview / Message:</strong>
               <p style="white-space: pre-wrap; margin-top: 8px; color: #334155; line-height: 1.5;">${safeHtmlMessage}</p>
             </div>
-            <p style="font-size: 12px; color: #64748b; margin-top: 30px; border-top: 1px solid #e2e8f0; padding-top: 12px;">This notification was dispatched via Asteya contact systems.</p>
+            <p style="font-size: 12px; color: #64748b; margin-top: 30px; border-top: 1px solid #e2e8f0; padding-top: 12px;">This notification was dispatched via Aadrut contact systems.</p>
           </div>
         `,
       }),

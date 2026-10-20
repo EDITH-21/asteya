@@ -2,8 +2,8 @@
 
 import React from "react";
 import Link from "next/link";
-import { AsteyaLogo } from "../ui/AsteyaLogo";
-import { ArrowUp, Mail } from "lucide-react";
+import { AadrutLogo } from "../ui/AadrutLogo";
+import { Mail } from "lucide-react";
 import { CONTACT_CONFIG } from "@/lib/constants";
 
 const InstagramIcon: React.FC<{ className?: string }> = ({ className = "w-4 h-4" }) => (
@@ -45,131 +45,262 @@ interface FooterProps {
 }
 
 export const Footer: React.FC<FooterProps> = ({ onOpenContact }) => {
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
   const handleContactClick = (e: React.MouseEvent) => {
     if (onOpenContact) {
       e.preventDefault();
       onOpenContact();
+      return;
+    }
+    const target = document.querySelector("#contact");
+    if (target) {
+      e.preventDefault();
+      target.scrollIntoView({ behavior: "smooth" });
     }
   };
 
   return (
-    <footer className="w-full bg-[#030508] border-t border-white/[0.04] py-10 sm:py-12 text-slate-400">
+    <footer className="w-full bg-[#030508] border-t border-white/[0.06] py-10 md:py-14 text-slate-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Main Footer Row */}
-        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-8 pb-10 border-b border-white/[0.06]">
-          {/* Brand & Tagline */}
-          <div className="space-y-2 max-w-sm">
-            <Link href="/" aria-label="Asteya Home">
-              <AsteyaLogo size={34} showText={true} />
-            </Link>
-            <p className="text-sm text-slate-400 font-normal pl-0.5">
-              Building what&apos;s next. Intelligent digital products, scalable technology architectures, and future ventures.
-            </p>
-          </div>
-
-          {/* Direct Contact & Social Links */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
-            {/* Email Contact Link */}
-            <a
-              href={`mailto:${CONTACT_CONFIG.email}`}
-              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white/[0.03] hover:bg-white/[0.08] border border-white/10 hover:border-indigo-400/40 text-slate-300 hover:text-white text-xs font-sans font-medium transition-all duration-200 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400"
-              aria-label={`Send email to ${CONTACT_CONFIG.email}`}
+        {/* Top Section: Brand Block + 4 Columns (5 Columns on Desktop, 2 on Tablet, 1 Stacked on Mobile) */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8 lg:gap-8">
+          {/* Left Brand Block (Desktop col-span-4) */}
+          <div className="lg:col-span-4 space-y-4">
+            <Link
+              href="/"
+              aria-label="Aadrut Home"
+              className="inline-flex focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 rounded-lg"
             >
-              <Mail strokeWidth={1.75} className="w-4 h-4 text-indigo-400 group-hover:scale-110 transition-transform" />
-              <span>{CONTACT_CONFIG.email}</span>
-            </a>
+              <AadrutLogo heightClass="h-[44px] md:h-[50px]" />
+            </Link>
 
-            {/* Social Channels */}
-            <div className="flex items-center gap-2">
-              {/* Instagram */}
+            <p className="font-bold text-white text-base sm:text-lg tracking-tight">
+              Building what&apos;s next.
+            </p>
+
+            <p className="text-xs sm:text-sm text-slate-400 leading-relaxed max-w-sm">
+              Intelligent digital products, scalable technology architectures, and future ventures.
+            </p>
+
+            <div className="pt-1">
+              <a
+                href="#contact"
+                onClick={handleContactClick}
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-400 hover:text-indigo-300 transition-colors py-2 min-h-[44px] group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 rounded"
+              >
+                <span>Start a Conversation</span>
+                <span className="transition-transform duration-200 group-hover:translate-x-1">&rarr;</span>
+              </a>
+            </div>
+
+            {/* Social Channels (44px tap targets) */}
+            <div className="flex items-center gap-3 pt-1">
               <a
                 href={CONTACT_CONFIG.instagram}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-9 h-9 rounded-xl bg-white/[0.03] hover:bg-white/[0.08] border border-white/10 hover:border-pink-500/40 flex items-center justify-center text-slate-300 hover:text-pink-300 transition-all duration-200 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-400"
-                aria-label="Visit Asteya on Instagram"
+                className="w-11 h-11 rounded-full bg-white/[0.04] border border-white/10 hover:border-indigo-400/50 hover:bg-white/[0.08] flex items-center justify-center text-slate-300 hover:text-white transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400"
+                aria-label="Visit Aadrut on Instagram"
               >
-                <InstagramIcon className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                <InstagramIcon className="w-4 h-4 transition-transform group-hover:scale-110" />
               </a>
 
-              {/* LinkedIn */}
               <a
                 href={CONTACT_CONFIG.linkedin}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-9 h-9 rounded-xl bg-white/[0.03] hover:bg-white/[0.08] border border-white/10 hover:border-blue-400/40 flex items-center justify-center text-slate-300 hover:text-blue-300 transition-all duration-200 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
-                aria-label="Visit Asteya on LinkedIn"
+                className="w-11 h-11 rounded-full bg-white/[0.04] border border-white/10 hover:border-indigo-400/50 hover:bg-white/[0.08] flex items-center justify-center text-slate-300 hover:text-white transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400"
+                aria-label="Visit Aadrut on LinkedIn"
               >
-                <LinkedInIcon className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                <LinkedInIcon className="w-4 h-4 transition-transform group-hover:scale-110" />
               </a>
             </div>
           </div>
 
-          {/* Navigation Links & Scroll to Top */}
-          <div className="flex items-center gap-6 sm:gap-8">
-            <nav aria-label="Footer Navigation" className="flex flex-wrap items-center gap-4 sm:gap-6 text-xs font-sans font-medium tracking-normal text-slate-300">
-              <a href="#" className="hover:text-white transition-colors">
-                Home
-              </a>
-              <a href="#about" className="hover:text-white transition-colors">
-                About
-              </a>
-              <a href="#services" className="hover:text-white transition-colors">
-                Services
-              </a>
-              <a href="#ventures" className="hover:text-white transition-colors">
-                Ventures
-              </a>
-              <a href="#process" className="hover:text-white transition-colors">
-                Process
-              </a>
-              <a href="#technology" className="hover:text-white transition-colors">
-                Technology
-              </a>
-              <a
-                href="#contact"
-                onClick={handleContactClick}
-                className="text-indigo-400 hover:text-indigo-300 font-semibold transition-colors"
-              >
-                Contact
-              </a>
-            </nav>
+          {/* Column 1: SERVICES (Desktop col-span-2) */}
+          <div className="lg:col-span-2 space-y-3">
+            <h3 className="text-[11px] font-mono uppercase tracking-[0.2em] text-slate-400 font-semibold mb-3">
+              SERVICES
+            </h3>
+            <ul className="space-y-1 text-xs">
+              <li>
+                <Link
+                  href="/services/web-development"
+                  className="inline-flex items-center min-h-[40px] sm:min-h-[32px] text-slate-300 hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 rounded"
+                >
+                  Web Development
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/services/digital-solutions"
+                  className="inline-flex items-center min-h-[40px] sm:min-h-[32px] text-slate-300 hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 rounded"
+                >
+                  Digital Solutions
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/services/brand-design"
+                  className="inline-flex items-center min-h-[40px] sm:min-h-[32px] text-slate-300 hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 rounded"
+                >
+                  Brand &amp; Design
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/services/business-automation"
+                  className="inline-flex items-center min-h-[40px] sm:min-h-[32px] text-slate-300 hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 rounded"
+                >
+                  Business Automation
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/services/digital-presence"
+                  className="inline-flex items-center min-h-[40px] sm:min-h-[32px] text-slate-300 hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 rounded"
+                >
+                  Digital Presence
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/services/technology-consulting"
+                  className="inline-flex items-center min-h-[40px] sm:min-h-[32px] text-slate-300 hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 rounded"
+                >
+                  Technology Consulting
+                </Link>
+              </li>
+            </ul>
+          </div>
 
-            {/* Scroll To Top */}
-            <button
-              onClick={scrollToTop}
-              className="w-9 h-9 rounded-full bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-300 hover:text-white hover:border-indigo-400/50 hover:bg-white/[0.08] transition-all shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 shrink-0"
-              aria-label="Scroll back to top"
-            >
-              <ArrowUp strokeWidth={1.75} className="w-4 h-4" />
-            </button>
+          {/* Column 2: COMPANY (Desktop col-span-2) */}
+          <div className="lg:col-span-2 space-y-3">
+            <h3 className="text-[11px] font-mono uppercase tracking-[0.2em] text-slate-400 font-semibold mb-3">
+              COMPANY
+            </h3>
+            <ul className="space-y-1 text-xs">
+              <li>
+                <a
+                  href="#about"
+                  className="inline-flex items-center min-h-[40px] sm:min-h-[32px] text-slate-300 hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 rounded"
+                >
+                  About
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#ventures"
+                  className="inline-flex items-center min-h-[40px] sm:min-h-[32px] text-slate-300 hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 rounded"
+                >
+                  Ventures
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#process"
+                  className="inline-flex items-center min-h-[40px] sm:min-h-[32px] text-slate-300 hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 rounded"
+                >
+                  Process
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#technology"
+                  className="inline-flex items-center min-h-[40px] sm:min-h-[32px] text-slate-300 hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 rounded"
+                >
+                  Technology
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#why-aadrut"
+                  className="inline-flex items-center min-h-[40px] sm:min-h-[32px] text-slate-300 hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 rounded"
+                >
+                  Why Aadrut
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          {/* Column 3: LEGAL (Desktop col-span-2) */}
+          <div className="lg:col-span-2 space-y-3">
+            <h3 className="text-[11px] font-mono uppercase tracking-[0.2em] text-slate-400 font-semibold mb-3">
+              LEGAL
+            </h3>
+            <ul className="space-y-1 text-xs">
+              <li>
+                <Link
+                  href="/privacy"
+                  className="inline-flex items-center min-h-[40px] sm:min-h-[32px] text-slate-300 hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 rounded"
+                >
+                  Privacy Policy
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/terms"
+                  className="inline-flex items-center min-h-[40px] sm:min-h-[32px] text-slate-300 hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 rounded"
+                >
+                  Terms of Service
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Column 4: CONNECT (Desktop col-span-2) */}
+          <div className="lg:col-span-2 space-y-3">
+            <h3 className="text-[11px] font-mono uppercase tracking-[0.2em] text-slate-400 font-semibold mb-3">
+              CONNECT
+            </h3>
+            <div className="space-y-3 text-xs">
+              <a
+                href={`mailto:${CONTACT_CONFIG.email}`}
+                className="inline-flex items-center gap-2 text-slate-300 hover:text-white transition-colors group min-h-[44px] py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 rounded"
+                aria-label={`Send email to ${CONTACT_CONFIG.email}`}
+              >
+                <Mail strokeWidth={1.75} className="w-4 h-4 text-indigo-400 group-hover:scale-110 transition-transform shrink-0" />
+                <span className="break-all">{CONTACT_CONFIG.email}</span>
+              </a>
+            </div>
           </div>
         </div>
 
-        {/* Bottom Bar with Legal Links */}
-        <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-sans text-slate-400">
-          <div className="flex items-center gap-4">
-            <span>&copy; 2026 Asteya. All rights reserved.</span>
-            <span>&bull;</span>
-            <Link href="/privacy" className="hover:text-white transition-colors">
-              Privacy Policy
-            </Link>
-            <span>&bull;</span>
-            <Link href="/terms" className="hover:text-white transition-colors">
-              Terms of Service
-            </Link>
+        {/* Divider Row with Centered Mono Tagline */}
+        <div className="my-8 md:my-10 flex items-center justify-center gap-2 sm:gap-4">
+          <div className="flex-1 h-px bg-white/[0.08]" />
+          <div className="text-[10px] sm:text-xs font-mono tracking-[0.18em] sm:tracking-[0.25em] text-slate-400 uppercase select-none whitespace-nowrap px-1">
+            IDEA ───── BUILD ───── EVOLVE
+          </div>
+          <div className="flex-1 h-px bg-white/[0.08]" />
+        </div>
+
+        {/* Bottom Bar */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-sans text-slate-400">
+          {/* Left Copyright */}
+          <div className="text-center sm:text-left">
+            &copy; 2026 Aadrut. All rights reserved.
           </div>
 
-          <div className="flex items-center gap-2 text-slate-400">
-            <span>Digital Products</span>
-            <span>&bull;</span>
-            <span>Intelligent Solutions</span>
-            <span>&bull;</span>
-            <span>Future Ventures</span>
+          {/* Center Brand Pillars */}
+          <div className="text-center text-slate-400 text-[11px] sm:text-xs tracking-wide">
+            Digital Products &bull; Intelligent Solutions &bull; Future Ventures
+          </div>
+
+          {/* Right Compact Legal Links */}
+          <div className="flex items-center gap-2">
+            <Link
+              href="/privacy"
+              className="hover:text-white transition-colors p-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 rounded"
+            >
+              Privacy Policy
+            </Link>
+            <span>&middot;</span>
+            <Link
+              href="/terms"
+              className="hover:text-white transition-colors p-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 rounded"
+            >
+              Terms
+            </Link>
           </div>
         </div>
       </div>

@@ -1,13 +1,13 @@
 import React from "react";
 import Link from "next/link";
 import type { Metadata } from "next";
-import { AsteyaLogo } from "@/components/ui/AsteyaLogo";
+import { AadrutLogo } from "@/components/ui/AadrutLogo";
 import { ArrowLeft } from "lucide-react";
 import { CONTACT_CONFIG } from "@/lib/constants";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy | Asteya",
-  description: "Asteya's commitment to protecting user privacy, data security, and client confidentiality.",
+  title: "Privacy Policy | Aadrut",
+  description: "Aadrut's commitment to protecting user privacy, data security, and client confidentiality.",
   alternates: {
     canonical: "https://asteya.tech/privacy",
   },
@@ -21,10 +21,10 @@ export default function PrivacyPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between">
           <Link
             href="/"
-            className="flex items-center gap-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 rounded-lg p-1"
-            aria-label="Return to Asteya homepage"
+            className="flex items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 rounded-lg p-1"
+            aria-label="Return to Aadrut homepage"
           >
-            <AsteyaLogo size={36} showText={true} />
+            <AadrutLogo heightClass="h-[40px] sm:h-[46px]" />
           </Link>
 
           <Link
@@ -56,7 +56,7 @@ export default function PrivacyPage() {
             <section className="space-y-3">
               <h2 className="text-xl font-bold text-white tracking-tight">1. Commitment to Privacy</h2>
               <p>
-                Asteya (&ldquo;we&rdquo;, &ldquo;our&rdquo;, or &ldquo;us&rdquo;) is dedicated to safeguarding the privacy and confidential data of our website visitors, clients, and partners. This policy outlines how we collect, handle, and protect information submitted across our digital platforms.
+                Aadrut (&ldquo;we&rdquo;, &ldquo;our&rdquo;, or &ldquo;us&rdquo;) is dedicated to safeguarding the privacy and confidential data of our website visitors, clients, and partners. This policy outlines how we collect, handle, and protect information submitted across our digital platforms.
               </p>
             </section>
 
@@ -102,7 +102,7 @@ export default function PrivacyPage() {
       {/* Footer */}
       <footer className="w-full bg-[#030508] border-t border-white/[0.08] py-8 text-slate-400 text-xs font-sans">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div>&copy; 2026 Asteya. All rights reserved.</div>
+          <div>&copy; 2026 Aadrut. All rights reserved.</div>
           <div className="flex items-center gap-6">
             <Link href="/" className="hover:text-white transition-colors">Home</Link>
             <Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link>
