@@ -14,7 +14,7 @@ export const VenturesSection: React.FC = () => {
       <div className="absolute top-1/4 left-1/4 w-[340px] sm:w-[600px] h-[300px] sm:h-[400px] bg-indigo-600/10 rounded-full blur-2xl sm:blur-[120px] pointer-events-none" />
       <div className="hidden sm:block absolute bottom-1/4 right-1/4 w-[500px] h-[400px] bg-cyan-600/10 rounded-full blur-2xl sm:blur-[120px] pointer-events-none" />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="site-container">
         {/* Header */}
         <div className="max-w-3xl mb-8 sm:mb-10 space-y-3">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] border border-white/10 text-indigo-300 font-sans text-xs font-medium tracking-wide">

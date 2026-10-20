@@ -16,7 +16,7 @@ export const WhyAadrutSection: React.FC = () => {
       {/* Ambient Lighting */}
       <div className="absolute top-1/3 left-0 w-[340px] sm:w-[500px] h-[340px] sm:h-[500px] bg-indigo-600/10 rounded-full blur-2xl sm:blur-[120px] pointer-events-none" />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="site-container">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
           {/* Left Column: Title & Mission */}
           <div className="lg:col-span-5 space-y-6 lg:sticky lg:top-24 self-start">

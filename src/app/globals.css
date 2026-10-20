@@ -13,6 +13,18 @@
   --header-h: 64px;
 }
 
+@media (min-width: 640px) {
+  :root {
+    --header-h: 72px;
+  }
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --header-h: 80px;
+  }
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -26,10 +38,35 @@ html {
   color: #f1f5f9;
   color-scheme: dark;
   scroll-behavior: smooth;
+  scroll-padding-top: var(--header-h);
+}
+
+/* Shared container utility ensuring pixel-perfect alignment across navbar, sections, and footer */
+.site-container {
+  width: 100%;
+  max-width: 1600px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem; /* px-4 (16px) on mobile */
+  padding-right: 1rem;
+}
+
+@media (min-width: 640px) {
+  .site-container {
+    padding-left: 1.5rem; /* px-6 (24px) on tablet */
+    padding-right: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .site-container {
+    padding-left: 2.5rem; /* px-10 (40px) on desktop */
+    padding-right: 2.5rem;
+  }
 }
 
 /* Single-direction section spacing and calibrated scroll margin
-   Guarantees section label/heading lands exactly 24px below the 64px navbar */
+   Guarantees section label/heading lands exactly 24px below the navbar */
 .site-section {
   padding-top: 2.5rem; /* mobile pt-10 (40px) */
   padding-bottom: 0;
@@ -39,14 +76,14 @@ html {
 @media (min-width: 640px) {
   .site-section {
     padding-top: 3.5rem; /* tablet pt-14 (56px) */
-    scroll-margin-top: calc(var(--header-h) + 24px - 3.5rem); /* 64 + 24 - 56 = 32px */
+    scroll-margin-top: calc(var(--header-h) + 24px - 3.5rem); /* 72 + 24 - 56 = 40px */
   }
 }
 
 @media (min-width: 1024px) {
   .site-section {
     padding-top: 4rem; /* desktop pt-16 (64px) */
-    scroll-margin-top: calc(var(--header-h) + 24px - 4rem); /* 64 + 24 - 64 = 24px */
+    scroll-margin-top: calc(var(--header-h) + 24px - 4rem); /* 80 + 24 - 64 = 40px */
   }
 }
 

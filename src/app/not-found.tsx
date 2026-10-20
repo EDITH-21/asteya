@@ -8,7 +8,7 @@ export default function NotFound() {
     <div className="min-h-screen bg-[#05070b] text-[#f1f5f9] flex flex-col justify-between selection:bg-indigo-500/30 selection:text-white">
       {/* Top Header */}
       <header className="w-full border-b border-white/[0.08] bg-[#05070b]/80 backdrop-blur-md">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between">
+        <div className="site-container h-16 sm:h-20 flex items-center justify-between">
           <Link href="/" aria-label="Aadrut Home" className="flex items-center focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 rounded-lg">
             <AadrutLogo heightClass="h-[40px] sm:h-[46px]" />
           </Link>

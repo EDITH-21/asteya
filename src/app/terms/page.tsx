@@ -18,7 +18,7 @@ export default function TermsPage() {
     <div className="min-h-screen bg-[#05070b] text-[#f1f5f9] flex flex-col justify-between selection:bg-indigo-500/30 selection:text-white">
       {/* Top Header */}
       <header className="sticky top-0 z-40 w-full bg-[#05070b]/80 backdrop-blur-md border-b border-white/[0.08]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between">
+        <div className="site-container h-16 sm:h-20 flex items-center justify-between">
           <Link
             href="/"
             className="flex items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 rounded-lg p-1"
@@ -96,7 +96,7 @@ export default function TermsPage() {
 
       {/* Footer */}
       <footer className="w-full bg-[#030508] border-t border-white/[0.08] py-8 text-slate-400 text-xs font-sans">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="site-container flex flex-col sm:flex-row items-center justify-between gap-4">
           <div>&copy; 2026 Aadrut. All rights reserved.</div>
           <div className="flex items-center gap-6">
             <Link href="/" className="hover:text-white transition-colors">Home</Link>

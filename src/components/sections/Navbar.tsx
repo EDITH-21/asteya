@@ -19,8 +19,21 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenContact }) => {
   const lockTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    // Header height (64px) + 24px landing clearance = 88px
-    const HEADER_THRESHOLD = 88;
+    // Dynamic header height + 24px landing clearance:
+    // Mobile: 64 + 24 = 88px | Tablet: 72 + 24 = 96px | Desktop: 80 + 24 = 104px
+    const getHeaderThreshold = () => {
+      if (typeof window === "undefined") return 104;
+      const headerEl = document.querySelector("header");
+      const headerHeight = headerEl
+        ? headerEl.offsetHeight
+        : window.innerWidth >= 1024
+        ? 80
+        : window.innerWidth >= 640
+        ? 72
+        : 64;
+      return headerHeight + 24;
+    };
+
     const sectionIds = NAV_ITEMS.map((item) => item.href.substring(1));
 
     const updateActiveSection = () => {
@@ -41,13 +54,14 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenContact }) => {
       }
 
       // 3. The active section is the last section whose top is <= (header height + 24px)
+      const threshold = getHeaderThreshold();
       let currentActive = "";
       for (const id of sectionIds) {
         const el = document.getElementById(id);
         if (el) {
           const rect = el.getBoundingClientRect();
           // +8px tolerance accounts for subpixel rendering variations
-          if (rect.top <= HEADER_THRESHOLD + 8) {
+          if (rect.top <= threshold + 8) {
             currentActive = id;
           }
         }
@@ -159,56 +173,60 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenContact }) => {
   return (
     <>
       <header
-        className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${
+        className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 h-[64px] sm:h-[72px] lg:h-[80px] flex items-center ${
           scrolled
-            ? "h-16 py-3 bg-[#05070b]/90 backdrop-blur-xl border-b border-white/[0.06] shadow-[0_4px_24px_rgba(0,0,0,0.6)] flex items-center"
-            : "h-20 py-4 sm:py-5 bg-transparent flex items-center"
+            ? "bg-[#05070b]/90 backdrop-blur-xl border-b border-white/[0.06] shadow-[0_4px_24px_rgba(0,0,0,0.6)]"
+            : "bg-transparent"
         }`}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-          <div className="flex items-center justify-between gap-4">
-            {/* Logo Brand Anchor */}
-            <a
-              href="#"
-              aria-label="Aadrut Home"
-              className="group flex items-center flex-shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 rounded-lg"
-            >
-              <AadrutLogo priority heightClass="h-[44px] md:h-[52px]" />
-            </a>
+        <div className="site-container">
+          <div className="grid grid-cols-[1fr_auto_1fr] items-center w-full">
+            {/* Left Column: Brand Logo */}
+            <div className="flex items-center justify-start">
+              <a
+                href="#"
+                aria-label="Aadrut Home"
+                className="group inline-flex items-center flex-shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 rounded-lg"
+              >
+                <AadrutLogo priority heightClass="h-[44px] sm:h-[52px] lg:h-[60px]" />
+              </a>
+            </div>
 
-            {/* Desktop Navigation - Switches cleanly to mobile drawer on viewports < 1180px to guarantee zero collision */}
-            <nav
-              aria-label="Primary Navigation"
-              className="hidden xl:flex items-center gap-1 bg-white/[0.03] border border-white/10 rounded-full px-3 py-1 backdrop-blur-md flex-shrink-0"
-            >
-              {NAV_ITEMS.map((item) => {
-                const isActive = activeSection === item.href.substring(1);
-                return (
-                  <a
-                    key={item.name}
-                    href={item.href}
-                    onClick={(e) => handleNavClick(e, item.href)}
-                    className={`relative px-3 py-1.5 text-xs font-sans font-medium tracking-normal transition-colors duration-200 rounded-full ${
-                      isActive
-                        ? "text-white font-semibold"
-                        : "text-slate-300 hover:text-white hover:bg-white/[0.04]"
-                    }`}
-                  >
-                    {item.name}
-                    {isActive && (
-                      <motion.div
-                        layoutId="navIndicator"
-                        className="absolute bottom-0 left-3 right-3 h-0.5 bg-gradient-to-r from-indigo-500 to-cyan-400 rounded-full"
-                        transition={{ type: "spring", stiffness: 380, damping: 30 }}
-                      />
-                    )}
-                  </a>
-                );
-              })}
-            </nav>
+            {/* Center Column: Perfectly Centered Pill Navigation */}
+            <div className="flex items-center justify-center">
+              <nav
+                aria-label="Primary Navigation"
+                className="hidden lg:flex items-center gap-1 bg-white/[0.03] border border-white/10 rounded-full px-3 py-1.5 backdrop-blur-md flex-shrink-0 shadow-[0_2px_12px_rgba(0,0,0,0.25)]"
+              >
+                {NAV_ITEMS.map((item) => {
+                  const isActive = activeSection === item.href.substring(1);
+                  return (
+                    <a
+                      key={item.name}
+                      href={item.href}
+                      onClick={(e) => handleNavClick(e, item.href)}
+                      className={`relative px-3 py-1.5 text-xs font-sans font-medium tracking-normal transition-colors duration-200 rounded-full ${
+                        isActive
+                          ? "text-white font-semibold"
+                          : "text-slate-300 hover:text-white hover:bg-white/[0.04]"
+                      }`}
+                    >
+                      {item.name}
+                      {isActive && (
+                        <motion.div
+                          layoutId="navIndicator"
+                          className="absolute bottom-0 left-3 right-3 h-0.5 bg-gradient-to-r from-indigo-500 to-cyan-400 rounded-full"
+                          transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                        />
+                      )}
+                    </a>
+                  );
+                })}
+              </nav>
+            </div>
 
-            {/* Actions: Primary CTA & Responsive Toggle */}
-            <div className="flex items-center gap-2.5 sm:gap-3 flex-shrink-0">
+            {/* Right Column: Actions (Let's Talk + Mobile/Tablet Menu Button) */}
+            <div className="flex items-center justify-end gap-2.5 sm:gap-3">
               <button
                 onClick={onOpenContact}
                 className="group inline-flex items-center gap-2 px-4 sm:px-5 py-2 rounded-full text-xs font-sans font-semibold tracking-wide text-white bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-500 hover:to-indigo-600 border border-indigo-400/30 transition-all duration-200 shadow-[0_2px_12px_rgba(99,102,241,0.25)] hover:shadow-[0_4px_20px_rgba(99,102,241,0.4)] active:scale-95"
@@ -223,7 +241,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenContact }) => {
               {/* Mobile/Tablet Menu Button */}
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="p-2 rounded-lg xl:hidden text-slate-300 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                className="p-2 rounded-lg lg:hidden text-slate-300 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
                 aria-label={mobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
                 aria-expanded={mobileMenuOpen}
               >
@@ -242,7 +260,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenContact }) => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-30 xl:hidden bg-[#05070b]/95 backdrop-blur-2xl flex flex-col justify-between pt-24 pb-8 px-6 overflow-y-auto"
+            className="fixed inset-0 z-30 lg:hidden bg-[#05070b]/95 backdrop-blur-2xl flex flex-col justify-between pt-[76px] sm:pt-[84px] pb-8 px-6 overflow-y-auto"
           >
             <div className="max-w-md mx-auto w-full pt-4 space-y-6">
               <div className="flex items-center justify-between pb-3 border-b border-white/10 text-xs font-sans tracking-wide text-slate-400 font-medium">

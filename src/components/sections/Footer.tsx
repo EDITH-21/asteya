@@ -60,7 +60,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenContact }) => {
 
   return (
     <footer className="w-full bg-[#030508] border-t border-white/[0.06] py-10 md:py-14 text-slate-300">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="site-container">
         {/* Top Section: Brand Block + 4 Columns (5 Columns on Desktop, 2 on Tablet, 1 Stacked on Mobile) */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8 lg:gap-8">
           {/* Left Brand Block (Desktop col-span-4) */}

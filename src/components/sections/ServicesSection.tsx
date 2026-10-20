@@ -39,7 +39,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onOpenContact 
       <div className="absolute top-1/3 right-0 w-72 sm:w-[500px] h-72 sm:h-[500px] bg-purple-600/10 rounded-full blur-2xl sm:blur-[140px] pointer-events-none" />
       <div className="hidden sm:block absolute bottom-10 left-10 w-[400px] h-[400px] bg-indigo-600/10 rounded-full blur-2xl sm:blur-[120px] pointer-events-none" />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="site-container">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 sm:mb-10 gap-6">
           <div className="max-w-2xl space-y-4">

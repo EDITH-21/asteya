@@ -462,7 +462,7 @@ export default function AdminDashboardPage() {
     <div className="min-h-screen bg-[#05070b] text-[#f1f5f9] flex flex-col selection:bg-indigo-500/30">
       {/* Top Navbar */}
       <header className="border-b border-white/[0.08] bg-[#090d16]/80 backdrop-blur-md sticky top-0 z-30">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+        <div className="site-container h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <AadrutLogo heightClass="h-[36px]" />
             <span className="hidden sm:inline-block text-[11px] font-sans px-2.5 py-0.5 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 font-medium">
@@ -507,7 +507,7 @@ export default function AdminDashboardPage() {
         </div>
 
         {/* Navigation Tabs */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center gap-2 overflow-x-auto py-2">
+        <div className="site-container flex items-center gap-2 overflow-x-auto py-2">
           <button
             onClick={() => setActiveTab("overview")}
             className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-sans font-medium transition-colors ${
@@ -564,7 +564,7 @@ export default function AdminDashboardPage() {
       </header>
 
       {/* Main Content Area */}
-      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
+      <main className="flex-1 site-container py-4 sm:py-6 lg:py-8">
         {/* ========================================================= */}
         {/* TAB 1: OVERVIEW */}
         {/* ========================================================= */}

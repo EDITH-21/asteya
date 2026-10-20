@@ -6,7 +6,7 @@ import Image from "next/image";
 interface AadrutLogoProps {
   className?: string;
   priority?: boolean;
-  /** Custom height class, defaults to mobile ~44px, desktop ~52px */
+  /** Responsive height class: mobile 44px, tablet 52px, desktop 60px */
   heightClass?: string;
   /** Whether to link to top of page */
   asLink?: boolean;
@@ -15,7 +15,7 @@ interface AadrutLogoProps {
 export const AadrutLogo: React.FC<AadrutLogoProps> = ({
   className = "",
   priority = false,
-  heightClass = "h-[44px] md:h-[52px]",
+  heightClass = "h-[44px] sm:h-[52px] lg:h-[60px]",
   asLink = false,
 }) => {
   const content = (
@@ -23,7 +23,7 @@ export const AadrutLogo: React.FC<AadrutLogoProps> = ({
       {/* 
         The primary logo is navy blue in /public/aadrut-logo.png.
         Rendered white on dark #05070b backgrounds via CSS [filter:brightness(0)_invert(1)].
-        To swap for a native light file in the future, simply update the src to '/aadrut-logo-light.png'.
+        To swap for a native light file in the future, update the src to '/aadrut-logo-light.png'.
       */}
       <Image
         src="/aadrut-logo.png"
@@ -31,6 +31,7 @@ export const AadrutLogo: React.FC<AadrutLogoProps> = ({
         width={272}
         height={339}
         priority={priority}
+        sizes="(max-width: 640px) 80px, (max-width: 1024px) 120px, 160px"
         className={`${heightClass} w-auto object-contain transition-transform duration-300 group-hover:scale-105 [filter:brightness(0)_invert(1)]`}
       />
     </div>

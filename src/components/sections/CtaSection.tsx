@@ -70,7 +70,7 @@ export const CtaSection: React.FC<CtaSectionProps> = () => {
       {/* Background Lighting (optimized) */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[340px] sm:w-[650px] h-[300px] sm:h-[450px] bg-indigo-600/10 rounded-full blur-2xl sm:blur-[140px] pointer-events-none" />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <div className="site-container relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
