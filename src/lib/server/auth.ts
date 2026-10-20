@@ -1,4 +1,5 @@
 import "server-only";
+import crypto from "crypto";
 import { cookies } from "next/headers";
 import { NextRequest } from "next/server";
 import { generateSecureToken, hashToken } from "./crypto";
@@ -15,6 +16,40 @@ import {
 export const SESSION_COOKIE_NAME = "aadrut_admin_session";
 export const LEGACY_SESSION_COOKIE_NAME = "asteya_admin_session";
 export const SESSION_MAX_AGE_SECONDS = 8 * 60 * 60; // 8 hours
+
+function getSessionSigningSecret(): string {
+  const secret = process.env.SESSION_SECRET || process.env.ADMIN_INITIAL_PASSWORD;
+  if (secret && secret.trim().length > 0) return secret.trim();
+  return process.env.VERCEL_GIT_COMMIT_SHA || "aadrut_serverless_session_hmac_secret_2026";
+}
+
+function signSessionToken(rawId: string, userId: string, expiresAtMs: number): string {
+  const payload = `${rawId}.${userId}.${expiresAtMs}`;
+  const secret = getSessionSigningSecret();
+  const sig = crypto.createHmac("sha256", secret).update(payload).digest("hex");
+  return `${payload}.${sig}`;
+}
+
+function verifySignedSessionToken(token: string): { rawId: string; userId: string; expiresAtMs: number } | null {
+  const parts = token.split(".");
+  if (parts.length !== 4) return null;
+  const [rawId, userId, expiresAtStr, sig] = parts;
+  const expiresAtMs = parseInt(expiresAtStr, 10);
+  if (isNaN(expiresAtMs) || expiresAtMs <= Date.now()) return null;
+
+  const payload = `${rawId}.${userId}.${expiresAtStr}`;
+  const secret = getSessionSigningSecret();
+  const expectedSig = crypto.createHmac("sha256", secret).update(payload).digest("hex");
+
+  try {
+    if (crypto.timingSafeEqual(Buffer.from(sig, "hex"), Buffer.from(expectedSig, "hex"))) {
+      return { rawId, userId, expiresAtMs };
+    }
+  } catch {
+    return null;
+  }
+  return null;
+}
 
 export interface AuthContext {
   user: Omit<AdminUser, "passwordHash" | "passwordSalt">;
@@ -77,7 +112,22 @@ export async function getAuthenticatedAdmin(
   }
 
   const tokenHash = hashToken(token);
-  const session = await getSessionByTokenHash(tokenHash);
+  let session = await getSessionByTokenHash(tokenHash);
+
+  // Fallback for multi-lambda serverless environments without shared Redis
+  if (!session) {
+    const verified = verifySignedSessionToken(token);
+    if (verified) {
+      session = {
+        id: verified.rawId,
+        sessionTokenHash: tokenHash,
+        userId: verified.userId,
+        createdAt: new Date().toISOString(),
+        expiresAt: new Date(verified.expiresAtMs).toISOString(),
+      };
+    }
+  }
+
   if (!session) {
     return null;
   }
@@ -113,9 +163,11 @@ export async function createAdminSession(
   userId: string,
   req?: Request | NextRequest
 ): Promise<{ token: string; expiresAt: string; session: AdminSession }> {
-  const token = generateSecureToken(32);
+  const rawId = generateSecureToken(16);
+  const expiresAtMs = Date.now() + SESSION_MAX_AGE_SECONDS * 1000;
+  const token = signSessionToken(rawId, userId, expiresAtMs);
   const tokenHash = hashToken(token);
-  const expiresAt = new Date(Date.now() + SESSION_MAX_AGE_SECONDS * 1000).toISOString();
+  const expiresAt = new Date(expiresAtMs).toISOString();
 
   const ipAddress = getClientIp(req);
   const userAgent = req?.headers.get("user-agent") || undefined;

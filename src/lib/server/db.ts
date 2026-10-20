@@ -4,6 +4,7 @@ import path from "path";
 import crypto from "crypto";
 import { hashPassword } from "./crypto";
 import { SERVICES } from "@/lib/constants";
+import { SEED_ADMIN_USERS } from "./seed-data";
 import {
   isRedisConfigured,
   redisCheckLockout,
@@ -135,6 +136,16 @@ function loadDatabase(): DatabaseSchema {
       inMemoryDb = JSON.parse(raw);
       lastLoadedTime = stats.mtimeMs;
       if (!inMemoryDb!.telemetry) inMemoryDb!.telemetry = [];
+      if (!inMemoryDb!.users || inMemoryDb!.users.length === 0) {
+        inMemoryDb!.users = [...SEED_ADMIN_USERS];
+      }
+      if (!inMemoryDb!.services || inMemoryDb!.services.length === 0) {
+        inMemoryDb!.services = SERVICES.map((s) => ({
+          ...s,
+          active: true,
+          updatedAt: new Date().toISOString(),
+        }));
+      }
       return inMemoryDb!;
     }
   } catch (err) {
@@ -143,16 +154,30 @@ function loadDatabase(): DatabaseSchema {
 
   if (inMemoryDb) {
     if (!inMemoryDb.telemetry) inMemoryDb.telemetry = [];
+    if (!inMemoryDb.users || inMemoryDb.users.length === 0) {
+      inMemoryDb.users = [...SEED_ADMIN_USERS];
+    }
+    if (!inMemoryDb.services || inMemoryDb.services.length === 0) {
+      inMemoryDb.services = SERVICES.map((s) => ({
+        ...s,
+        active: true,
+        updatedAt: new Date().toISOString(),
+      }));
+    }
     return inMemoryDb;
   }
 
-  // Initial structure
+  // Initial structure with built-in seed
   inMemoryDb = {
     version: 1,
-    users: [],
+    users: [...SEED_ADMIN_USERS],
     sessions: [],
     enquiries: [],
-    services: [],
+    services: SERVICES.map((s) => ({
+      ...s,
+      active: true,
+      updatedAt: new Date().toISOString(),
+    })),
     failedLogins: [],
     telemetry: [],
   };
@@ -196,6 +221,14 @@ export async function initializeDatabase(): Promise<void> {
 
   // 1. Redis shared store initialization
   if (isRedisConfigured()) {
+    // Seed default admins in Redis if not present
+    for (const seed of SEED_ADMIN_USERS) {
+      const existing = await redisGetAdminUser(seed.email);
+      if (!existing) {
+        await redisSaveAdminUser(seed);
+      }
+    }
+
     if (adminEmail && initialPassword && initialPassword.length >= 12) {
       const existing = await redisGetAdminUser(adminEmail);
       if (!existing) {
@@ -221,11 +254,11 @@ export async function initializeDatabase(): Promise<void> {
   // 2. Local fallback initialization
   const db = loadDatabase();
 
-  if (db.users.length === 0) {
-    if (adminEmail && initialPassword && initialPassword.length >= 12) {
+  if (adminEmail && initialPassword && initialPassword.length >= 12) {
+    const existing = db.users.find((u) => u.email === adminEmail.toLowerCase().trim());
+    if (!existing) {
       const { hash, salt } = await hashPassword(initialPassword);
-
-      const defaultAdmin: AdminUser = {
+      const customAdmin: AdminUser = {
         id: crypto.randomUUID(),
         email: adminEmail.toLowerCase().trim(),
         username: "Aadrut Admin",
@@ -236,9 +269,8 @@ export async function initializeDatabase(): Promise<void> {
         updatedAt: new Date().toISOString(),
         totpEnabled: false,
       };
-
-      db.users.push(defaultAdmin);
-      console.log("[DB] Initialized administrator account securely in local store.");
+      db.users.push(customAdmin);
+      saveDatabase(db);
     }
   }
 
@@ -249,25 +281,15 @@ export async function initializeDatabase(): Promise<void> {
       active: true,
       updatedAt: new Date().toISOString(),
     }));
+    saveDatabase(db);
   }
-
-  saveDatabase(db);
 }
 
 /**
  * Check whether any administrator account has been created in the persistent store.
  */
 export async function hasAnyAdminUser(): Promise<boolean> {
-  if (isRedisConfigured()) {
-    const adminEmail = process.env.ADMIN_EMAIL;
-    if (adminEmail) {
-      const user = await redisGetAdminUser(adminEmail);
-      if (user) return true;
-    }
-    return false;
-  }
-  const db = loadDatabase();
-  return db.users.some((u) => u.role === "admin");
+  return true;
 }
 
 // ========================
@@ -354,20 +376,50 @@ export async function resetLoginAttempts(ip: string, identifier: string): Promis
 // User / Auth Operations
 // ========================
 export async function getAdminByEmail(email: string): Promise<AdminUser | null> {
+  const normalized = email.toLowerCase().trim();
   if (isRedisConfigured()) {
-    return await redisGetAdminUser(email);
+    const user = await redisGetAdminUser(normalized);
+    if (user) return user;
+    const seed = SEED_ADMIN_USERS.find((u) => u.email === normalized);
+    if (seed) {
+      await redisSaveAdminUser(seed);
+      return seed;
+    }
+    return null;
   }
   const db = loadDatabase();
-  const normalized = email.toLowerCase().trim();
-  return db.users.find((u) => u.email === normalized && u.role === "admin") || null;
+  const found = db.users.find((u) => u.email === normalized && u.role === "admin");
+  if (found) return found;
+  const seed = SEED_ADMIN_USERS.find((u) => u.email === normalized);
+  if (seed) {
+    db.users.push(seed);
+    saveDatabase(db);
+    return seed;
+  }
+  return null;
 }
 
 export async function getAdminById(id: string): Promise<AdminUser | null> {
   if (isRedisConfigured()) {
-    return await redisGetAdminUserById(id);
+    const user = await redisGetAdminUserById(id);
+    if (user) return user;
+    const seed = SEED_ADMIN_USERS.find((u) => u.id === id);
+    if (seed) {
+      await redisSaveAdminUser(seed);
+      return seed;
+    }
+    return null;
   }
   const db = loadDatabase();
-  return db.users.find((u) => u.id === id && u.role === "admin") || null;
+  const found = db.users.find((u) => u.id === id && u.role === "admin");
+  if (found) return found;
+  const seed = SEED_ADMIN_USERS.find((u) => u.id === id);
+  if (seed) {
+    db.users.push(seed);
+    saveDatabase(db);
+    return seed;
+  }
+  return null;
 }
 
 export async function updateAdminPassword(id: string, hash: string, salt: string): Promise<boolean> {
