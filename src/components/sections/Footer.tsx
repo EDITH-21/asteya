@@ -44,9 +44,10 @@ const LinkedInIcon: React.FC<{ className?: string }> = ({ className = "w-4 h-4" 
 interface FooterProps {
   onOpenContact?: () => void;
   settings?: SiteSettings;
+  hasFaqs?: boolean;
 }
 
-export const Footer: React.FC<FooterProps> = ({ onOpenContact, settings }) => {
+export const Footer: React.FC<FooterProps> = ({ onOpenContact, settings, hasFaqs = false }) => {
   const email = settings?.contactEmail || CONTACT_CONFIG.email;
   const instagram = settings?.instagramUrl || CONTACT_CONFIG.instagram;
   const linkedin = settings?.linkedinUrl || CONTACT_CONFIG.linkedin;
@@ -191,45 +192,55 @@ export const Footer: React.FC<FooterProps> = ({ onOpenContact, settings }) => {
             </h3>
             <ul className="space-y-1 text-xs">
               <li>
-                <a
-                  href="#about"
+                <Link
+                  href="/about"
                   className="inline-flex items-center min-h-[40px] sm:min-h-[32px] text-slate-300 hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 rounded"
                 >
                   About
-                </a>
+                </Link>
               </li>
               <li>
-                <a
-                  href="#ventures"
+                <Link
+                  href="/#ventures"
                   className="inline-flex items-center min-h-[40px] sm:min-h-[32px] text-slate-300 hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 rounded"
                 >
                   Ventures
-                </a>
+                </Link>
               </li>
               <li>
-                <a
-                  href="#process"
+                <Link
+                  href="/#process"
                   className="inline-flex items-center min-h-[40px] sm:min-h-[32px] text-slate-300 hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 rounded"
                 >
                   Process
-                </a>
+                </Link>
               </li>
               <li>
-                <a
-                  href="#technology"
+                <Link
+                  href="/#technology"
                   className="inline-flex items-center min-h-[40px] sm:min-h-[32px] text-slate-300 hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 rounded"
                 >
                   Technology
-                </a>
+                </Link>
               </li>
               <li>
-                <a
-                  href="#why-aadrut"
+                <Link
+                  href="/#why-aadrut"
                   className="inline-flex items-center min-h-[40px] sm:min-h-[32px] text-slate-300 hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 rounded"
                 >
                   Why Aadrut
-                </a>
+                </Link>
               </li>
+              {hasFaqs && (
+                <li>
+                  <Link
+                    href="/faq"
+                    className="inline-flex items-center min-h-[40px] sm:min-h-[32px] text-slate-300 hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 rounded"
+                  >
+                    FAQ
+                  </Link>
+                </li>
+              )}
             </ul>
           </div>
 

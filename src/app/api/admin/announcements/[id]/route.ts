@@ -49,6 +49,8 @@ export async function PATCH(req: NextRequest, context: RouteContext) {
     });
 
     revalidatePath("/");
+    revalidatePath("/about");
+    revalidatePath("/faq");
     revalidatePath("/admin");
 
     return NextResponse.json({ success: true, announcement: updated });
@@ -85,6 +87,8 @@ export async function DELETE(req: NextRequest, context: RouteContext) {
     });
 
     revalidatePath("/");
+    revalidatePath("/about");
+    revalidatePath("/faq");
     revalidatePath("/admin");
 
     return NextResponse.json({ success: true });

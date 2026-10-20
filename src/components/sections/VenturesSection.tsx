@@ -11,6 +11,10 @@ interface VenturesSectionProps {
 }
 
 export const VenturesSection: React.FC<VenturesSectionProps> = ({ ventures = [] }) => {
+  if (!ventures || ventures.length === 0) {
+    return null;
+  }
+
   const featuredVenture = ventures.find((v) => v.featured) || ventures[0];
   const otherVentures = featuredVenture
     ? ventures.filter((v) => v.id !== featuredVenture.id)

@@ -4,9 +4,9 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { DETAILED_SERVICES } from "@/lib/services-data";
 import { CONTACT_CONFIG } from "@/lib/constants";
-import { AadrutLogo } from "@/components/ui/AadrutLogo";
+import { getPublicSiteContent } from "@/lib/server/content";
+import { PublicLayout } from "@/components/layout/PublicLayout";
 import {
-  ArrowLeft,
   ArrowRight,
   CheckCircle2,
   Code,
@@ -66,43 +66,12 @@ export default async function ServicePage({ params }: PageProps) {
     notFound();
   }
 
+  const content = await getPublicSiteContent();
   const otherServices = Object.values(DETAILED_SERVICES).filter((s) => s.slug !== slug);
 
   return (
-    <div className="min-h-screen bg-[#05070b] text-[#f1f5f9] flex flex-col justify-between selection:bg-indigo-500/30 selection:text-white">
-      {/* Top Header Navigation */}
-      <header className="sticky top-0 z-40 w-full bg-[#05070b]/80 backdrop-blur-md border-b border-white/[0.08]">
-        <div className="site-container h-16 sm:h-20 flex items-center justify-between">
-          <Link
-            href="/"
-            className="flex items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 rounded-lg p-1"
-            aria-label="Return to Aadrut homepage"
-          >
-            <AadrutLogo heightClass="h-[40px] sm:h-[46px]" />
-          </Link>
-
-          <div className="flex items-center gap-3 sm:gap-4">
-            <Link
-              href="/#services"
-              className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-sans font-medium text-slate-300 hover:text-white transition-colors px-3 py-1.5 rounded-lg hover:bg-white/[0.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400"
-            >
-              <ArrowLeft className="w-4 h-4 text-indigo-400" />
-              <span>All Services</span>
-            </Link>
-
-            <Link
-              href="/#contact"
-              className="inline-flex items-center gap-2 min-h-[40px] px-4 sm:px-5 py-2 rounded-full bg-white text-black text-xs sm:text-sm font-semibold tracking-normal hover:bg-slate-100 transition-all duration-200 shadow-[0_0_20px_rgba(255,255,255,0.18)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400"
-            >
-              <span>Get in Touch</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="flex-1 py-12 sm:py-20">
+    <PublicLayout content={content}>
+      <main className="flex-1 pt-28 sm:pt-36 pb-16 sm:pb-24">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16 sm:space-y-20">
           {/* Breadcrumb & Section Identifier */}
           <div className="space-y-4">
@@ -299,28 +268,6 @@ export default async function ServicePage({ params }: PageProps) {
           </section>
         </div>
       </main>
-
-      {/* Service Page Footer */}
-      <footer className="w-full bg-[#030508] border-t border-white/[0.08] py-8 text-slate-400 text-xs font-sans">
-        <div className="site-container flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <Link href="/" className="hover:text-white transition-colors">
-              &copy; 2026 Aadrut. All rights reserved.
-            </Link>
-          </div>
-          <div className="flex items-center gap-6">
-            <Link href="/privacy" className="hover:text-white transition-colors">
-              Privacy Policy
-            </Link>
-            <Link href="/terms" className="hover:text-white transition-colors">
-              Terms of Service
-            </Link>
-            <Link href="/#contact" className="text-indigo-400 hover:text-indigo-300 transition-colors">
-              Contact
-            </Link>
-          </div>
-        </div>
-      </footer>
-    </div>
+    </PublicLayout>
   );
 }

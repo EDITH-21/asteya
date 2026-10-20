@@ -1,35 +1,16 @@
 "use client";
 
 import React, { useEffect, useRef } from "react";
-import Image from "next/image";
+import Link from "next/link";
 import { motion, useInView } from "framer-motion";
-import { Cpu, Zap, Users } from "lucide-react";
-import type { AboutContent, TeamMember } from "@/lib/server/content-types";
-import { SafeMarkdown } from "@/components/ui/SafeMarkdown";
-
-const LinkedInIcon: React.FC<{ className?: string }> = ({ className = "w-4 h-4" }) => (
-  <svg
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.75"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={className}
-    aria-hidden="true"
-  >
-    <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
-    <rect width="4" height="12" x="2" y="9" />
-    <circle cx="4" cy="4" r="2" />
-  </svg>
-);
+import { Cpu, Zap, ArrowRight } from "lucide-react";
+import type { AboutContent } from "@/lib/server/content-types";
 
 interface AboutSectionProps {
   about?: AboutContent;
-  team?: TeamMember[];
 }
 
-export const AboutSection: React.FC<AboutSectionProps> = ({ about, team = [] }) => {
+export const AboutSection: React.FC<AboutSectionProps> = ({ about }) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const isInView = useInView(containerRef, { once: false, amount: 0.15 });
@@ -38,7 +19,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ about, team = [] }) 
   const story =
     about?.story ||
     "Aadrut exists to transform ideas into meaningful digital experiences, products, and technology ventures. We combine engineering, design, automation, and emerging technologies to build solutions that are useful today and ready for tomorrow.";
-  const values = about?.values && about.values.length > 0 ? about.values : [
+  const values = about?.values && about.values.length > 0 ? about.values.slice(0, 2) : [
     {
       title: "Precision Engineering",
       text: "High-speed, scalable, modern architectural foundations built for longevity.",
@@ -51,7 +32,6 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ about, team = [] }) 
 
   // Interactive Digital Architecture Canvas (paused when off-screen or on mobile)
   useEffect(() => {
-    // Check reduced motion or small mobile screens
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (prefersReducedMotion) return;
 
@@ -66,236 +46,173 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ about, team = [] }) 
 
     let animId: number = 0;
     let width = (canvas.width = canvas.parentElement?.clientWidth || 500);
-    let height = (canvas.height = canvas.parentElement?.clientHeight || 450);
+    let height = (canvas.height = canvas.parentElement?.clientHeight || 500);
 
-    const handleResize = () => {
+    const onResize = () => {
       if (!canvas || !canvas.parentElement) return;
-      width = canvas.width = canvas.parentElement.clientWidth || 500;
-      height = canvas.height = canvas.parentElement.clientHeight || 450;
+      width = canvas.width = canvas.parentElement.clientWidth;
+      height = canvas.height = canvas.parentElement.clientHeight;
     };
+    window.addEventListener("resize", onResize);
 
-    window.addEventListener("resize", handleResize, { passive: true });
-
-    interface Node {
+    // Dynamic Nodes & Connecting Graph
+    const nodeCount = 18;
+    const nodes: {
       x: number;
       y: number;
-      targetX: number;
-      targetY: number;
       vx: number;
       vy: number;
       radius: number;
-      layer: number;
-      pulse: number;
+      color: string;
+      baseAlpha: number;
+    }[] = [];
+
+    const colors = [
+      "rgba(99, 102, 241, ", // indigo
+      "rgba(6, 182, 212, ",   // cyan
+      "rgba(139, 92, 246, ",  // violet
+    ];
+
+    for (let i = 0; i < nodeCount; i++) {
+      nodes.push({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        vx: (Math.random() - 0.5) * 0.45,
+        vy: (Math.random() - 0.5) * 0.45,
+        radius: Math.random() * 2 + 1.5,
+        color: colors[i % colors.length],
+        baseAlpha: Math.random() * 0.5 + 0.3,
+      });
     }
 
-    const nodes: Node[] = [];
-    const layers = 3;
-    const nodesPerLayer = 8; // Restrained node count for high FPS
+    let mouseX = -1000;
+    let mouseY = -1000;
 
-    for (let l = 0; l < layers; l++) {
-      for (let i = 0; i < nodesPerLayer; i++) {
-        const angle = (i / nodesPerLayer) * Math.PI * 2 + l * 0.5;
-        const radiusDist = 55 + l * 50;
-        const cx = width / 2 + Math.cos(angle) * radiusDist;
-        const cy = height / 2 + Math.sin(angle) * (radiusDist * 0.7);
-
-        nodes.push({
-          x: cx + (Math.random() - 0.5) * 30,
-          y: cy + (Math.random() - 0.5) * 30,
-          targetX: cx,
-          targetY: cy,
-          vx: (Math.random() - 0.5) * 0.25,
-          vy: (Math.random() - 0.5) * 0.25,
-          radius: l === 0 ? 3 : l === 1 ? 2.2 : 1.6,
-          layer: l,
-          pulse: Math.random() * Math.PI * 2,
-        });
-      }
-    }
-
-    let pointer = { x: width / 2, y: height / 2, active: false };
-    const handlePointerMove = (e: MouseEvent) => {
+    const onMouseMove = (e: MouseEvent) => {
       const rect = canvas.getBoundingClientRect();
-      pointer = {
-        x: e.clientX - rect.left,
-        y: e.clientY - rect.top,
-        active: true,
-      };
+      mouseX = e.clientX - rect.left;
+      mouseY = e.clientY - rect.top;
     };
-    const handlePointerLeave = () => {
-      pointer.active = false;
+    const onMouseLeave = () => {
+      mouseX = -1000;
+      mouseY = -1000;
     };
 
-    canvas.addEventListener("mousemove", handlePointerMove, { passive: true });
-    canvas.addEventListener("mouseleave", handlePointerLeave);
+    canvas.addEventListener("mousemove", onMouseMove);
+    canvas.addEventListener("mouseleave", onMouseLeave);
 
-    let frame = 0;
-    const draw = () => {
-      if (!isInView || document.hidden) {
-        animId = 0;
-        return;
-      }
-
-      frame++;
+    const render = () => {
       ctx.clearRect(0, 0, width, height);
 
-      // Central glowing core
-      const coreGrad = ctx.createRadialGradient(
-        width / 2,
-        height / 2,
-        0,
-        width / 2,
-        height / 2,
-        160
-      );
-      coreGrad.addColorStop(0, "rgba(99, 102, 241, 0.12)");
-      coreGrad.addColorStop(0.5, "rgba(6, 182, 212, 0.03)");
-      coreGrad.addColorStop(1, "transparent");
-      ctx.fillStyle = coreGrad;
-      ctx.beginPath();
-      ctx.arc(width / 2, height / 2, 160, 0, Math.PI * 2);
-      ctx.fill();
+      // Draw subtle grid lines
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.03)";
+      ctx.lineWidth = 1;
+      const step = 40;
+      for (let x = 0; x < width; x += step) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, height);
+        ctx.stroke();
+      }
+      for (let y = 0; y < height; y += step) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(width, y);
+        ctx.stroke();
+      }
 
-      // Update and draw connections
+      // Update and connect nodes
       for (let i = 0; i < nodes.length; i++) {
-        const n1 = nodes[i];
-        n1.pulse += 0.025;
+        const node = nodes[i];
+        node.x += node.vx;
+        node.y += node.vy;
 
-        n1.x += n1.vx;
-        n1.y += n1.vy;
+        if (node.x < 0 || node.x > width) node.vx *= -1;
+        if (node.y < 0 || node.y > height) node.vy *= -1;
 
-        const dxTarget = n1.targetX - n1.x;
-        const dyTarget = n1.targetY - n1.y;
-        n1.x += dxTarget * 0.02;
-        n1.y += dyTarget * 0.02;
-
-        if (pointer.active) {
-          const pdx = pointer.x - n1.x;
-          const pdy = pointer.y - n1.y;
-          const pdist = Math.sqrt(pdx * pdx + pdy * pdy);
-          if (pdist < 90) {
-            n1.x -= (pdx / pdist) * 1.5;
-            n1.y -= (pdy / pdist) * 1.5;
-          }
+        // Subtle mouse repulsion
+        const dx = mouseX - node.x;
+        const dy = mouseY - node.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 100) {
+          const force = (100 - dist) / 100;
+          node.x -= (dx / dist) * force * 1.5;
+          node.y -= (dy / dist) * force * 1.5;
         }
 
-        // Connect to other nodes
+        // Connect with nearby nodes
         for (let j = i + 1; j < nodes.length; j++) {
-          const n2 = nodes[j];
-          const dx = n1.x - n2.x;
-          const dy = n1.y - n2.y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-
-          if (dist < 100) {
-            const alpha = (1 - dist / 100) * (n1.layer === n2.layer ? 0.25 : 0.12);
-            ctx.strokeStyle =
-              n1.layer === 0
-                ? `rgba(129, 140, 248, ${alpha})`
-                : n1.layer === 1
-                ? `rgba(34, 211, 238, ${alpha})`
-                : `rgba(168, 85, 247, ${alpha})`;
-            ctx.lineWidth = 0.8;
+          const other = nodes[j];
+          const dist2 = Math.hypot(node.x - other.x, node.y - other.y);
+          if (dist2 < 120) {
+            const alpha = (1 - dist2 / 120) * 0.25;
+            ctx.strokeStyle = `rgba(99, 102, 241, ${alpha})`;
+            ctx.lineWidth = 1;
             ctx.beginPath();
-            ctx.moveTo(n1.x, n1.y);
-            ctx.lineTo(n2.x, n2.y);
+            ctx.moveTo(node.x, node.y);
+            ctx.lineTo(other.x, other.y);
             ctx.stroke();
-
-            // Subtle data impulse
-            if ((frame + i * 7) % 200 < 20) {
-              const progress = ((frame + i * 7) % 200) / 20;
-              const px = n1.x + (n2.x - n1.x) * progress;
-              const py = n1.y + (n2.y - n1.y) * progress;
-              ctx.fillStyle = "#ffffff";
-              ctx.beginPath();
-              ctx.arc(px, py, 1.2, 0, Math.PI * 2);
-              ctx.fill();
-            }
           }
         }
 
         // Draw node
-        const currentRadius = n1.radius + Math.sin(n1.pulse) * 0.4;
-        ctx.fillStyle = n1.layer === 0 ? "#818cf8" : n1.layer === 1 ? "#38bdf8" : "#c084fc";
+        ctx.fillStyle = `${node.color}${node.baseAlpha})`;
         ctx.beginPath();
-        ctx.arc(n1.x, n1.y, Math.max(1, currentRadius), 0, Math.PI * 2);
+        ctx.arc(node.x, node.y, node.radius, 0, Math.PI * 2);
         ctx.fill();
       }
 
-      // Central reference ring
-      ctx.strokeStyle = "rgba(255, 255, 255, 0.05)";
-      ctx.lineWidth = 1;
-      ctx.setLineDash([4, 6]);
-      ctx.beginPath();
-      ctx.arc(width / 2, height / 2, 64, 0, Math.PI * 2);
-      ctx.stroke();
-      ctx.setLineDash([]);
-
-      animId = requestAnimationFrame(draw);
+      animId = requestAnimationFrame(render);
     };
 
-    if (isInView) {
-      animId = requestAnimationFrame(draw);
-    }
-
-    const handleVisibility = () => {
-      if (document.hidden) {
-        cancelAnimationFrame(animId);
-        animId = 0;
-      } else if (isInView && !animId) {
-        animId = requestAnimationFrame(draw);
-      }
-    };
-    document.addEventListener("visibilitychange", handleVisibility);
+    render();
 
     return () => {
       cancelAnimationFrame(animId);
-      document.removeEventListener("visibilitychange", handleVisibility);
-      window.removeEventListener("resize", handleResize);
-      canvas.removeEventListener("mousemove", handlePointerMove);
-      canvas.removeEventListener("mouseleave", handlePointerLeave);
+      window.removeEventListener("resize", onResize);
+      canvas.removeEventListener("mousemove", onMouseMove);
+      canvas.removeEventListener("mouseleave", onMouseLeave);
     };
-  }, [isInView]);
+  }, []);
 
   return (
     <section
       id="about"
       ref={containerRef}
-      className="site-section relative w-full bg-[#07090e] border-t border-white/[0.04] overflow-hidden"
+      className="site-section relative w-full bg-[#05070b] overflow-hidden"
     >
-      {/* Background Ambient Glow (optimized) */}
+      {/* Background Lighting Gradients */}
       <div className="absolute top-1/2 left-0 -translate-y-1/2 w-72 sm:w-96 h-72 sm:h-96 bg-indigo-600/10 rounded-full blur-2xl sm:blur-[120px] pointer-events-none" />
+      <div className="hidden sm:block absolute top-1/3 right-10 w-80 h-80 bg-cyan-600/10 rounded-full blur-2xl sm:blur-[140px] pointer-events-none" />
 
-      <div className="site-container">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
-          {/* Left Column: Editorial Content */}
+      <div className="site-container relative z-10">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
+          {/* Left Column: Brand Statement & Teaser */}
           <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -20 }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
             transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-            className="lg:col-span-7 space-y-7"
+            className="lg:col-span-7 space-y-6"
           >
-            {/* Section Tag */}
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] border border-white/10 text-indigo-300 font-sans text-xs font-medium tracking-wide">
               <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
-              <span>01 &bull; About Aadrut</span>
+              <span>01 &bull; Purpose &amp; Philosophy</span>
             </div>
 
-            {/* Headline */}
-            <h2 className="text-3xl sm:text-5xl md:text-6xl font-bold tracking-tight text-white leading-[1.12]">
-              <SafeMarkdown content={headline} />
+            <h2 className="text-3xl sm:text-5xl md:text-6xl font-bold tracking-tight text-white uppercase leading-[1.08]">
+              {headline}
             </h2>
 
-            {/* Paragraph */}
-            <div className="text-base sm:text-lg text-slate-300 font-normal leading-relaxed max-w-2xl">
-              <SafeMarkdown content={story} />
-            </div>
+            <p className="text-slate-300 text-base sm:text-lg font-normal leading-relaxed max-w-2xl">
+              {story}
+            </p>
 
-            {/* Value Pillars List */}
+            {/* Core Values Teaser */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
               {values.map((v, i) => (
                 <div
                   key={i}
-                  className="p-5 rounded-xl bg-white/[0.02] border border-white/[0.08] backdrop-blur-sm space-y-1.5 hover:border-indigo-500/25 transition-colors"
+                  className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.06] space-y-1.5"
                 >
                   <div className="flex items-center gap-2 text-indigo-300 font-sans text-sm font-semibold">
                     {i % 2 === 0 ? (
@@ -308,6 +225,17 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ about, team = [] }) 
                   <p className="text-xs text-slate-400 leading-relaxed">{v.text}</p>
                 </div>
               ))}
+            </div>
+
+            {/* Teaser Action Link to Dedicated /about Page */}
+            <div className="pt-2">
+              <Link
+                href="/about"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 hover:border-indigo-400/40 text-xs sm:text-sm font-semibold text-white transition-all group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400"
+              >
+                <span>Learn more about Aadrut</span>
+                <ArrowRight className="w-4 h-4 text-indigo-400 group-hover:translate-x-1 transition-transform" />
+              </Link>
             </div>
           </motion.div>
 
@@ -353,88 +281,6 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ about, team = [] }) 
             </div>
           </motion.div>
         </div>
-
-        {/* Team Members Subsection */}
-        {team.length > 0 && (
-          <div className="mt-16 pt-12 border-t border-white/[0.06]">
-            <div className="max-w-2xl mb-8 space-y-2">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] border border-white/10 text-indigo-300 font-sans text-xs font-medium tracking-wide">
-                <Users className="w-3.5 h-3.5 text-indigo-400" />
-                <span>Leadership &amp; Core Founders</span>
-              </div>
-              <h3 className="text-2xl sm:text-3xl font-bold tracking-tight text-white uppercase">
-                The Minds Behind Aadrut
-              </h3>
-              <p className="text-sm text-slate-400">
-                Direct technical stewardship, precision execution, and dedicated accountability.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-              {team.map((member) => {
-                const initials = member.name
-                  .split(" ")
-                  .map((n) => n[0])
-                  .join("")
-                  .slice(0, 2)
-                  .toUpperCase();
-
-                return (
-                  <div
-                    key={member.id}
-                    className="p-5 rounded-2xl bg-white/[0.02] border border-white/[0.08] backdrop-blur-sm flex flex-col justify-between hover:border-indigo-500/30 transition-colors group"
-                  >
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between">
-                        {member.photoUrl ? (
-                          <Image
-                            src={member.photoUrl}
-                            alt={member.name}
-                            width={56}
-                            height={56}
-                            unoptimized
-                            className="w-14 h-14 rounded-2xl object-cover border border-white/10"
-                          />
-                        ) : (
-                          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500/20 via-purple-500/10 to-cyan-500/20 border border-white/10 flex items-center justify-center font-bold text-lg text-white">
-                            {initials}
-                          </div>
-                        )}
-
-                        {member.linkedinUrl && (
-                          <a
-                            href={member.linkedinUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="p-2 rounded-xl bg-white/[0.03] text-slate-400 hover:text-white hover:bg-white/[0.08] border border-white/[0.06] transition-colors"
-                            aria-label={`${member.name} LinkedIn Profile`}
-                          >
-                            <LinkedInIcon className="w-4 h-4 text-indigo-400" />
-                          </a>
-                        )}
-                      </div>
-
-                      <div>
-                        <h4 className="text-base font-semibold text-white group-hover:text-indigo-300 transition-colors">
-                          {member.name}
-                        </h4>
-                        <p className="text-xs font-medium text-cyan-400 mt-0.5">
-                          {member.displayRole}
-                        </p>
-                      </div>
-
-                      {member.bio && (
-                        <p className="text-xs text-slate-400 leading-relaxed">
-                          <SafeMarkdown content={member.bio} />
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
       </div>
     </section>
   );

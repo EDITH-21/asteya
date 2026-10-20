@@ -58,6 +58,7 @@ export async function POST(req: NextRequest) {
     });
 
     revalidatePath("/");
+    revalidatePath("/about");
     revalidatePath("/admin");
 
     return NextResponse.json({ success: true, member }, { status: 201 });

@@ -58,6 +58,7 @@ export async function POST(req: NextRequest) {
     });
 
     revalidatePath("/");
+    revalidatePath("/faq");
     revalidatePath("/admin");
 
     return NextResponse.json({ success: true, faq }, { status: 201 });

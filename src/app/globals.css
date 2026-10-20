@@ -19,7 +19,7 @@
   }
 }
 
-@media (min-width: 1024px) {
+@media (min-width: 1280px) {
   :root {
     --header-h: 88px;
   }
@@ -80,7 +80,7 @@ html {
   }
 }
 
-@media (min-width: 1024px) {
+@media (min-width: 1280px) {
   .site-section {
     padding-top: 4rem; /* desktop pt-16 (64px) */
     scroll-margin-top: calc(var(--header-h) + 24px - 4rem); /* 88 + 24 - 64 = 48px */

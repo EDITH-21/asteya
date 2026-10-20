@@ -57,6 +57,8 @@ export async function PUT(req: NextRequest) {
     });
 
     revalidatePath("/");
+    revalidatePath("/about");
+    revalidatePath("/faq");
     revalidatePath("/admin");
 
     return NextResponse.json({ success: true, settings: updated });

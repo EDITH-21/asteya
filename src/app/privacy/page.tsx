@@ -1,9 +1,8 @@
 import React from "react";
-import Link from "next/link";
 import type { Metadata } from "next";
-import { AadrutLogo } from "@/components/ui/AadrutLogo";
-import { ArrowLeft } from "lucide-react";
 import { CONTACT_CONFIG } from "@/lib/constants";
+import { getPublicSiteContent } from "@/lib/server/content";
+import { PublicLayout } from "@/components/layout/PublicLayout";
 
 export const metadata: Metadata = {
   title: "Privacy Policy | Aadrut",
@@ -11,34 +10,21 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://asteya.tech/privacy",
   },
+  openGraph: {
+    title: "Privacy Policy | Aadrut",
+    description: "Aadrut's commitment to protecting user privacy, data security, and client confidentiality.",
+    url: "https://asteya.tech/privacy",
+    siteName: "Aadrut",
+    type: "website",
+  },
 };
 
-export default function PrivacyPage() {
+export default async function PrivacyPage() {
+  const content = await getPublicSiteContent();
+
   return (
-    <div className="min-h-screen bg-[#05070b] text-[#f1f5f9] flex flex-col justify-between selection:bg-indigo-500/30 selection:text-white">
-      {/* Top Header */}
-      <header className="sticky top-0 z-40 w-full bg-[#05070b]/80 backdrop-blur-md border-b border-white/[0.08]">
-        <div className="site-container h-16 sm:h-20 flex items-center justify-between">
-          <Link
-            href="/"
-            className="flex items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 rounded-lg p-1"
-            aria-label="Return to Aadrut homepage"
-          >
-            <AadrutLogo heightClass="h-[40px] sm:h-[46px]" />
-          </Link>
-
-          <Link
-            href="/"
-            className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-sans font-medium text-slate-300 hover:text-white transition-colors px-3 py-1.5 rounded-lg hover:bg-white/[0.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400"
-          >
-            <ArrowLeft className="w-4 h-4 text-indigo-400" />
-            <span>Return Home</span>
-          </Link>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="flex-1 py-12 sm:py-20">
+    <PublicLayout content={content}>
+      <main className="flex-1 pt-28 sm:pt-36 pb-16 sm:pb-24">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
           <div className="space-y-3">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] border border-white/10 text-indigo-300 font-sans text-xs font-medium">
@@ -98,18 +84,6 @@ export default function PrivacyPage() {
           </div>
         </div>
       </main>
-
-      {/* Footer */}
-      <footer className="w-full bg-[#030508] border-t border-white/[0.08] py-8 text-slate-400 text-xs font-sans">
-        <div className="site-container flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div>&copy; 2026 Aadrut. All rights reserved.</div>
-          <div className="flex items-center gap-6">
-            <Link href="/" className="hover:text-white transition-colors">Home</Link>
-            <Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link>
-            <Link href="/#contact" className="text-indigo-400 hover:text-indigo-300 transition-colors">Contact</Link>
-          </div>
-        </div>
-      </footer>
-    </div>
+    </PublicLayout>
   );
 }

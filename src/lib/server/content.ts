@@ -1,4 +1,5 @@
 import "server-only";
+import { cache } from "react";
 import {
   initializeDatabase,
   getActiveAnnouncement,
@@ -14,8 +15,9 @@ import type { PublicSiteContent } from "./content-types";
 /**
  * Fetch all public-facing site content on the server.
  * Enables zero-flicker Server-Side Rendering (SSR) without layout shift.
+ * Wrapped in React cache() to deduplicate queries across a single render tree.
  */
-export async function getPublicSiteContent(): Promise<PublicSiteContent> {
+export const getPublicSiteContent = cache(async (): Promise<PublicSiteContent> => {
   await initializeDatabase();
 
   const [activeAnnouncement, testimonials, faqs, ventures, about, team, settings] =
@@ -38,4 +40,4 @@ export async function getPublicSiteContent(): Promise<PublicSiteContent> {
     team,
     settings,
   };
-}
+});
