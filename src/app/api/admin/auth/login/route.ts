@@ -3,13 +3,20 @@ import { AdminLoginSchema } from "@/lib/server/validations";
 import {
   initializeDatabase,
   getAdminByEmail,
+  hasAnyAdminUser,
+  deleteAllUserSessions,
   checkRateLimit,
   recordFailedLogin,
   resetLoginAttempts,
   updateAdminLastLogin,
   updateAdminPassword,
 } from "@/lib/server/db";
-import { verifyPassword, hashPassword, needsPasswordRehash } from "@/lib/server/crypto";
+import {
+  verifyPassword,
+  hashPassword,
+  needsPasswordRehash,
+  OWASP_SCRYPT_PREFIX,
+} from "@/lib/server/crypto";
 import {
   createAdminSession,
   getClientIp,
@@ -18,6 +25,10 @@ import {
 } from "@/lib/server/auth";
 import { isAllowedOrigin } from "@/lib/server/origin";
 import { createMfaPreAuthToken } from "@/lib/server/totp";
+
+// Fixed dummy hash for constant-time comparison when email is not found
+const DUMMY_SCRYPT_HASH = `${OWASP_SCRYPT_PREFIX}00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000`;
+const DUMMY_SALT = "0000000000000000000000000000000000000000000000000000000000000000";
 
 export async function POST(req: NextRequest) {
   try {
@@ -38,7 +49,7 @@ export async function POST(req: NextRequest) {
 
     if (!parsed.success) {
       return NextResponse.json(
-        { error: "Invalid credentials format" },
+        { error: "Invalid credentials" },
         { status: 400 }
       );
     }
@@ -60,10 +71,20 @@ export async function POST(req: NextRequest) {
     // 2. Fetch admin user
     const admin = await getAdminByEmail(email);
     if (!admin) {
-      // Record failed attempt even if user doesn't exist to prevent timing enumeration
+      // Check if admin is configured at all
+      const anyAdmin = await hasAnyAdminUser();
+      if (!anyAdmin) {
+        return NextResponse.json(
+          { error: "Administrator account is not configured. Run 'npm run admin:create' or configure server environment variables." },
+          { status: 503 }
+        );
+      }
+
+      // Timing-attack mitigation: perform a real scrypt computation so execution time is indistinguishable
+      await verifyPassword(password, DUMMY_SCRYPT_HASH, DUMMY_SALT);
       await recordFailedLogin(ip, email);
       return NextResponse.json(
-        { error: "Invalid email or password" },
+        { error: "Invalid credentials" },
         { status: 401 }
       );
     }
@@ -73,7 +94,7 @@ export async function POST(req: NextRequest) {
     if (!isValid) {
       await recordFailedLogin(ip, email);
       return NextResponse.json(
-        { error: "Invalid email or password" },
+        { error: "Invalid credentials" },
         { status: 401 }
       );
     }
@@ -100,7 +121,8 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // 7. If MFA is not yet enabled, proceed to complete session creation
+    // 7. Session rotation: delete previous sessions and issue new 8-hour session
+    await deleteAllUserSessions(admin.id);
     await updateAdminLastLogin(admin.id);
     const { token, expiresAt } = await createAdminSession(admin.id, req);
 

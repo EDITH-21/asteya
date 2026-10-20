@@ -5,13 +5,18 @@ import { isAllowedOrigin } from "@/lib/server/origin";
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  const sessionCookie =
+    request.cookies.get("aadrut_admin_session") ||
+    request.cookies.get("asteya_admin_session");
+
   // Protect /admin pages (except /admin/login)
   if (pathname.startsWith("/admin") && pathname !== "/admin/login") {
-    const sessionCookie = request.cookies.get("asteya_admin_session");
     if (!sessionCookie || !sessionCookie.value) {
       const loginUrl = new URL("/admin/login", request.url);
       loginUrl.searchParams.set("from", pathname);
-      return NextResponse.redirect(loginUrl);
+      const redirectResponse = NextResponse.redirect(loginUrl);
+      redirectResponse.headers.set("X-Robots-Tag", "noindex, nofollow, noarchive");
+      return redirectResponse;
     }
   }
 
@@ -32,7 +37,6 @@ export function middleware(request: NextRequest) {
       }
     }
 
-    const sessionCookie = request.cookies.get("asteya_admin_session");
     if (!sessionCookie || !sessionCookie.value) {
       return NextResponse.json(
         { error: "Unauthorized access. Administrator session required." },
@@ -41,7 +45,18 @@ export function middleware(request: NextRequest) {
     }
   }
 
-  return NextResponse.next();
+  const response = NextResponse.next();
+
+  // Enforce noindex and no-cache headers on all admin pages and admin APIs
+  if (pathname.startsWith("/admin") || pathname.startsWith("/api/admin")) {
+    response.headers.set("X-Robots-Tag", "noindex, nofollow, noarchive");
+    response.headers.set(
+      "Cache-Control",
+      "no-store, no-cache, must-revalidate, proxy-revalidate"
+    );
+  }
+
+  return response;
 }
 
 export const config = {

@@ -1,3 +1,4 @@
+import "server-only";
 import { z } from "zod";
 
 export const ALLOWED_ENQUIRY_SERVICES = [
@@ -59,7 +60,7 @@ export const ChangePasswordSchema = z.object({
   currentPassword: z.string().min(1, "Current password is required"),
   newPassword: z
     .string()
-    .min(10, "New password must be at least 10 characters long")
+    .min(12, "New password must be at least 12 characters long")
     .max(128, "Password too long")
     .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
     .regex(/[0-9]/, "Password must contain at least one number")

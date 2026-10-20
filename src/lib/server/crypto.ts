@@ -1,3 +1,4 @@
+import "server-only";
 import crypto from "crypto";
 
 export const OWASP_SCRYPT_PARAMS = {
@@ -91,9 +92,15 @@ export function generateSecureToken(bytes = 32): string {
 }
 
 /**
- * Hash a session token with SHA-256 before storing it in the database.
- * This prevents token compromise if database records are ever exposed.
+ * Hash a session token before storing it in the database.
+ * If SESSION_SECRET is set, HMAC-SHA256 is used with the secret.
+ * Otherwise, SHA-256 digest is used.
+ * This prevents token compromise even if database records are exposed.
  */
 export function hashToken(token: string): string {
+  const secret = process.env.SESSION_SECRET;
+  if (secret && secret.trim().length > 0) {
+    return crypto.createHmac("sha256", secret.trim()).update(token).digest("hex");
+  }
   return crypto.createHash("sha256").update(token).digest("hex");
 }

@@ -1,3 +1,4 @@
+import "server-only";
 import { Redis } from "@upstash/redis";
 import type { AdminUser, AdminSession, Enquiry } from "./db";
 
@@ -127,6 +128,8 @@ export async function redisGetAdminUserById(id: string): Promise<AdminUser | nul
 export async function redisCreateSession(session: AdminSession, ttlSeconds: number): Promise<void> {
   if (!redis) return;
   await redis.set(`session:${session.sessionTokenHash}`, session, { ex: ttlSeconds });
+  await redis.sadd(`admin:user_sessions:${session.userId}`, session.sessionTokenHash);
+  await redis.expire(`admin:user_sessions:${session.userId}`, ttlSeconds);
 }
 
 export async function redisGetSession(tokenHash: string): Promise<AdminSession | null> {
@@ -136,7 +139,26 @@ export async function redisGetSession(tokenHash: string): Promise<AdminSession |
 
 export async function redisDeleteSession(tokenHash: string): Promise<void> {
   if (!redis) return;
+  const session = await redis.get<AdminSession>(`session:${tokenHash}`);
+  if (session?.userId) {
+    await redis.srem(`admin:user_sessions:${session.userId}`, tokenHash);
+  }
   await redis.del(`session:${tokenHash}`);
+}
+
+export async function redisDeleteAllUserSessions(userId: string): Promise<void> {
+  if (!redis) return;
+  try {
+    const sessionHashes = await redis.smembers<string[]>(`admin:user_sessions:${userId}`);
+    if (sessionHashes && sessionHashes.length > 0) {
+      for (const hash of sessionHashes) {
+        await redis.del(`session:${hash}`);
+      }
+    }
+    await redis.del(`admin:user_sessions:${userId}`);
+  } catch (err) {
+    console.error("[Redis DeleteAllUserSessions Error]", err);
+  }
 }
 
 export async function redisSaveEnquiry(enquiry: Enquiry): Promise<void> {

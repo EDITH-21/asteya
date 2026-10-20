@@ -1,3 +1,4 @@
+import "server-only";
 import { cookies } from "next/headers";
 import { NextRequest } from "next/server";
 import { generateSecureToken, hashToken } from "./crypto";
@@ -11,8 +12,9 @@ import {
   initializeDatabase,
 } from "./db";
 
-export const SESSION_COOKIE_NAME = "asteya_admin_session";
-export const SESSION_MAX_AGE_SECONDS = 7 * 24 * 60 * 60; // 7 days
+export const SESSION_COOKIE_NAME = "aadrut_admin_session";
+export const LEGACY_SESSION_COOKIE_NAME = "asteya_admin_session";
+export const SESSION_MAX_AGE_SECONDS = 8 * 60 * 60; // 8 hours
 
 export interface AuthContext {
   user: Omit<AdminUser, "passwordHash" | "passwordSalt">;
@@ -49,16 +51,22 @@ export async function getAuthenticatedAdmin(
     const match = rawCookies
       .split(";")
       .map((c) => c.trim())
-      .find((c) => c.startsWith(`${SESSION_COOKIE_NAME}=`));
+      .find(
+        (c) =>
+          c.startsWith(`${SESSION_COOKIE_NAME}=`) ||
+          c.startsWith(`${LEGACY_SESSION_COOKIE_NAME}=`)
+      );
     if (match) {
-      token = match.substring(SESSION_COOKIE_NAME.length + 1);
+      token = match.split("=")[1];
     }
   }
 
   if (!token) {
     try {
       const cookieStore = await cookies();
-      token = cookieStore.get(SESSION_COOKIE_NAME)?.value;
+      token =
+        cookieStore.get(SESSION_COOKIE_NAME)?.value ||
+        cookieStore.get(LEGACY_SESSION_COOKIE_NAME)?.value;
     } catch {
       // Not in Next.js Server Component or Action context
     }
@@ -136,6 +144,7 @@ export function getSessionCookieOptions(expiresAt: string) {
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax" as const,
     path: "/",
+    maxAge: SESSION_MAX_AGE_SECONDS,
     expires: new Date(expiresAt),
   };
 }

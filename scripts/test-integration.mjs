@@ -108,6 +108,9 @@ async function runTests() {
     }
   }
 
+const TEST_EMAIL = process.env.ADMIN_EMAIL || "admin@example.com";
+const ADMIN_PASSWORD = process.env.ADMIN_INITIAL_PASSWORD || process.env.TEST_ADMIN_PASSWORD || "TestAdmin#DevPass2026!";
+
   // 4. Test invalid login
   console.log("\n4. Testing Failed Login (Wrong Password)...");
   {
@@ -115,7 +118,7 @@ async function runTests() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        email: "admin@asteya.tech",
+        email: TEST_EMAIL,
         password: "IncorrectPassword123!",
       }),
     });
@@ -127,8 +130,6 @@ async function runTests() {
     }
   }
 
-const ADMIN_PASSWORD = process.env.ADMIN_INITIAL_PASSWORD || process.env.TEST_ADMIN_PASSWORD || "TestAdmin#DevPass2026!";
-
   // 5. Test valid admin login
   console.log("\n5. Testing Valid Admin Login...");
   {
@@ -136,7 +137,7 @@ const ADMIN_PASSWORD = process.env.ADMIN_INITIAL_PASSWORD || process.env.TEST_AD
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        email: "admin@asteya.tech",
+        email: TEST_EMAIL,
         password: ADMIN_PASSWORD,
       }),
     });
@@ -163,7 +164,7 @@ const ADMIN_PASSWORD = process.env.ADMIN_INITIAL_PASSWORD || process.env.TEST_AD
       headers: { Cookie: cookie },
     });
     const data = await res.json();
-    if (res.status === 200 && data.user && data.user.email === "admin@asteya.tech") {
+    if (res.status === 200 && data.user && data.user.email === TEST_EMAIL) {
       console.log(`   [PASS] Verified session for user: ${data.user.email} (${data.user.role})`);
     } else {
       console.error(`   [FAIL] Auth verification failed:`, res.status, data);

@@ -1,3 +1,4 @@
+import "server-only";
 import fs from "fs";
 import path from "path";
 import crypto from "crypto";
@@ -14,6 +15,7 @@ import {
   redisCreateSession,
   redisGetSession,
   redisDeleteSession,
+  redisDeleteAllUserSessions,
   redisSaveEnquiry,
   redisGetEnquiries,
   redisGetEnquiryById,
@@ -186,6 +188,7 @@ function saveDatabase(data: DatabaseSchema): void {
 /**
  * Initialize database with admin user and service records if empty.
  * Requires explicit ADMIN_EMAIL and ADMIN_INITIAL_PASSWORD (no hardcoded fallbacks).
+ * Bootstrap runs lazily at request time, never at build/import time.
  */
 export async function initializeDatabase(): Promise<void> {
   const adminEmail = process.env.ADMIN_EMAIL;
@@ -193,7 +196,7 @@ export async function initializeDatabase(): Promise<void> {
 
   // 1. Redis shared store initialization
   if (isRedisConfigured()) {
-    if (adminEmail && initialPassword && initialPassword.length >= 10) {
+    if (adminEmail && initialPassword && initialPassword.length >= 12) {
       const existing = await redisGetAdminUser(adminEmail);
       if (!existing) {
         const { hash, salt } = await hashPassword(initialPassword);
@@ -211,10 +214,6 @@ export async function initializeDatabase(): Promise<void> {
         await redisSaveAdminUser(newAdmin);
         console.log("[DB] Initialized administrator in shared Redis store.");
       }
-    } else if (!adminEmail) {
-      console.warn(
-        "[Security Warning] ADMIN_EMAIL is not set in environment variables. Admin creation requires an explicit ADMIN_EMAIL."
-      );
     }
     return;
   }
@@ -223,11 +222,7 @@ export async function initializeDatabase(): Promise<void> {
   const db = loadDatabase();
 
   if (db.users.length === 0) {
-    if (!adminEmail) {
-      console.warn(
-        "[Security Warning] ADMIN_EMAIL is not set in environment variables. Admin creation requires an explicit ADMIN_EMAIL."
-      );
-    } else if (initialPassword && initialPassword.length >= 10) {
+    if (adminEmail && initialPassword && initialPassword.length >= 12) {
       const { hash, salt } = await hashPassword(initialPassword);
 
       const defaultAdmin: AdminUser = {
@@ -257,6 +252,22 @@ export async function initializeDatabase(): Promise<void> {
   }
 
   saveDatabase(db);
+}
+
+/**
+ * Check whether any administrator account has been created in the persistent store.
+ */
+export async function hasAnyAdminUser(): Promise<boolean> {
+  if (isRedisConfigured()) {
+    const adminEmail = process.env.ADMIN_EMAIL;
+    if (adminEmail) {
+      const user = await redisGetAdminUser(adminEmail);
+      if (user) return true;
+    }
+    return false;
+  }
+  const db = loadDatabase();
+  return db.users.some((u) => u.role === "admin");
 }
 
 // ========================
@@ -367,6 +378,7 @@ export async function updateAdminPassword(id: string, hash: string, salt: string
     user.passwordSalt = salt;
     user.updatedAt = new Date().toISOString();
     await redisSaveAdminUser(user);
+    await redisDeleteAllUserSessions(id);
     return true;
   }
 
@@ -381,6 +393,16 @@ export async function updateAdminPassword(id: string, hash: string, salt: string
 
   saveDatabase(db);
   return true;
+}
+
+export async function deleteAllUserSessions(userId: string): Promise<void> {
+  if (isRedisConfigured()) {
+    await redisDeleteAllUserSessions(userId);
+    return;
+  }
+  const db = loadDatabase();
+  db.sessions = db.sessions.filter((s) => s.userId !== userId);
+  saveDatabase(db);
 }
 
 export async function updateAdminMfa(

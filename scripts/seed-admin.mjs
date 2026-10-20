@@ -9,24 +9,39 @@ const rootDir = path.join(__dirname, "..");
 const dbDir = path.join(rootDir, "data");
 const dbPath = path.join(dbDir, "asteya-db.json");
 
-const email = (process.argv[2] || process.env.ADMIN_EMAIL || "admin@asteya.tech").toLowerCase().trim();
+const email = (process.argv[2] || process.env.ADMIN_EMAIL || "").toLowerCase().trim();
 const password = process.argv[3] || process.env.ADMIN_INITIAL_PASSWORD;
 
-if (!password || password.length < 10) {
+if (!email || !email.includes("@")) {
+  console.error("\n[Aadrut Admin Bootstrap ERROR] Explicit admin email is required.");
+  console.error("Usage: node scripts/seed-admin.mjs <email> <password>");
+  console.error("   OR: Set ADMIN_EMAIL and ADMIN_INITIAL_PASSWORD environment variables.\n");
+  process.exit(1);
+}
+
+if (!password || password.length < 12) {
   console.error("\n[Aadrut Admin Bootstrap ERROR] Explicit password is required.");
-  console.error("Password must be at least 10 characters long.");
+  console.error("Password must be at least 12 characters long.");
   console.error("Usage: node scripts/seed-admin.mjs <email> <password>");
   console.error("   OR: Set ADMIN_INITIAL_PASSWORD environment variable.\n");
   process.exit(1);
 }
 
+const OWASP_SCRYPT_PARAMS = {
+  N: 131072, // 2^17
+  r: 8,
+  p: 1,
+  maxmem: 256 * 1024 * 1024,
+};
+const OWASP_SCRYPT_PREFIX = "scrypt$131072$8$1$";
+
 async function hashPassword(pwd) {
   const salt = crypto.randomBytes(32).toString("hex");
   return new Promise((resolve, reject) => {
-    crypto.scrypt(pwd, salt, 64, { N: 16384, r: 8, p: 1 }, (err, derivedKey) => {
+    crypto.scrypt(pwd, salt, 64, OWASP_SCRYPT_PARAMS, (err, derivedKey) => {
       if (err) return reject(err);
       resolve({
-        hash: derivedKey.toString("hex"),
+        hash: `${OWASP_SCRYPT_PREFIX}${derivedKey.toString("hex")}`,
         salt,
       });
     });

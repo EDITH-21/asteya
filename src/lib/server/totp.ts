@@ -1,3 +1,4 @@
+import "server-only";
 import crypto from "crypto";
 
 const BASE32_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
@@ -169,6 +170,16 @@ export function verifyRecoveryCode(
   return { valid: found, updatedCodes };
 }
 
+let _ephemeralSecret: string | null = null;
+function getServerSigningSecret(): string {
+  const secret = process.env.SESSION_SECRET || process.env.ADMIN_INITIAL_PASSWORD;
+  if (secret && secret.trim().length > 0) return secret.trim();
+  if (!_ephemeralSecret) {
+    _ephemeralSecret = crypto.randomBytes(32).toString("hex");
+  }
+  return _ephemeralSecret;
+}
+
 /**
  * Create a signed, short-lived (5 minutes) MFA pre-authentication token.
  */
@@ -177,8 +188,8 @@ export function createMfaPreAuthToken(userId: string, email: string): string {
   const payload = JSON.stringify({ userId, email, expiresAt });
   const payloadBase64 = Buffer.from(payload).toString("base64url");
 
-  // Sign using a deterministic internal server seed derived from machine/runtime environment
-  const seed = process.env.ADMIN_INITIAL_PASSWORD || process.env.RESEND_API_KEY || "aadrut_mfa_sign_seed_2026";
+  // Sign using server secret (SESSION_SECRET or ADMIN_INITIAL_PASSWORD or process-ephemeral secret)
+  const seed = getServerSigningSecret();
   const signature = crypto.createHmac("sha256", seed).update(payloadBase64).digest("base64url");
 
   return `${payloadBase64}.${signature}`;
@@ -192,7 +203,7 @@ export function verifyMfaPreAuthToken(token: string): { userId: string; email: s
     const [payloadBase64, signature] = token.split(".");
     if (!payloadBase64 || !signature) return null;
 
-    const seed = process.env.ADMIN_INITIAL_PASSWORD || process.env.RESEND_API_KEY || "aadrut_mfa_sign_seed_2026";
+    const seed = getServerSigningSecret();
     const expectedSig = crypto.createHmac("sha256", seed).update(payloadBase64).digest("base64url");
 
     if (!crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSig))) {

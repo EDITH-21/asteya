@@ -1,14 +1,14 @@
 import type { MetadataRoute } from "next";
 
 export default function robots(): MetadataRoute.Robots {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://asteya.tech";
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://aadrut.tech";
 
   return {
     rules: [
       {
         userAgent: "*",
         allow: ["/", "/services/"],
-        disallow: ["/admin/", "/api/"],
+        disallow: ["/admin", "/admin/", "/api", "/api/"],
       },
     ],
     sitemap: `${siteUrl}/sitemap.xml`,

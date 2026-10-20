@@ -3,6 +3,7 @@ import {
   getAdminById,
   updateAdminMfa,
   updateAdminLastLogin,
+  deleteAllUserSessions,
   initializeDatabase,
 } from "@/lib/server/db";
 import {
@@ -85,7 +86,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 5. Verification successful: create active admin session
+    // 5. Verification successful: rotate sessions and create active admin session
+    await deleteAllUserSessions(admin.id);
     await updateAdminLastLogin(admin.id);
     const { token, expiresAt } = await createAdminSession(admin.id, req);
 
