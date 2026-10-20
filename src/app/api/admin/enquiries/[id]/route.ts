@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthenticatedAdmin } from "@/lib/server/auth";
-import { updateEnquiry, deleteEnquiry, getEnquiryById } from "@/lib/server/db";
+import { isAllowedOrigin } from "@/lib/server/origin";
+import { updateEnquiry, deleteEnquiry, getEnquiryById, recordActivityLog } from "@/lib/server/db";
 import { EnquiryUpdateSchema } from "@/lib/server/validations";
 
 interface RouteContext {
@@ -28,6 +29,10 @@ export async function GET(req: NextRequest, context: RouteContext) {
 
 export async function PATCH(req: NextRequest, context: RouteContext) {
   try {
+    if (!isAllowedOrigin(req.headers.get("origin"), req.headers.get("host"))) {
+      return NextResponse.json({ error: "Forbidden origin" }, { status: 403 });
+    }
+
     const auth = await getAuthenticatedAdmin(req);
     if (!auth) {
       return NextResponse.json({ error: "Unauthorized access" }, { status: 401 });
@@ -47,6 +52,15 @@ export async function PATCH(req: NextRequest, context: RouteContext) {
       return NextResponse.json({ error: "Enquiry not found" }, { status: 404 });
     }
 
+    await recordActivityLog({
+      adminId: auth.user.id,
+      adminEmail: auth.user.email,
+      action: "UPDATE_ENQUIRY",
+      entityType: "enquiry",
+      entityId: id,
+      details: `Updated enquiry from "${updated.name}" (Status: ${updated.status})`,
+    });
+
     return NextResponse.json({ success: true, enquiry: updated });
   } catch {
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
@@ -55,6 +69,10 @@ export async function PATCH(req: NextRequest, context: RouteContext) {
 
 export async function DELETE(req: NextRequest, context: RouteContext) {
   try {
+    if (!isAllowedOrigin(req.headers.get("origin"), req.headers.get("host"))) {
+      return NextResponse.json({ error: "Forbidden origin" }, { status: 403 });
+    }
+
     const auth = await getAuthenticatedAdmin(req);
     if (!auth) {
       return NextResponse.json({ error: "Unauthorized access" }, { status: 401 });
@@ -67,6 +85,15 @@ export async function DELETE(req: NextRequest, context: RouteContext) {
       return NextResponse.json({ error: "Enquiry not found" }, { status: 404 });
     }
 
+    await recordActivityLog({
+      adminId: auth.user.id,
+      adminEmail: auth.user.email,
+      action: "DELETE_ENQUIRY",
+      entityType: "enquiry",
+      entityId: id,
+      details: `Deleted enquiry record ID: ${id}`,
+    });
+
     return NextResponse.json({
       success: true,
       message: "Enquiry record deleted permanently",
@@ -76,3 +103,4 @@ export async function DELETE(req: NextRequest, context: RouteContext) {
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
+

@@ -29,7 +29,22 @@ import {
   Terminal,
   Smartphone,
   Copy,
+  Download,
+  Megaphone,
+  Rocket,
+  Quote,
+  HelpCircle,
+  Building,
+  Sliders,
+  ShieldAlert,
 } from "lucide-react";
+import { AnnouncementsTab } from "@/components/admin/AnnouncementsTab";
+import { VenturesTab } from "@/components/admin/VenturesTab";
+import { TestimonialsTab } from "@/components/admin/TestimonialsTab";
+import { FaqsTab } from "@/components/admin/FaqsTab";
+import { AboutAndTeamTab } from "@/components/admin/AboutAndTeamTab";
+import { SiteSettingsTab } from "@/components/admin/SiteSettingsTab";
+import { ActivityLogsTab } from "@/components/admin/ActivityLogsTab";
 
 interface AdminUser {
   id: string;
@@ -97,7 +112,20 @@ export default function AdminDashboardPage() {
   const [loadingAuth, setLoadingAuth] = useState(true);
 
   // Active navigation tab
-  const [activeTab, setActiveTab] = useState<"overview" | "enquiries" | "services" | "security">("overview");
+  const [activeTab, setActiveTab] = useState<
+    | "overview"
+    | "enquiries"
+    | "services"
+    | "announcements"
+    | "ventures"
+    | "testimonials"
+    | "faqs"
+    | "about"
+    | "settings"
+    | "security"
+    | "activity-logs"
+  >("overview");
+  const [loggingOutAll, setLoggingOutAll] = useState(false);
 
   // Dashboard Data states
   const [stats, setStats] = useState<StatsData | null>(null);
@@ -229,6 +257,21 @@ export default function AdminDashboardPage() {
   const handleLogout = async () => {
     try {
       await fetch("/api/admin/auth/logout", { method: "POST" });
+    } catch {
+      // ignore
+    } finally {
+      router.replace("/admin/login");
+    }
+  };
+
+  // Handle Logout from all devices
+  const handleLogoutAll = async () => {
+    if (!window.confirm("Are you sure you want to terminate all active admin sessions across all devices? You will be signed out immediately.")) {
+      return;
+    }
+    setLoggingOutAll(true);
+    try {
+      await fetch("/api/admin/auth/logout-all", { method: "POST" });
     } catch {
       // ignore
     } finally {
@@ -538,8 +581,68 @@ export default function AdminDashboardPage() {
           </button>
 
           <button
+            onClick={() => setActiveTab("announcements")}
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-sans font-medium whitespace-nowrap transition-colors ${
+              activeTab === "announcements"
+                ? "bg-white/[0.1] text-white border border-white/20"
+                : "text-slate-400 hover:text-white hover:bg-white/[0.04]"
+            }`}
+          >
+            <Megaphone strokeWidth={1.75} className="w-4 h-4" />
+            <span>Announcements</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab("ventures")}
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-sans font-medium whitespace-nowrap transition-colors ${
+              activeTab === "ventures"
+                ? "bg-white/[0.1] text-white border border-white/20"
+                : "text-slate-400 hover:text-white hover:bg-white/[0.04]"
+            }`}
+          >
+            <Rocket strokeWidth={1.75} className="w-4 h-4" />
+            <span>Ventures</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab("testimonials")}
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-sans font-medium whitespace-nowrap transition-colors ${
+              activeTab === "testimonials"
+                ? "bg-white/[0.1] text-white border border-white/20"
+                : "text-slate-400 hover:text-white hover:bg-white/[0.04]"
+            }`}
+          >
+            <Quote strokeWidth={1.75} className="w-4 h-4" />
+            <span>Testimonials</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab("faqs")}
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-sans font-medium whitespace-nowrap transition-colors ${
+              activeTab === "faqs"
+                ? "bg-white/[0.1] text-white border border-white/20"
+                : "text-slate-400 hover:text-white hover:bg-white/[0.04]"
+            }`}
+          >
+            <HelpCircle strokeWidth={1.75} className="w-4 h-4" />
+            <span>FAQ</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab("about")}
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-sans font-medium whitespace-nowrap transition-colors ${
+              activeTab === "about"
+                ? "bg-white/[0.1] text-white border border-white/20"
+                : "text-slate-400 hover:text-white hover:bg-white/[0.04]"
+            }`}
+          >
+            <Building strokeWidth={1.75} className="w-4 h-4" />
+            <span>About &amp; Team</span>
+          </button>
+
+          <button
             onClick={() => setActiveTab("services")}
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-sans font-medium transition-colors ${
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-sans font-medium whitespace-nowrap transition-colors ${
               activeTab === "services"
                 ? "bg-white/[0.1] text-white border border-white/20"
                 : "text-slate-400 hover:text-white hover:bg-white/[0.04]"
@@ -550,15 +653,39 @@ export default function AdminDashboardPage() {
           </button>
 
           <button
+            onClick={() => setActiveTab("settings")}
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-sans font-medium whitespace-nowrap transition-colors ${
+              activeTab === "settings"
+                ? "bg-white/[0.1] text-white border border-white/20"
+                : "text-slate-400 hover:text-white hover:bg-white/[0.04]"
+            }`}
+          >
+            <Sliders strokeWidth={1.75} className="w-4 h-4" />
+            <span>Site Settings</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab("activity-logs")}
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-sans font-medium whitespace-nowrap transition-colors ${
+              activeTab === "activity-logs"
+                ? "bg-white/[0.1] text-white border border-white/20"
+                : "text-slate-400 hover:text-white hover:bg-white/[0.04]"
+            }`}
+          >
+            <Activity strokeWidth={1.75} className="w-4 h-4" />
+            <span>Audit Trail</span>
+          </button>
+
+          <button
             onClick={() => setActiveTab("security")}
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-sans font-medium transition-colors ${
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-sans font-medium whitespace-nowrap transition-colors ${
               activeTab === "security"
                 ? "bg-white/[0.1] text-white border border-white/20"
                 : "text-slate-400 hover:text-white hover:bg-white/[0.04]"
             }`}
           >
             <Shield strokeWidth={1.75} className="w-4 h-4" />
-            <span>Security &amp; Account</span>
+            <span>Security &amp; MFA</span>
           </button>
         </div>
       </header>
@@ -848,6 +975,17 @@ export default function AdminDashboardPage() {
                   <option value="Technology Consulting">Technology Consulting</option>
                   <option value="Venture Collaboration">Venture Collaboration</option>
                 </select>
+
+                {/* CSV Export Button */}
+                <a
+                  href="/api/admin/enquiries/export"
+                  download
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/[0.06] hover:bg-white/[0.1] text-xs font-sans text-slate-200 hover:text-white border border-white/10 transition-colors"
+                  title="Export all customer submissions to CSV"
+                >
+                  <Download strokeWidth={1.75} className="w-3.5 h-3.5 text-indigo-400" />
+                  <span>Export CSV</span>
+                </a>
               </div>
             </div>
 
@@ -1414,8 +1552,65 @@ export default function AdminDashboardPage() {
                 </form>
               )}
             </div>
+
+            {/* Global Session Revocation */}
+            <div className="bg-[#090d16] border border-white/[0.08] rounded-2xl p-6 space-y-4">
+              <div className="flex items-center gap-2">
+                <ShieldAlert strokeWidth={1.75} className="w-5 h-5 text-amber-400" />
+                <h3 className="text-base font-bold text-white">Active Sessions &amp; Global Logout</h3>
+              </div>
+              <p className="text-xs text-slate-400 leading-relaxed max-w-xl">
+                Immediately invalidate all active session tokens across every device, desktop, and mobile browser where an administrator is signed in. This will force re-authentication everywhere.
+              </p>
+              <div>
+                <button
+                  type="button"
+                  onClick={handleLogoutAll}
+                  disabled={loggingOutAll}
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-red-600/10 hover:bg-red-600/20 text-red-300 hover:text-red-200 border border-red-500/20 text-xs font-semibold transition-colors disabled:opacity-50"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span>{loggingOutAll ? "Terminating All Sessions..." : "Sign Out From All Devices"}</span>
+                </button>
+              </div>
+            </div>
           </div>
         )}
+
+        {/* ========================================================= */}
+        {/* TAB: ANNOUNCEMENTS */}
+        {/* ========================================================= */}
+        {activeTab === "announcements" && <AnnouncementsTab />}
+
+        {/* ========================================================= */}
+        {/* TAB: VENTURES */}
+        {/* ========================================================= */}
+        {activeTab === "ventures" && <VenturesTab />}
+
+        {/* ========================================================= */}
+        {/* TAB: TESTIMONIALS */}
+        {/* ========================================================= */}
+        {activeTab === "testimonials" && <TestimonialsTab />}
+
+        {/* ========================================================= */}
+        {/* TAB: FAQ */}
+        {/* ========================================================= */}
+        {activeTab === "faqs" && <FaqsTab />}
+
+        {/* ========================================================= */}
+        {/* TAB: ABOUT & TEAM */}
+        {/* ========================================================= */}
+        {activeTab === "about" && <AboutAndTeamTab />}
+
+        {/* ========================================================= */}
+        {/* TAB: SITE SETTINGS */}
+        {/* ========================================================= */}
+        {activeTab === "settings" && <SiteSettingsTab />}
+
+        {/* ========================================================= */}
+        {/* TAB: AUDIT LOGS */}
+        {/* ========================================================= */}
+        {activeTab === "activity-logs" && <ActivityLogsTab />}
       </main>
 
       {/* Delete Confirmation Modal */}

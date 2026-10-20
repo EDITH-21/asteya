@@ -1,6 +1,16 @@
 import "server-only";
 import { Redis } from "@upstash/redis";
 import type { AdminUser, AdminSession, Enquiry } from "./db";
+import type {
+  Announcement,
+  Testimonial,
+  FAQItem,
+  Venture,
+  AboutContent,
+  TeamMember,
+  SiteSettings,
+  ActivityLog,
+} from "./content-types";
 
 const redisUrl = process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API_URL;
 const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN || process.env.KV_REST_API_TOKEN;
@@ -210,4 +220,102 @@ export async function redisDeleteEnquiry(id: string): Promise<boolean> {
   await redis.del(`enquiry:${id}`);
   await redis.lrem("enquiry:ids", 0, id);
   return true;
+}
+
+// ========================================================
+// Content Management Persistence in Redis
+// ========================================================
+
+// 1. Announcements
+export async function redisGetAnnouncements(): Promise<Announcement[]> {
+  if (!redis) return [];
+  const list = await redis.get<Announcement[]>("content:announcements");
+  return list || [];
+}
+
+export async function redisSaveAnnouncementsList(list: Announcement[]): Promise<void> {
+  if (!redis) return;
+  await redis.set("content:announcements", list);
+}
+
+// 2. Testimonials
+export async function redisGetTestimonials(): Promise<Testimonial[]> {
+  if (!redis) return [];
+  const list = await redis.get<Testimonial[]>("content:testimonials");
+  return list || [];
+}
+
+export async function redisSaveTestimonialsList(list: Testimonial[]): Promise<void> {
+  if (!redis) return;
+  await redis.set("content:testimonials", list);
+}
+
+// 3. FAQs
+export async function redisGetFAQs(): Promise<FAQItem[]> {
+  if (!redis) return [];
+  const list = await redis.get<FAQItem[]>("content:faqs");
+  return list || [];
+}
+
+export async function redisSaveFAQsList(list: FAQItem[]): Promise<void> {
+  if (!redis) return;
+  await redis.set("content:faqs", list);
+}
+
+// 4. Ventures
+export async function redisGetVentures(): Promise<Venture[]> {
+  if (!redis) return [];
+  const list = await redis.get<Venture[]>("content:ventures");
+  return list || [];
+}
+
+export async function redisSaveVenturesList(list: Venture[]): Promise<void> {
+  if (!redis) return;
+  await redis.set("content:ventures", list);
+}
+
+// 5. About Content & Team
+export async function redisGetAboutContent(): Promise<AboutContent | null> {
+  if (!redis) return null;
+  return await redis.get<AboutContent>("content:about");
+}
+
+export async function redisSaveAboutContent(content: AboutContent): Promise<void> {
+  if (!redis) return;
+  await redis.set("content:about", content);
+}
+
+export async function redisGetTeamMembers(): Promise<TeamMember[]> {
+  if (!redis) return [];
+  const list = await redis.get<TeamMember[]>("content:team");
+  return list || [];
+}
+
+export async function redisSaveTeamMembersList(list: TeamMember[]): Promise<void> {
+  if (!redis) return;
+  await redis.set("content:team", list);
+}
+
+// 6. Site Settings
+export async function redisGetSiteSettings(): Promise<SiteSettings | null> {
+  if (!redis) return null;
+  return await redis.get<SiteSettings>("content:settings");
+}
+
+export async function redisSaveSiteSettings(settings: SiteSettings): Promise<void> {
+  if (!redis) return;
+  await redis.set("content:settings", settings);
+}
+
+// 7. Activity Logs
+export async function redisGetActivityLogs(limit = 100): Promise<ActivityLog[]> {
+  if (!redis) return [];
+  const list = await redis.lrange<ActivityLog>("content:activity_logs", 0, limit - 1);
+  return list || [];
+}
+
+export async function redisPushActivityLog(log: ActivityLog): Promise<void> {
+  if (!redis) return;
+  await redis.lpush("content:activity_logs", log);
+  await redis.ltrim("content:activity_logs", 0, 999); // keep last 1000 logs
 }

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { AadrutLogo } from "../ui/AadrutLogo";
 import { Mail } from "lucide-react";
 import { CONTACT_CONFIG } from "@/lib/constants";
+import type { SiteSettings } from "@/lib/server/content-types";
 
 const InstagramIcon: React.FC<{ className?: string }> = ({ className = "w-4 h-4" }) => (
   <svg
@@ -42,9 +43,15 @@ const LinkedInIcon: React.FC<{ className?: string }> = ({ className = "w-4 h-4" 
 
 interface FooterProps {
   onOpenContact?: () => void;
+  settings?: SiteSettings;
 }
 
-export const Footer: React.FC<FooterProps> = ({ onOpenContact }) => {
+export const Footer: React.FC<FooterProps> = ({ onOpenContact, settings }) => {
+  const email = settings?.contactEmail || CONTACT_CONFIG.email;
+  const instagram = settings?.instagramUrl || CONTACT_CONFIG.instagram;
+  const linkedin = settings?.linkedinUrl || CONTACT_CONFIG.linkedin;
+  const tagline = settings?.footerTagline || "IDEA ───── BUILD ───── EVOLVE";
+
   const handleContactClick = (e: React.MouseEvent) => {
     if (onOpenContact) {
       e.preventDefault();
@@ -94,25 +101,29 @@ export const Footer: React.FC<FooterProps> = ({ onOpenContact }) => {
 
             {/* Social Channels (44px tap targets) */}
             <div className="flex items-center gap-3 pt-1">
-              <a
-                href={CONTACT_CONFIG.instagram}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-11 h-11 rounded-full bg-white/[0.04] border border-white/10 hover:border-indigo-400/50 hover:bg-white/[0.08] flex items-center justify-center text-slate-300 hover:text-white transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400"
-                aria-label="Visit Aadrut on Instagram"
-              >
-                <InstagramIcon className="w-4 h-4 transition-transform group-hover:scale-110" />
-              </a>
+              {instagram && (
+                <a
+                  href={instagram}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-11 h-11 rounded-full bg-white/[0.04] border border-white/10 hover:border-indigo-400/50 hover:bg-white/[0.08] flex items-center justify-center text-slate-300 hover:text-white transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400"
+                  aria-label="Visit Aadrut on Instagram"
+                >
+                  <InstagramIcon className="w-4 h-4 transition-transform group-hover:scale-110" />
+                </a>
+              )}
 
-              <a
-                href={CONTACT_CONFIG.linkedin}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-11 h-11 rounded-full bg-white/[0.04] border border-white/10 hover:border-indigo-400/50 hover:bg-white/[0.08] flex items-center justify-center text-slate-300 hover:text-white transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400"
-                aria-label="Visit Aadrut on LinkedIn"
-              >
-                <LinkedInIcon className="w-4 h-4 transition-transform group-hover:scale-110" />
-              </a>
+              {linkedin && (
+                <a
+                  href={linkedin}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-11 h-11 rounded-full bg-white/[0.04] border border-white/10 hover:border-indigo-400/50 hover:bg-white/[0.08] flex items-center justify-center text-slate-300 hover:text-white transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400"
+                  aria-label="Visit Aadrut on LinkedIn"
+                >
+                  <LinkedInIcon className="w-4 h-4 transition-transform group-hover:scale-110" />
+                </a>
+              )}
             </div>
           </div>
 
@@ -254,12 +265,12 @@ export const Footer: React.FC<FooterProps> = ({ onOpenContact }) => {
             </h3>
             <div className="space-y-3 text-xs">
               <a
-                href={`mailto:${CONTACT_CONFIG.email}`}
+                href={`mailto:${email}`}
                 className="inline-flex items-center gap-2 text-slate-300 hover:text-white transition-colors group min-h-[44px] py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 rounded"
-                aria-label={`Send email to ${CONTACT_CONFIG.email}`}
+                aria-label={`Send email to ${email}`}
               >
                 <Mail strokeWidth={1.75} className="w-4 h-4 text-indigo-400 group-hover:scale-110 transition-transform shrink-0" />
-                <span className="break-all">{CONTACT_CONFIG.email}</span>
+                <span className="break-all">{email}</span>
               </a>
             </div>
           </div>
@@ -269,7 +280,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenContact }) => {
         <div className="my-8 md:my-10 flex items-center justify-center gap-2 sm:gap-4">
           <div className="flex-1 h-px bg-white/[0.08]" />
           <div className="text-[10px] sm:text-xs font-mono tracking-[0.18em] sm:tracking-[0.25em] text-slate-400 uppercase select-none whitespace-nowrap px-1">
-            IDEA ───── BUILD ───── EVOLVE
+            {tagline}
           </div>
           <div className="flex-1 h-px bg-white/[0.08]" />
         </div>

@@ -2,9 +2,20 @@
 
 import React from "react";
 import { motion } from "framer-motion";
-import { Brain, Activity, Clock, Sparkles } from "lucide-react";
+import { Clock, Sparkles, ExternalLink } from "lucide-react";
+import type { Venture } from "@/lib/server/content-types";
+import { SafeMarkdown } from "@/components/ui/SafeMarkdown";
 
-export const VenturesSection: React.FC = () => {
+interface VenturesSectionProps {
+  ventures?: Venture[];
+}
+
+export const VenturesSection: React.FC<VenturesSectionProps> = ({ ventures = [] }) => {
+  const featuredVenture = ventures.find((v) => v.featured) || ventures[0];
+  const otherVentures = featuredVenture
+    ? ventures.filter((v) => v.id !== featuredVenture.id)
+    : ventures;
+
   return (
     <section
       id="ventures"
@@ -31,163 +42,252 @@ export const VenturesSection: React.FC = () => {
           </p>
         </div>
 
-        {/* Featured Venture: ATTENZA */}
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.7 }}
-          className="relative rounded-3xl bg-gradient-to-b from-white/[0.05] via-[#0b101d] to-[#070a14] border border-white/[0.12] p-6 sm:p-8 lg:p-10 overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.6)]"
-        >
-          {/* Subtle Corner Glow */}
-          <div className="absolute -top-32 -right-32 w-80 h-80 bg-indigo-500/15 rounded-full blur-3xl pointer-events-none" />
+        {/* Featured Venture: Dynamic Spotlight */}
+        {featuredVenture && (
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.7 }}
+            className="relative rounded-3xl bg-gradient-to-b from-white/[0.05] via-[#0b101d] to-[#070a14] border border-white/[0.12] p-6 sm:p-8 lg:p-10 overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.6)]"
+          >
+            {/* Subtle Corner Glow */}
+            <div className="absolute -top-32 -right-32 w-80 h-80 bg-indigo-500/15 rounded-full blur-3xl pointer-events-none" />
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
-            {/* Left Info Column */}
-            <div className="lg:col-span-6 space-y-6">
-              {/* Status Badge */}
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-400/30 text-indigo-300 text-xs font-sans font-medium">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-70" />
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500" />
-                </span>
-                <span>Coming Soon &bull; Venture Spotlight</span>
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
+              {/* Left Info Column */}
+              <div className="lg:col-span-6 space-y-6">
+                {/* Status Badge */}
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-400/30 text-indigo-300 text-xs font-sans font-medium">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-70" />
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500" />
+                  </span>
+                  <span>{featuredVenture.status} &bull; Venture Spotlight</span>
+                </div>
+
+                {/* Title & Tagline */}
+                <div>
+                  <h3 className="text-3xl sm:text-5xl font-bold tracking-tight text-white uppercase">
+                    {featuredVenture.name}
+                  </h3>
+                  <p className="text-lg sm:text-xl font-medium text-indigo-300 mt-1">
+                    {featuredVenture.tagline}
+                  </p>
+                </div>
+
+                {/* Description */}
+                <div className="text-slate-300 text-sm sm:text-base leading-relaxed font-normal">
+                  <SafeMarkdown content={featuredVenture.description} />
+                </div>
+
+                {/* Venture Feature Highlights / Tags */}
+                {featuredVenture.tags && featuredVenture.tags.length > 0 && (
+                  <div className="flex flex-wrap gap-2 pt-1">
+                    {featuredVenture.tags.map((tag, idx) => (
+                      <div
+                        key={idx}
+                        className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white/[0.03] border border-white/[0.08] text-xs text-slate-300"
+                      >
+                        <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
+                        <span>{tag}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Optional External Link & Stage Indicator */}
+                <div className="pt-2 flex flex-wrap items-center gap-4 text-xs font-sans text-slate-400">
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                    <span>{featuredVenture.status}</span>
+                  </span>
+                  <span>&bull;</span>
+                  <span>Aadrut Venture Labs</span>
+
+                  {featuredVenture.link && (
+                    <>
+                      <span>&bull;</span>
+                      <a
+                        href={featuredVenture.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-indigo-400 hover:text-indigo-300 transition-colors underline underline-offset-2"
+                      >
+                        <span>Visit Venture</span>
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+                    </>
+                  )}
+                </div>
               </div>
 
-              {/* Title & Tagline */}
+              {/* Right: Thoughtful Conceptual Interface or Stats */}
+              <div className="lg:col-span-6">
+                <div className="rounded-2xl bg-[#080c16]/90 border border-white/[0.1] p-6 backdrop-blur-xl shadow-2xl space-y-5">
+                  {/* Interface Header */}
+                  <div className="flex items-center justify-between border-b border-white/[0.08] pb-3.5">
+                    <div className="flex items-center gap-2.5">
+                      <div className="flex gap-1.5">
+                        <span className="w-2.5 h-2.5 rounded-full bg-white/10" />
+                        <span className="w-2.5 h-2.5 rounded-full bg-white/10" />
+                        <span className="w-2.5 h-2.5 rounded-full bg-white/10" />
+                      </div>
+                      <span className="text-xs font-sans text-slate-300 font-medium ml-2">
+                        {featuredVenture.name} Systems Architecture
+                      </span>
+                    </div>
+                    <div className="text-[11px] font-sans text-emerald-300 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 rounded-full">
+                      Active
+                    </div>
+                  </div>
+
+                  {/* Session Card */}
+                  <div className="p-4 rounded-xl bg-white/[0.03] border border-white/[0.06] space-y-3">
+                    <div className="flex items-center justify-between text-xs text-slate-400">
+                      <span className="flex items-center gap-1.5">
+                        <Clock strokeWidth={1.75} className="w-3.5 h-3.5 text-indigo-400" />
+                        <span>Execution Pipeline</span>
+                      </span>
+                      <span className="font-mono text-slate-300">Continuous Integration</span>
+                    </div>
+
+                    <div className="w-full bg-white/10 h-1.5 rounded-full overflow-hidden">
+                      <div className="h-full bg-gradient-to-r from-indigo-500 to-cyan-400 rounded-full w-3/4" />
+                    </div>
+
+                    <div className="flex justify-between items-center text-xs pt-1">
+                      <span className="text-slate-300 font-medium">{featuredVenture.tagline}</span>
+                      <span className="text-emerald-400 text-[11px] font-medium">99.9% Uptime</span>
+                    </div>
+                  </div>
+
+                  {/* Dynamic Stats Grid (ONLY rendered if stats are present and non-empty) */}
+                  {featuredVenture.stats && featuredVenture.stats.length > 0 && (
+                    <div className={`grid grid-cols-${Math.min(2, featuredVenture.stats.length)} gap-3 text-xs`}>
+                      {featuredVenture.stats.map((stat, sIdx) => (
+                        <div
+                          key={sIdx}
+                          className="p-3.5 rounded-xl bg-white/[0.02] border border-white/[0.06] space-y-1"
+                        >
+                          <div className="text-slate-400 text-[11px]">{stat.label}</div>
+                          <div className="text-base font-semibold text-white">{stat.value}</div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Subtle footer info */}
+                  <div className="pt-2 text-[11px] font-sans text-slate-400 flex justify-between items-center border-t border-white/[0.06]">
+                    <span>Productivity-focused learning architecture</span>
+                    <span>Incubating</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Other Ventures or Pipeline Roadmap */}
+        {otherVentures.length > 0 ? (
+          <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+            {otherVentures.map((v) => (
+              <motion.div
+                key={v.id}
+                initial={{ opacity: 0, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5 }}
+                className="p-6 rounded-2xl bg-white/[0.02] border border-white/[0.08] backdrop-blur-sm flex flex-col justify-between hover:border-indigo-500/30 transition-colors group"
+              >
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="px-2.5 py-0.5 rounded-full text-xs font-sans bg-cyan-500/10 border border-cyan-500/20 text-cyan-300">
+                      {v.status}
+                    </span>
+
+                    {v.link && (
+                      <a
+                        href={v.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="p-2 rounded-xl bg-white/[0.03] text-slate-400 hover:text-white transition-colors"
+                        aria-label={`Visit ${v.name}`}
+                      >
+                        <ExternalLink className="w-4 h-4" />
+                      </a>
+                    )}
+                  </div>
+
+                  <div>
+                    <h4 className="text-xl font-bold text-white group-hover:text-indigo-300 transition-colors">
+                      {v.name}
+                    </h4>
+                    <p className="text-xs font-medium text-indigo-400 mt-1">{v.tagline}</p>
+                  </div>
+
+                  <p className="text-xs text-slate-400 leading-relaxed font-normal">
+                    <SafeMarkdown content={v.description} />
+                  </p>
+
+                  {v.tags && v.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5 pt-1">
+                      {v.tags.map((t, idx) => (
+                        <span
+                          key={idx}
+                          className="px-2 py-0.5 rounded-md bg-white/[0.03] border border-white/[0.06] text-[11px] text-slate-400"
+                        >
+                          {t}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Hide stats block when empty as required */}
+                {v.stats && v.stats.length > 0 && (
+                  <div className="pt-4 mt-4 border-t border-white/[0.06] grid grid-cols-2 gap-2">
+                    {v.stats.map((s, idx) => (
+                      <div key={idx} className="text-xs">
+                        <div className="text-[10px] text-slate-400">{s.label}</div>
+                        <div className="font-semibold text-slate-200">{s.value}</div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </motion.div>
+            ))}
+          </div>
+        ) : (
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.15 }}
+            className="mt-6 rounded-2xl bg-white/[0.02] border border-white/[0.06] p-6 sm:p-7 flex flex-col sm:flex-row items-center justify-between gap-4"
+          >
+            <div className="flex items-center gap-3.5">
+              <div className="w-10 h-10 rounded-xl bg-white/[0.03] border border-white/10 flex items-center justify-center text-indigo-300">
+                <Sparkles strokeWidth={1.75} className="w-5 h-5" />
+              </div>
               <div>
-                <h3 className="text-3xl sm:text-5xl font-bold tracking-tight text-white uppercase">
-                  ATTENZA
-                </h3>
-                <p className="text-lg sm:text-xl font-medium text-indigo-300 mt-1">
-                  Focus better. Learn smarter.
+                <h4 className="text-sm sm:text-base font-semibold text-slate-200">
+                  Additional Ventures in Pipeline
+                </h4>
+                <p className="text-xs text-slate-400">
+                  More technology ventures to be announced as development milestones are met.
                 </p>
               </div>
-
-              {/* Description */}
-              <p className="text-slate-300 text-sm sm:text-base leading-relaxed font-normal">
-                Attenza is a productivity-focused learning experience designed to help people create a more focused digital environment.
-              </p>
-
-              {/* Venture Feature Highlights */}
-              <div className="space-y-3 pt-1">
-                <div className="flex items-start gap-3 text-sm text-slate-300">
-                  <div className="w-6 h-6 rounded-md bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 shrink-0 mt-0.5">
-                    <Brain strokeWidth={1.75} className="w-3.5 h-3.5" />
-                  </div>
-                  <span>Cognitive Friction Reduction &amp; Flow State Architecture</span>
-                </div>
-                <div className="flex items-start gap-3 text-sm text-slate-300">
-                  <div className="w-6 h-6 rounded-md bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 shrink-0 mt-0.5">
-                    <Activity strokeWidth={1.75} className="w-3.5 h-3.5" />
-                  </div>
-                  <span>Intelligent Distraction Shielding &amp; Attention Analytics</span>
-                </div>
-              </div>
-
-              {/* Honest Stage Indicator */}
-              <div className="pt-2 flex items-center gap-4 text-xs font-sans text-slate-400">
-                <span className="flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                  <span>In Active Development</span>
-                </span>
-                <span>&bull;</span>
-                <span>Aadrut Venture Labs</span>
-              </div>
             </div>
 
-            {/* Right: Thoughtful Conceptual Workspace Interface */}
-            <div className="lg:col-span-6">
-              <div className="rounded-2xl bg-[#080c16]/90 border border-white/[0.1] p-6 backdrop-blur-xl shadow-2xl space-y-5">
-                {/* Interface Header */}
-                <div className="flex items-center justify-between border-b border-white/[0.08] pb-3.5">
-                  <div className="flex items-center gap-2.5">
-                    <div className="flex gap-1.5">
-                      <span className="w-2.5 h-2.5 rounded-full bg-white/10" />
-                      <span className="w-2.5 h-2.5 rounded-full bg-white/10" />
-                      <span className="w-2.5 h-2.5 rounded-full bg-white/10" />
-                    </div>
-                    <span className="text-xs font-sans text-slate-300 font-medium ml-2">
-                      Attenza Workspace
-                    </span>
-                  </div>
-                  <div className="text-[11px] font-sans text-emerald-300 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 rounded-full">
-                    Focus Mode Active
-                  </div>
-                </div>
-
-                {/* Session Card */}
-                <div className="p-4 rounded-xl bg-white/[0.03] border border-white/[0.06] space-y-3">
-                  <div className="flex items-center justify-between text-xs text-slate-400">
-                    <span className="flex items-center gap-1.5">
-                      <Clock strokeWidth={1.75} className="w-3.5 h-3.5 text-indigo-400" />
-                      <span>Deep Learning Interval</span>
-                    </span>
-                    <span className="font-mono text-slate-300">42:15 remaining</span>
-                  </div>
-
-                  <div className="w-full bg-white/10 h-1.5 rounded-full overflow-hidden">
-                    <div className="h-full bg-gradient-to-r from-indigo-500 to-cyan-400 rounded-full w-3/4" />
-                  </div>
-
-                  <div className="flex justify-between items-center text-xs pt-1">
-                    <span className="text-slate-300 font-medium">Session Goal: Advanced Systems Modeling</span>
-                    <span className="text-emerald-400 text-[11px] font-medium">Zero Interruptions</span>
-                  </div>
-                </div>
-
-                {/* Three Focus Columns */}
-                <div className="grid grid-cols-2 gap-3 text-xs">
-                  <div className="p-3.5 rounded-xl bg-white/[0.02] border border-white/[0.06] space-y-1">
-                    <div className="text-slate-400 text-[11px]">Attention Continuity</div>
-                    <div className="text-base font-semibold text-white">96% Coherence</div>
-                    <p className="text-[11px] text-slate-400 leading-tight">Adaptive notification shielding engaged</p>
-                  </div>
-                  <div className="p-3.5 rounded-xl bg-white/[0.02] border border-white/[0.06] space-y-1">
-                    <div className="text-slate-400 text-[11px]">Curriculum Retention</div>
-                    <div className="text-base font-semibold text-indigo-300">Optimal Flow</div>
-                    <p className="text-[11px] text-slate-400 leading-tight">Spaced recall intervals active</p>
-                  </div>
-                </div>
-
-                {/* Subtle footer info */}
-                <div className="pt-2 text-[11px] font-sans text-slate-400 flex justify-between items-center border-t border-white/[0.06]">
-                  <span>Productivity-focused learning architecture</span>
-                  <span>Early access pending</span>
-                </div>
-              </div>
+            <div className="flex items-center gap-2 text-xs font-sans text-slate-400">
+              <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
+              <span>Incubating &bull; Aadrut Roadmap</span>
             </div>
-          </div>
-        </motion.div>
-
-        {/* Minimal Placeholder: MORE VENTURES TO BE ANNOUNCED */}
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.15 }}
-          className="mt-6 rounded-2xl bg-white/[0.02] border border-white/[0.06] p-6 sm:p-7 flex flex-col sm:flex-row items-center justify-between gap-4"
-        >
-          <div className="flex items-center gap-3.5">
-            <div className="w-10 h-10 rounded-xl bg-white/[0.03] border border-white/10 flex items-center justify-center text-indigo-300">
-              <Sparkles strokeWidth={1.75} className="w-5 h-5" />
-            </div>
-            <div>
-              <h4 className="text-sm sm:text-base font-semibold text-slate-200">
-                Additional Ventures in Pipeline
-              </h4>
-              <p className="text-xs text-slate-400">
-                More technology ventures to be announced as development milestones are met.
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2 text-xs font-sans text-slate-400">
-            <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
-            <span>Incubating &bull; Aadrut Roadmap</span>
-          </div>
-        </motion.div>
+          </motion.div>
+        )}
       </div>
     </section>
   );
 };
+

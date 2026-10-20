@@ -1,13 +1,53 @@
 "use client";
 
 import React, { useEffect, useRef } from "react";
+import Image from "next/image";
 import { motion, useInView } from "framer-motion";
-import { Cpu, Zap } from "lucide-react";
+import { Cpu, Zap, Users } from "lucide-react";
+import type { AboutContent, TeamMember } from "@/lib/server/content-types";
+import { SafeMarkdown } from "@/components/ui/SafeMarkdown";
 
-export const AboutSection: React.FC = () => {
+const LinkedInIcon: React.FC<{ className?: string }> = ({ className = "w-4 h-4" }) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.75"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+    aria-hidden="true"
+  >
+    <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
+    <rect width="4" height="12" x="2" y="9" />
+    <circle cx="4" cy="4" r="2" />
+  </svg>
+);
+
+interface AboutSectionProps {
+  about?: AboutContent;
+  team?: TeamMember[];
+}
+
+export const AboutSection: React.FC<AboutSectionProps> = ({ about, team = [] }) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const isInView = useInView(containerRef, { once: false, amount: 0.15 });
+
+  const headline = about?.headline || "Technology should move humanity forward.";
+  const story =
+    about?.story ||
+    "Aadrut exists to transform ideas into meaningful digital experiences, products, and technology ventures. We combine engineering, design, automation, and emerging technologies to build solutions that are useful today and ready for tomorrow.";
+  const values = about?.values && about.values.length > 0 ? about.values : [
+    {
+      title: "Precision Engineering",
+      text: "High-speed, scalable, modern architectural foundations built for longevity.",
+    },
+    {
+      title: "Intelligent Velocity",
+      text: "Autonomous workflows and rapid continuous product deployment loops.",
+    },
+  ];
 
   // Interactive Digital Architecture Canvas (paused when off-screen or on mobile)
   useEffect(() => {
@@ -242,38 +282,32 @@ export const AboutSection: React.FC = () => {
 
             {/* Headline */}
             <h2 className="text-3xl sm:text-5xl md:text-6xl font-bold tracking-tight text-white leading-[1.12]">
-              Technology should move humanity{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-300 via-purple-200 to-cyan-300">
-                forward.
-              </span>
+              <SafeMarkdown content={headline} />
             </h2>
 
             {/* Paragraph */}
-            <p className="text-base sm:text-lg text-slate-300 font-normal leading-relaxed max-w-2xl">
-              Aadrut exists to transform ideas into meaningful digital experiences, products, and technology ventures. We combine engineering, design, automation, and emerging technologies to build solutions that are useful today and ready for tomorrow.
-            </p>
+            <div className="text-base sm:text-lg text-slate-300 font-normal leading-relaxed max-w-2xl">
+              <SafeMarkdown content={story} />
+            </div>
 
             {/* Value Pillars List */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-              <div className="p-5 rounded-xl bg-white/[0.02] border border-white/[0.08] backdrop-blur-sm space-y-1.5 hover:border-indigo-500/25 transition-colors">
-                <div className="flex items-center gap-2 text-indigo-300 font-sans text-sm font-semibold">
-                  <Cpu strokeWidth={1.75} className="w-4 h-4 text-indigo-400" />
-                  <span>Precision Engineering</span>
+              {values.map((v, i) => (
+                <div
+                  key={i}
+                  className="p-5 rounded-xl bg-white/[0.02] border border-white/[0.08] backdrop-blur-sm space-y-1.5 hover:border-indigo-500/25 transition-colors"
+                >
+                  <div className="flex items-center gap-2 text-indigo-300 font-sans text-sm font-semibold">
+                    {i % 2 === 0 ? (
+                      <Cpu strokeWidth={1.75} className="w-4 h-4 text-indigo-400" />
+                    ) : (
+                      <Zap strokeWidth={1.75} className="w-4 h-4 text-cyan-400" />
+                    )}
+                    <span>{v.title}</span>
+                  </div>
+                  <p className="text-xs text-slate-400 leading-relaxed">{v.text}</p>
                 </div>
-                <p className="text-xs text-slate-400 leading-relaxed">
-                  High-speed, scalable, modern architectural foundations built for longevity.
-                </p>
-              </div>
-
-              <div className="p-5 rounded-xl bg-white/[0.02] border border-white/[0.08] backdrop-blur-sm space-y-1.5 hover:border-cyan-500/25 transition-colors">
-                <div className="flex items-center gap-2 text-cyan-300 font-sans text-sm font-semibold">
-                  <Zap strokeWidth={1.75} className="w-4 h-4 text-cyan-400" />
-                  <span>Intelligent Velocity</span>
-                </div>
-                <p className="text-xs text-slate-400 leading-relaxed">
-                  Autonomous workflows and rapid continuous product deployment loops.
-                </p>
-              </div>
+              ))}
             </div>
           </motion.div>
 
@@ -319,6 +353,88 @@ export const AboutSection: React.FC = () => {
             </div>
           </motion.div>
         </div>
+
+        {/* Team Members Subsection */}
+        {team.length > 0 && (
+          <div className="mt-16 pt-12 border-t border-white/[0.06]">
+            <div className="max-w-2xl mb-8 space-y-2">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] border border-white/10 text-indigo-300 font-sans text-xs font-medium tracking-wide">
+                <Users className="w-3.5 h-3.5 text-indigo-400" />
+                <span>Leadership &amp; Core Founders</span>
+              </div>
+              <h3 className="text-2xl sm:text-3xl font-bold tracking-tight text-white uppercase">
+                The Minds Behind Aadrut
+              </h3>
+              <p className="text-sm text-slate-400">
+                Direct technical stewardship, precision execution, and dedicated accountability.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+              {team.map((member) => {
+                const initials = member.name
+                  .split(" ")
+                  .map((n) => n[0])
+                  .join("")
+                  .slice(0, 2)
+                  .toUpperCase();
+
+                return (
+                  <div
+                    key={member.id}
+                    className="p-5 rounded-2xl bg-white/[0.02] border border-white/[0.08] backdrop-blur-sm flex flex-col justify-between hover:border-indigo-500/30 transition-colors group"
+                  >
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        {member.photoUrl ? (
+                          <Image
+                            src={member.photoUrl}
+                            alt={member.name}
+                            width={56}
+                            height={56}
+                            unoptimized
+                            className="w-14 h-14 rounded-2xl object-cover border border-white/10"
+                          />
+                        ) : (
+                          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500/20 via-purple-500/10 to-cyan-500/20 border border-white/10 flex items-center justify-center font-bold text-lg text-white">
+                            {initials}
+                          </div>
+                        )}
+
+                        {member.linkedinUrl && (
+                          <a
+                            href={member.linkedinUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="p-2 rounded-xl bg-white/[0.03] text-slate-400 hover:text-white hover:bg-white/[0.08] border border-white/[0.06] transition-colors"
+                            aria-label={`${member.name} LinkedIn Profile`}
+                          >
+                            <LinkedInIcon className="w-4 h-4 text-indigo-400" />
+                          </a>
+                        )}
+                      </div>
+
+                      <div>
+                        <h4 className="text-base font-semibold text-white group-hover:text-indigo-300 transition-colors">
+                          {member.name}
+                        </h4>
+                        <p className="text-xs font-medium text-cyan-400 mt-0.5">
+                          {member.displayRole}
+                        </p>
+                      </div>
+
+                      {member.bio && (
+                        <p className="text-xs text-slate-400 leading-relaxed">
+                          <SafeMarkdown content={member.bio} />
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
     </section>
   );

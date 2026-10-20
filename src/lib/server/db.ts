@@ -4,7 +4,24 @@ import path from "path";
 import crypto from "crypto";
 import { hashPassword } from "./crypto";
 import { SERVICES } from "@/lib/constants";
-import { SEED_ADMIN_USERS } from "./seed-data";
+import {
+  SEED_ADMIN_USERS,
+  SEED_VENTURES,
+  SEED_ABOUT_CONTENT,
+  SEED_TEAM_MEMBERS,
+  SEED_FAQS,
+  SEED_SITE_SETTINGS,
+} from "./seed-data";
+import type {
+  Announcement,
+  Testimonial,
+  FAQItem,
+  Venture,
+  AboutContent,
+  TeamMember,
+  SiteSettings,
+  ActivityLog,
+} from "./content-types";
 import {
   isRedisConfigured,
   redisCheckLockout,
@@ -22,6 +39,22 @@ import {
   redisGetEnquiryById,
   redisUpdateEnquiry,
   redisDeleteEnquiry,
+  redisGetAnnouncements,
+  redisSaveAnnouncementsList,
+  redisGetTestimonials,
+  redisSaveTestimonialsList,
+  redisGetFAQs,
+  redisSaveFAQsList,
+  redisGetVentures,
+  redisSaveVenturesList,
+  redisGetAboutContent,
+  redisSaveAboutContent,
+  redisGetTeamMembers,
+  redisSaveTeamMembersList,
+  redisGetSiteSettings,
+  redisSaveSiteSettings,
+  redisGetActivityLogs,
+  redisPushActivityLog,
 } from "./redis";
 
 export interface AdminUser {
@@ -50,7 +83,7 @@ export interface AdminSession {
   userAgent?: string;
 }
 
-export type EnquiryStatus = "new" | "in_progress" | "contacted" | "archived";
+export type EnquiryStatus = "new" | "in_progress" | "contacted" | "archived" | "done";
 
 export interface Enquiry {
   id: string;
@@ -103,6 +136,14 @@ interface DatabaseSchema {
   services: ServiceRecord[];
   failedLogins: FailedLoginAttempt[];
   telemetry?: ExtensionTelemetry[];
+  announcements?: Announcement[];
+  testimonials?: Testimonial[];
+  faqs?: FAQItem[];
+  ventures?: Venture[];
+  about?: AboutContent;
+  team?: TeamMember[];
+  settings?: SiteSettings;
+  activityLogs?: ActivityLog[];
 }
 
 function getDatabasePath(): string {
@@ -123,52 +164,50 @@ function getDatabasePath(): string {
 let inMemoryDb: DatabaseSchema | null = null;
 let lastLoadedTime = 0;
 
+function ensureSeeds(db: DatabaseSchema): DatabaseSchema {
+  if (!db.users || db.users.length === 0) db.users = [...SEED_ADMIN_USERS];
+  if (!db.services || db.services.length === 0) {
+    db.services = SERVICES.map((s) => ({
+      ...s,
+      active: true,
+      updatedAt: new Date().toISOString(),
+    }));
+  }
+  if (!db.announcements) db.announcements = [];
+  if (!db.testimonials) db.testimonials = [];
+  if (!db.faqs || db.faqs.length === 0) db.faqs = [...SEED_FAQS];
+  if (!db.ventures || db.ventures.length === 0) db.ventures = [...SEED_VENTURES];
+  if (!db.about) db.about = { ...SEED_ABOUT_CONTENT };
+  if (!db.team || db.team.length === 0) db.team = [...SEED_TEAM_MEMBERS];
+  if (!db.settings) db.settings = { ...SEED_SITE_SETTINGS };
+  if (!db.activityLogs) db.activityLogs = [];
+  if (!db.telemetry) db.telemetry = [];
+  return db;
+}
+
 function loadDatabase(): DatabaseSchema {
   const dbPath = getDatabasePath();
   try {
     if (fs.existsSync(dbPath)) {
       const stats = fs.statSync(dbPath);
       if (inMemoryDb && stats.mtimeMs <= lastLoadedTime) {
-        if (!inMemoryDb.telemetry) inMemoryDb.telemetry = [];
-        return inMemoryDb;
+        return ensureSeeds(inMemoryDb);
       }
       const raw = fs.readFileSync(dbPath, "utf-8");
       inMemoryDb = JSON.parse(raw);
       lastLoadedTime = stats.mtimeMs;
-      if (!inMemoryDb!.telemetry) inMemoryDb!.telemetry = [];
-      if (!inMemoryDb!.users || inMemoryDb!.users.length === 0) {
-        inMemoryDb!.users = [...SEED_ADMIN_USERS];
-      }
-      if (!inMemoryDb!.services || inMemoryDb!.services.length === 0) {
-        inMemoryDb!.services = SERVICES.map((s) => ({
-          ...s,
-          active: true,
-          updatedAt: new Date().toISOString(),
-        }));
-      }
-      return inMemoryDb!;
+      return ensureSeeds(inMemoryDb!);
     }
   } catch (err) {
     console.error("[DB] Error reading fallback database file:", err);
   }
 
   if (inMemoryDb) {
-    if (!inMemoryDb.telemetry) inMemoryDb.telemetry = [];
-    if (!inMemoryDb.users || inMemoryDb.users.length === 0) {
-      inMemoryDb.users = [...SEED_ADMIN_USERS];
-    }
-    if (!inMemoryDb.services || inMemoryDb.services.length === 0) {
-      inMemoryDb.services = SERVICES.map((s) => ({
-        ...s,
-        active: true,
-        updatedAt: new Date().toISOString(),
-      }));
-    }
-    return inMemoryDb;
+    return ensureSeeds(inMemoryDb);
   }
 
-  // Initial structure with built-in seed
-  inMemoryDb = {
+  // Initial structure with built-in seeds
+  inMemoryDb = ensureSeeds({
     version: 1,
     users: [...SEED_ADMIN_USERS],
     sessions: [],
@@ -180,7 +219,15 @@ function loadDatabase(): DatabaseSchema {
     })),
     failedLogins: [],
     telemetry: [],
-  };
+    announcements: [],
+    testimonials: [],
+    faqs: [...SEED_FAQS],
+    ventures: [...SEED_VENTURES],
+    about: { ...SEED_ABOUT_CONTENT },
+    team: [...SEED_TEAM_MEMBERS],
+    settings: { ...SEED_SITE_SETTINGS },
+    activityLogs: [],
+  });
 
   saveDatabase(inMemoryDb);
   return inMemoryDb;
@@ -228,6 +275,18 @@ export async function initializeDatabase(): Promise<void> {
         await redisSaveAdminUser(seed);
       }
     }
+
+    // Seed default content in Redis if missing
+    const ventures = await redisGetVentures();
+    if (ventures.length === 0) await redisSaveVenturesList(SEED_VENTURES);
+    const about = await redisGetAboutContent();
+    if (!about) await redisSaveAboutContent(SEED_ABOUT_CONTENT);
+    const team = await redisGetTeamMembers();
+    if (team.length === 0) await redisSaveTeamMembersList(SEED_TEAM_MEMBERS);
+    const faqs = await redisGetFAQs();
+    if (faqs.length === 0) await redisSaveFAQsList(SEED_FAQS);
+    const settings = await redisGetSiteSettings();
+    if (!settings) await redisSaveSiteSettings(SEED_SITE_SETTINGS);
 
     if (adminEmail && initialPassword && initialPassword.length >= 12) {
       const existing = await redisGetAdminUser(adminEmail);
@@ -795,3 +854,594 @@ export async function getDashboardStats() {
     attenzaStats,
   };
 }
+
+// ========================================================
+// Content Management Operations (Announcements, Ventures,
+// Testimonials, FAQs, About, Team, Settings, Activity Logs)
+// ========================================================
+
+// 1. Announcements
+export async function getAnnouncements(): Promise<Announcement[]> {
+  if (isRedisConfigured()) {
+    return await redisGetAnnouncements();
+  }
+  const db = loadDatabase();
+  return db.announcements || [];
+}
+
+export async function getActiveAnnouncement(): Promise<Announcement | null> {
+  const all = await getAnnouncements();
+  const now = new Date().toISOString();
+  return (
+    all.find((a) => {
+      if (!a.active) return false;
+      if (a.startDate && a.startDate > now) return false;
+      if (a.endDate && a.endDate < now) return false;
+      return true;
+    }) || null
+  );
+}
+
+export async function createAnnouncement(data: Omit<Announcement, "id" | "createdAt" | "updatedAt">): Promise<Announcement> {
+  const now = new Date().toISOString();
+  const announcement: Announcement = {
+    id: crypto.randomUUID(),
+    ...data,
+    createdAt: now,
+    updatedAt: now,
+  };
+
+  let list = await getAnnouncements();
+  if (announcement.active) {
+    list = list.map((a) => ({ ...a, active: false }));
+  }
+  list.unshift(announcement);
+
+  if (isRedisConfigured()) {
+    await redisSaveAnnouncementsList(list);
+  } else {
+    const db = loadDatabase();
+    db.announcements = list;
+    saveDatabase(db);
+  }
+
+  return announcement;
+}
+
+export async function updateAnnouncement(id: string, updates: Partial<Omit<Announcement, "id" | "createdAt">>): Promise<Announcement | null> {
+  let list = await getAnnouncements();
+  const idx = list.findIndex((a) => a.id === id);
+  if (idx === -1) return null;
+
+  const now = new Date().toISOString();
+  if (updates.active) {
+    list = list.map((a) => (a.id === id ? a : { ...a, active: false }));
+  }
+
+  const updated: Announcement = {
+    ...list[idx],
+    ...updates,
+    updatedAt: now,
+  };
+  list[idx] = updated;
+
+  if (isRedisConfigured()) {
+    await redisSaveAnnouncementsList(list);
+  } else {
+    const db = loadDatabase();
+    db.announcements = list;
+    saveDatabase(db);
+  }
+
+  return updated;
+}
+
+export async function deleteAnnouncement(id: string): Promise<boolean> {
+  const list = await getAnnouncements();
+  const filtered = list.filter((a) => a.id !== id);
+  if (filtered.length === list.length) return false;
+
+  if (isRedisConfigured()) {
+    await redisSaveAnnouncementsList(filtered);
+  } else {
+    const db = loadDatabase();
+    db.announcements = filtered;
+    saveDatabase(db);
+  }
+  return true;
+}
+
+// 2. Testimonials
+export async function getTestimonials(): Promise<Testimonial[]> {
+  let list: Testimonial[] = [];
+  if (isRedisConfigured()) {
+    list = await redisGetTestimonials();
+  } else {
+    const db = loadDatabase();
+    list = db.testimonials || [];
+  }
+  return [...list].sort((a, b) => a.order - b.order);
+}
+
+export async function getPublishedTestimonials(): Promise<Testimonial[]> {
+  const all = await getTestimonials();
+  return all.filter((t) => t.published);
+}
+
+export async function createTestimonial(data: Omit<Testimonial, "id" | "createdAt" | "updatedAt">): Promise<Testimonial> {
+  const now = new Date().toISOString();
+  const testimonial: Testimonial = {
+    id: crypto.randomUUID(),
+    ...data,
+    createdAt: now,
+    updatedAt: now,
+  };
+
+  const list = await getTestimonials();
+  list.push(testimonial);
+
+  if (isRedisConfigured()) {
+    await redisSaveTestimonialsList(list);
+  } else {
+    const db = loadDatabase();
+    db.testimonials = list;
+    saveDatabase(db);
+  }
+
+  return testimonial;
+}
+
+export async function updateTestimonial(id: string, updates: Partial<Omit<Testimonial, "id" | "createdAt">>): Promise<Testimonial | null> {
+  const list = await getTestimonials();
+  const idx = list.findIndex((t) => t.id === id);
+  if (idx === -1) return null;
+
+  const updated: Testimonial = {
+    ...list[idx],
+    ...updates,
+    updatedAt: new Date().toISOString(),
+  };
+  list[idx] = updated;
+
+  if (isRedisConfigured()) {
+    await redisSaveTestimonialsList(list);
+  } else {
+    const db = loadDatabase();
+    db.testimonials = list;
+    saveDatabase(db);
+  }
+
+  return updated;
+}
+
+export async function deleteTestimonial(id: string): Promise<boolean> {
+  const list = await getTestimonials();
+  const filtered = list.filter((t) => t.id !== id);
+  if (filtered.length === list.length) return false;
+
+  if (isRedisConfigured()) {
+    await redisSaveTestimonialsList(filtered);
+  } else {
+    const db = loadDatabase();
+    db.testimonials = filtered;
+    saveDatabase(db);
+  }
+  return true;
+}
+
+export async function reorderTestimonials(orderedIds: string[]): Promise<Testimonial[]> {
+  const list = await getTestimonials();
+  const idMap = new Map(orderedIds.map((id, index) => [id, index]));
+  const updated = list.map((item) => {
+    if (idMap.has(item.id)) {
+      return { ...item, order: idMap.get(item.id)!, updatedAt: new Date().toISOString() };
+    }
+    return item;
+  });
+  updated.sort((a, b) => a.order - b.order);
+
+  if (isRedisConfigured()) {
+    await redisSaveTestimonialsList(updated);
+  } else {
+    const db = loadDatabase();
+    db.testimonials = updated;
+    saveDatabase(db);
+  }
+  return updated;
+}
+
+// 3. FAQs
+export async function getFAQs(): Promise<FAQItem[]> {
+  let list: FAQItem[] = [];
+  if (isRedisConfigured()) {
+    list = await redisGetFAQs();
+    if (list.length === 0) {
+      list = [...SEED_FAQS];
+      await redisSaveFAQsList(list);
+    }
+  } else {
+    const db = loadDatabase();
+    list = db.faqs && db.faqs.length > 0 ? db.faqs : [...SEED_FAQS];
+  }
+  return [...list].sort((a, b) => a.order - b.order);
+}
+
+export async function getPublishedFAQs(): Promise<FAQItem[]> {
+  const all = await getFAQs();
+  return all.filter((f) => f.published);
+}
+
+export async function createFAQ(data: Omit<FAQItem, "id" | "createdAt" | "updatedAt">): Promise<FAQItem> {
+  const now = new Date().toISOString();
+  const faq: FAQItem = {
+    id: crypto.randomUUID(),
+    ...data,
+    createdAt: now,
+    updatedAt: now,
+  };
+
+  const list = await getFAQs();
+  list.push(faq);
+
+  if (isRedisConfigured()) {
+    await redisSaveFAQsList(list);
+  } else {
+    const db = loadDatabase();
+    db.faqs = list;
+    saveDatabase(db);
+  }
+
+  return faq;
+}
+
+export async function updateFAQ(id: string, updates: Partial<Omit<FAQItem, "id" | "createdAt">>): Promise<FAQItem | null> {
+  const list = await getFAQs();
+  const idx = list.findIndex((f) => f.id === id);
+  if (idx === -1) return null;
+
+  const updated: FAQItem = {
+    ...list[idx],
+    ...updates,
+    updatedAt: new Date().toISOString(),
+  };
+  list[idx] = updated;
+
+  if (isRedisConfigured()) {
+    await redisSaveFAQsList(list);
+  } else {
+    const db = loadDatabase();
+    db.faqs = list;
+    saveDatabase(db);
+  }
+
+  return updated;
+}
+
+export async function deleteFAQ(id: string): Promise<boolean> {
+  const list = await getFAQs();
+  const filtered = list.filter((f) => f.id !== id);
+  if (filtered.length === list.length) return false;
+
+  if (isRedisConfigured()) {
+    await redisSaveFAQsList(filtered);
+  } else {
+    const db = loadDatabase();
+    db.faqs = filtered;
+    saveDatabase(db);
+  }
+  return true;
+}
+
+export async function reorderFAQs(orderedIds: string[]): Promise<FAQItem[]> {
+  const list = await getFAQs();
+  const idMap = new Map(orderedIds.map((id, index) => [id, index]));
+  const updated = list.map((item) => {
+    if (idMap.has(item.id)) {
+      return { ...item, order: idMap.get(item.id)!, updatedAt: new Date().toISOString() };
+    }
+    return item;
+  });
+  updated.sort((a, b) => a.order - b.order);
+
+  if (isRedisConfigured()) {
+    await redisSaveFAQsList(updated);
+  } else {
+    const db = loadDatabase();
+    db.faqs = updated;
+    saveDatabase(db);
+  }
+  return updated;
+}
+
+// 4. Ventures
+export async function getVentures(): Promise<Venture[]> {
+  let list: Venture[] = [];
+  if (isRedisConfigured()) {
+    list = await redisGetVentures();
+    if (list.length === 0) {
+      list = [...SEED_VENTURES];
+      await redisSaveVenturesList(list);
+    }
+  } else {
+    const db = loadDatabase();
+    list = db.ventures && db.ventures.length > 0 ? db.ventures : [...SEED_VENTURES];
+  }
+  return [...list].sort((a, b) => a.order - b.order);
+}
+
+export async function getPublishedVentures(): Promise<Venture[]> {
+  const all = await getVentures();
+  return all.filter((v) => v.published);
+}
+
+export async function createVenture(data: Omit<Venture, "id" | "createdAt" | "updatedAt">): Promise<Venture> {
+  const now = new Date().toISOString();
+  const venture: Venture = {
+    id: crypto.randomUUID(),
+    ...data,
+    createdAt: now,
+    updatedAt: now,
+  };
+
+  const list = await getVentures();
+  list.push(venture);
+
+  if (isRedisConfigured()) {
+    await redisSaveVenturesList(list);
+  } else {
+    const db = loadDatabase();
+    db.ventures = list;
+    saveDatabase(db);
+  }
+
+  return venture;
+}
+
+export async function updateVenture(id: string, updates: Partial<Omit<Venture, "id" | "createdAt">>): Promise<Venture | null> {
+  const list = await getVentures();
+  const idx = list.findIndex((v) => v.id === id);
+  if (idx === -1) return null;
+
+  const updated: Venture = {
+    ...list[idx],
+    ...updates,
+    updatedAt: new Date().toISOString(),
+  };
+  list[idx] = updated;
+
+  if (isRedisConfigured()) {
+    await redisSaveVenturesList(list);
+  } else {
+    const db = loadDatabase();
+    db.ventures = list;
+    saveDatabase(db);
+  }
+
+  return updated;
+}
+
+export async function deleteVenture(id: string): Promise<boolean> {
+  const list = await getVentures();
+  const filtered = list.filter((v) => v.id !== id);
+  if (filtered.length === list.length) return false;
+
+  if (isRedisConfigured()) {
+    await redisSaveVenturesList(filtered);
+  } else {
+    const db = loadDatabase();
+    db.ventures = filtered;
+    saveDatabase(db);
+  }
+  return true;
+}
+
+export async function reorderVentures(orderedIds: string[]): Promise<Venture[]> {
+  const list = await getVentures();
+  const idMap = new Map(orderedIds.map((id, index) => [id, index]));
+  const updated = list.map((item) => {
+    if (idMap.has(item.id)) {
+      return { ...item, order: idMap.get(item.id)!, updatedAt: new Date().toISOString() };
+    }
+    return item;
+  });
+  updated.sort((a, b) => a.order - b.order);
+
+  if (isRedisConfigured()) {
+    await redisSaveVenturesList(updated);
+  } else {
+    const db = loadDatabase();
+    db.ventures = updated;
+    saveDatabase(db);
+  }
+  return updated;
+}
+
+// 5. About Content & Team
+export async function getAboutContent(): Promise<AboutContent> {
+  if (isRedisConfigured()) {
+    const content = await redisGetAboutContent();
+    if (content) return content;
+    await redisSaveAboutContent(SEED_ABOUT_CONTENT);
+    return SEED_ABOUT_CONTENT;
+  }
+  const db = loadDatabase();
+  return db.about || { ...SEED_ABOUT_CONTENT };
+}
+
+export async function updateAboutContent(data: Omit<AboutContent, "updatedAt">): Promise<AboutContent> {
+  const updated: AboutContent = {
+    ...data,
+    updatedAt: new Date().toISOString(),
+  };
+
+  if (isRedisConfigured()) {
+    await redisSaveAboutContent(updated);
+  } else {
+    const db = loadDatabase();
+    db.about = updated;
+    saveDatabase(db);
+  }
+  return updated;
+}
+
+export async function getTeamMembers(): Promise<TeamMember[]> {
+  let list: TeamMember[] = [];
+  if (isRedisConfigured()) {
+    list = await redisGetTeamMembers();
+    if (list.length === 0) {
+      list = [...SEED_TEAM_MEMBERS];
+      await redisSaveTeamMembersList(list);
+    }
+  } else {
+    const db = loadDatabase();
+    list = db.team && db.team.length > 0 ? db.team : [...SEED_TEAM_MEMBERS];
+  }
+  return [...list].sort((a, b) => a.order - b.order);
+}
+
+export async function getPublishedTeamMembers(): Promise<TeamMember[]> {
+  const all = await getTeamMembers();
+  return all.filter((m) => m.published);
+}
+
+export async function createTeamMember(data: Omit<TeamMember, "id" | "createdAt" | "updatedAt">): Promise<TeamMember> {
+  const now = new Date().toISOString();
+  const member: TeamMember = {
+    id: crypto.randomUUID(),
+    ...data,
+    createdAt: now,
+    updatedAt: now,
+  };
+
+  const list = await getTeamMembers();
+  list.push(member);
+
+  if (isRedisConfigured()) {
+    await redisSaveTeamMembersList(list);
+  } else {
+    const db = loadDatabase();
+    db.team = list;
+    saveDatabase(db);
+  }
+  return member;
+}
+
+export async function updateTeamMember(id: string, updates: Partial<Omit<TeamMember, "id" | "createdAt">>): Promise<TeamMember | null> {
+  const list = await getTeamMembers();
+  const idx = list.findIndex((m) => m.id === id);
+  if (idx === -1) return null;
+
+  const updated: TeamMember = {
+    ...list[idx],
+    ...updates,
+    updatedAt: new Date().toISOString(),
+  };
+  list[idx] = updated;
+
+  if (isRedisConfigured()) {
+    await redisSaveTeamMembersList(list);
+  } else {
+    const db = loadDatabase();
+    db.team = list;
+    saveDatabase(db);
+  }
+  return updated;
+}
+
+export async function deleteTeamMember(id: string): Promise<boolean> {
+  const list = await getTeamMembers();
+  const filtered = list.filter((m) => m.id !== id);
+  if (filtered.length === list.length) return false;
+
+  if (isRedisConfigured()) {
+    await redisSaveTeamMembersList(filtered);
+  } else {
+    const db = loadDatabase();
+    db.team = filtered;
+    saveDatabase(db);
+  }
+  return true;
+}
+
+export async function reorderTeamMembers(orderedIds: string[]): Promise<TeamMember[]> {
+  const list = await getTeamMembers();
+  const idMap = new Map(orderedIds.map((id, index) => [id, index]));
+  const updated = list.map((item) => {
+    if (idMap.has(item.id)) {
+      return { ...item, order: idMap.get(item.id)!, updatedAt: new Date().toISOString() };
+    }
+    return item;
+  });
+  updated.sort((a, b) => a.order - b.order);
+
+  if (isRedisConfigured()) {
+    await redisSaveTeamMembersList(updated);
+  } else {
+    const db = loadDatabase();
+    db.team = updated;
+    saveDatabase(db);
+  }
+  return updated;
+}
+
+// 6. Site Settings
+export async function getSiteSettings(): Promise<SiteSettings> {
+  if (isRedisConfigured()) {
+    const settings = await redisGetSiteSettings();
+    if (settings) return settings;
+    await redisSaveSiteSettings(SEED_SITE_SETTINGS);
+    return SEED_SITE_SETTINGS;
+  }
+  const db = loadDatabase();
+  return db.settings || { ...SEED_SITE_SETTINGS };
+}
+
+export async function updateSiteSettings(data: Partial<Omit<SiteSettings, "updatedAt">>): Promise<SiteSettings> {
+  const current = await getSiteSettings();
+  const updated: SiteSettings = {
+    ...current,
+    ...data,
+    updatedAt: new Date().toISOString(),
+  };
+
+  if (isRedisConfigured()) {
+    await redisSaveSiteSettings(updated);
+  } else {
+    const db = loadDatabase();
+    db.settings = updated;
+    saveDatabase(db);
+  }
+  return updated;
+}
+
+// 7. Activity Logs
+export async function getActivityLogs(limit = 100): Promise<ActivityLog[]> {
+  if (isRedisConfigured()) {
+    return await redisGetActivityLogs(limit);
+  }
+  const db = loadDatabase();
+  return (db.activityLogs || []).slice(0, limit);
+}
+
+export async function recordActivityLog(log: Omit<ActivityLog, "id" | "timestamp">): Promise<ActivityLog> {
+  const entry: ActivityLog = {
+    id: crypto.randomUUID(),
+    ...log,
+    timestamp: new Date().toISOString(),
+  };
+
+  if (isRedisConfigured()) {
+    await redisPushActivityLog(entry);
+  } else {
+    const db = loadDatabase();
+    if (!db.activityLogs) db.activityLogs = [];
+    db.activityLogs.unshift(entry);
+    if (db.activityLogs.length > 500) {
+      db.activityLogs = db.activityLogs.slice(0, 500);
+    }
+    saveDatabase(db);
+  }
+
+  return entry;
+}
+
