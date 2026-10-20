@@ -57,7 +57,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenContact }) => {
   };
 
   return (
-    <footer className="w-full bg-[#030508] border-t border-white/[0.08] py-10 sm:py-12 text-slate-400">
+    <footer className="w-full bg-[#030508] border-t border-white/[0.04] py-10 sm:py-12 text-slate-400">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Main Footer Row */}
         <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-8 pb-10 border-b border-white/[0.06]">

@@ -10,6 +10,7 @@
   --accent-indigo: #6366f1;
   --accent-cyan: #06b6d4;
   --accent-violet: #8b5cf6;
+  --header-h: 64px;
 }
 
 @theme inline {
@@ -25,7 +26,28 @@ html {
   color: #f1f5f9;
   color-scheme: dark;
   scroll-behavior: smooth;
-  scroll-padding-top: 68px;
+}
+
+/* Single-direction section spacing and calibrated scroll margin
+   Guarantees section label/heading lands exactly 24px below the 64px navbar */
+.site-section {
+  padding-top: 2.5rem; /* mobile pt-10 (40px) */
+  padding-bottom: 0;
+  scroll-margin-top: calc(var(--header-h) + 24px - 2.5rem); /* 64 + 24 - 40 = 48px */
+}
+
+@media (min-width: 640px) {
+  .site-section {
+    padding-top: 3.5rem; /* tablet pt-14 (56px) */
+    scroll-margin-top: calc(var(--header-h) + 24px - 3.5rem); /* 64 + 24 - 56 = 32px */
+  }
+}
+
+@media (min-width: 1024px) {
+  .site-section {
+    padding-top: 4rem; /* desktop pt-16 (64px) */
+    scroll-margin-top: calc(var(--header-h) + 24px - 4rem); /* 64 + 24 - 64 = 24px */
+  }
 }
 
 body {

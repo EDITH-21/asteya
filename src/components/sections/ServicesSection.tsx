@@ -33,7 +33,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onOpenContact 
   return (
     <section
       id="services"
-      className="relative w-full py-10 sm:py-14 lg:py-16 bg-[#05070b] border-t border-white/[0.08] overflow-hidden scroll-mt-[68px]"
+      className="site-section relative w-full bg-[#05070b] border-t border-white/[0.04] overflow-hidden"
     >
       {/* Background Lighting (optimized for mobile) */}
       <div className="absolute top-1/3 right-0 w-72 sm:w-[500px] h-72 sm:h-[500px] bg-purple-600/10 rounded-full blur-2xl sm:blur-[140px] pointer-events-none" />
@@ -45,7 +45,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onOpenContact 
           <div className="max-w-2xl space-y-4">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] border border-white/10 text-indigo-300 font-sans text-xs font-medium tracking-wide">
               <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
-              <span>Core Capabilities</span>
+              <span>02 &bull; Core Capabilities</span>
             </div>
             <h2 className="text-3xl sm:text-5xl md:text-6xl font-bold tracking-tight text-white uppercase">
               What We Build

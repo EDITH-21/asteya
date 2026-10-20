@@ -8,7 +8,7 @@ export const VenturesSection: React.FC = () => {
   return (
     <section
       id="ventures"
-      className="relative w-full py-10 sm:py-14 lg:py-16 bg-[#05070b] border-t border-white/[0.08] overflow-hidden scroll-mt-[68px]"
+      className="site-section relative w-full bg-[#05070b] border-t border-white/[0.04] overflow-hidden"
     >
       {/* Ambient Lighting */}
       <div className="absolute top-1/4 left-1/4 w-[340px] sm:w-[600px] h-[300px] sm:h-[400px] bg-indigo-600/10 rounded-full blur-2xl sm:blur-[120px] pointer-events-none" />

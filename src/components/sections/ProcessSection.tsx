@@ -62,7 +62,7 @@ export const ProcessSection: React.FC = () => {
     <section
       id="process"
       ref={containerRef}
-      className="relative w-full py-10 sm:py-14 lg:py-16 bg-[#07090e] border-t border-white/[0.08] overflow-hidden scroll-mt-[68px]"
+      className="site-section relative w-full bg-[#07090e] border-t border-white/[0.04] overflow-hidden"
     >
       {/* Background Subtle Gradient */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[340px] sm:w-[600px] h-[300px] sm:h-[450px] bg-indigo-600/10 rounded-full blur-2xl sm:blur-[140px] pointer-events-none" />

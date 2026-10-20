@@ -220,7 +220,7 @@ export const AboutSection: React.FC = () => {
     <section
       id="about"
       ref={containerRef}
-      className="relative w-full py-10 sm:py-14 lg:py-16 bg-[#07090e] border-t border-white/[0.08] overflow-hidden scroll-mt-[68px]"
+      className="site-section relative w-full bg-[#07090e] border-t border-white/[0.04] overflow-hidden"
     >
       {/* Background Ambient Glow (optimized) */}
       <div className="absolute top-1/2 left-0 -translate-y-1/2 w-72 sm:w-96 h-72 sm:h-96 bg-indigo-600/10 rounded-full blur-2xl sm:blur-[120px] pointer-events-none" />

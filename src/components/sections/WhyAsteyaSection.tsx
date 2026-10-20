@@ -8,7 +8,7 @@ export const WhyAsteyaSection: React.FC = () => {
   return (
     <section
       id="why-asteya"
-      className="relative w-full py-10 sm:py-14 lg:py-16 bg-[#05070b] border-t border-white/[0.08] overflow-hidden scroll-mt-[68px]"
+      className="site-section relative w-full bg-[#05070b] border-t border-white/[0.04] overflow-hidden"
     >
       {/* Ambient Lighting */}
       <div className="absolute top-1/3 left-0 w-[340px] sm:w-[500px] h-[340px] sm:h-[500px] bg-indigo-600/10 rounded-full blur-2xl sm:blur-[120px] pointer-events-none" />
@@ -19,7 +19,7 @@ export const WhyAsteyaSection: React.FC = () => {
           <div className="lg:col-span-5 space-y-6 lg:sticky lg:top-24 self-start">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] border border-white/10 text-indigo-300 font-sans text-xs font-medium tracking-wide">
               <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
-              <span>05 &bull; The Asteya Advantage</span>
+              <span>06 &bull; The Asteya Advantage</span>
             </div>
 
             <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-white uppercase leading-[1.08]">

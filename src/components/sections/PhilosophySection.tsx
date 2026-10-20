@@ -18,7 +18,7 @@ export const PhilosophySection: React.FC = () => {
   return (
     <section
       ref={containerRef}
-      className="relative w-full flex items-center justify-center bg-[#030508] border-t border-white/[0.08] overflow-hidden py-10 sm:py-14 lg:py-16"
+      className="site-section relative w-full flex items-center justify-center bg-[#030508] border-t border-white/[0.04] overflow-hidden"
     >
       {/* Slow Cosmic Glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[340px] sm:w-[650px] h-[300px] sm:h-[450px] bg-gradient-to-tr from-indigo-900/15 via-purple-900/15 to-cyan-900/12 rounded-full blur-2xl sm:blur-[120px] pointer-events-none" />
