@@ -816,7 +816,7 @@ export default function AdminDashboardPage() {
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Search sender, message..."
-                    className="pl-8 pr-3 py-1.5 rounded-lg bg-black/40 border border-white/10 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-indigo-400 w-44 sm:w-56"
+                    className="pl-8 pr-3 py-1.5 rounded-lg bg-black/40 border border-white/10 text-xs text-white placeholder:text-slate-400 focus:outline-none focus:border-indigo-400 w-44 sm:w-56"
                   />
                 </div>
 
@@ -1000,7 +1000,7 @@ export default function AdminDashboardPage() {
                       value={editingNotes}
                       onChange={(e) => setEditingNotes(e.target.value)}
                       placeholder="Add private team notes, proposal links, or call summaries..."
-                      className="w-full p-2.5 rounded-xl bg-black/40 border border-white/10 text-xs text-white placeholder:text-slate-600 focus:outline-none focus:border-indigo-400 resize-none font-sans"
+                      className="w-full p-2.5 rounded-xl bg-black/40 border border-white/10 text-xs text-white placeholder:text-slate-400 focus:outline-none focus:border-indigo-400 resize-none font-sans"
                     />
                   </div>
                 </div>
@@ -1062,7 +1062,7 @@ export default function AdminDashboardPage() {
                   </div>
 
                   <div className="pt-4 mt-4 border-t border-white/[0.06] flex items-center justify-between">
-                    <span className="text-[10px] text-slate-500 font-mono">
+                    <span className="text-[10px] text-slate-400 font-mono">
                       Updated: {new Date(service.updatedAt).toLocaleDateString()}
                     </span>
                     <button
@@ -1234,7 +1234,7 @@ export default function AdminDashboardPage() {
                     value={currentPassword}
                     onChange={(e) => setCurrentPassword(e.target.value)}
                     placeholder="Enter current password"
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-black/40 border border-white/10 text-xs text-white placeholder:text-slate-600 focus:outline-none focus:border-indigo-400 font-mono"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-black/40 border border-white/10 text-xs text-white placeholder:text-slate-400 focus:outline-none focus:border-indigo-400 font-mono"
                   />
                 </div>
 
@@ -1248,7 +1248,7 @@ export default function AdminDashboardPage() {
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                     placeholder="Minimum 10 characters with upper, number, symbol"
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-black/40 border border-white/10 text-xs text-white placeholder:text-slate-600 focus:outline-none focus:border-indigo-400 font-mono"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-black/40 border border-white/10 text-xs text-white placeholder:text-slate-400 focus:outline-none focus:border-indigo-400 font-mono"
                   />
                 </div>
 
@@ -1262,7 +1262,7 @@ export default function AdminDashboardPage() {
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder="Re-enter new password"
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-black/40 border border-white/10 text-xs text-white placeholder:text-slate-600 focus:outline-none focus:border-indigo-400 font-mono"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-black/40 border border-white/10 text-xs text-white placeholder:text-slate-400 focus:outline-none focus:border-indigo-400 font-mono"
                   />
                 </div>
 
@@ -1388,7 +1388,7 @@ export default function AdminDashboardPage() {
                       value={mfaCodeInput}
                       onChange={(e) => setMfaCodeInput(e.target.value)}
                       placeholder="123456"
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-black/40 border border-white/10 text-center font-mono text-sm tracking-widest text-white placeholder:text-slate-600 focus:outline-none focus:border-emerald-400"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-black/40 border border-white/10 text-center font-mono text-sm tracking-widest text-white placeholder:text-slate-400 focus:outline-none focus:border-emerald-400"
                     />
                   </div>
 

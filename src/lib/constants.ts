@@ -134,12 +134,22 @@ export const WHY_AADRUT_ITEMS: WhyAadrutItem[] = [
 
 export const WHY_ASTEYA_ITEMS = WHY_AADRUT_ITEMS;
 
-export const TECH_DOMAINS = [
-  { id: "ai", label: "AI", desc: "Machine intelligence & neural automation models", color: "#818cf8" },
-  { id: "web", label: "WEB", desc: "Modern full-stack responsive web systems", color: "#38bdf8" },
-  { id: "automation", label: "AUTOMATION", desc: "Autonomous workflows & business logic pipelines", color: "#a855f7" },
-  { id: "cloud", label: "CLOUD", desc: "Serverless edge & scalable containerized infra", color: "#34d399" },
-  { id: "digital-products", label: "DIGITAL PRODUCTS", desc: "End-to-end consumer & enterprise software", color: "#f472b6" },
-  { id: "data", label: "DATA", desc: "Real-time analytics & intelligence streams", color: "#fb923c" },
-  { id: "emerging-tech", label: "EMERGING TECHNOLOGY", desc: "Next-generation protocols and futuristic interfaces", color: "#60a5fa" },
+export type TechDomainTheme = "indigo" | "cyan" | "violet";
+
+export interface TechDomain {
+  id: string;
+  label: string;
+  desc: string;
+  color: string;
+  theme: TechDomainTheme;
+}
+
+export const TECH_DOMAINS: TechDomain[] = [
+  { id: "ai", label: "AI", desc: "Machine intelligence & neural automation models", color: "#818cf8", theme: "indigo" },
+  { id: "web", label: "WEB", desc: "Modern full-stack responsive web systems", color: "#22d3ee", theme: "cyan" },
+  { id: "automation", label: "AUTOMATION", desc: "Autonomous workflows & business logic pipelines", color: "#a78bfa", theme: "violet" },
+  { id: "cloud", label: "CLOUD", desc: "Serverless edge & scalable containerized infra", color: "#22d3ee", theme: "cyan" },
+  { id: "digital-products", label: "DIGITAL PRODUCTS", desc: "End-to-end consumer & enterprise software", color: "#818cf8", theme: "indigo" },
+  { id: "data", label: "DATA", desc: "Real-time analytics & intelligence streams", color: "#a78bfa", theme: "violet" },
+  { id: "emerging-tech", label: "EMERGING TECHNOLOGY", desc: "Next-generation protocols and futuristic interfaces", color: "#818cf8", theme: "indigo" },
 ];

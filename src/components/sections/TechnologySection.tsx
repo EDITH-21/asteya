@@ -2,13 +2,47 @@
 
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { TECH_DOMAINS } from "@/lib/constants";
+import { TECH_DOMAINS, type TechDomainTheme } from "@/lib/constants";
 import { Check } from "lucide-react";
+
+const getThemeClasses = (theme: TechDomainTheme = "indigo") => {
+  switch (theme) {
+    case "cyan":
+      return {
+        selectedBtn: "bg-white/[0.08] border-cyan-400/50 shadow-[0_4px_20px_rgba(6,182,212,0.18)]",
+        checkIcon: "text-cyan-400",
+        panelBorder: "border-cyan-500/20 shadow-[0_8px_32px_rgba(6,182,212,0.08)]",
+        badge: "text-cyan-300 bg-cyan-500/10 border-cyan-500/20",
+        philosophyAccent: "text-cyan-300",
+        footerAccent: "text-cyan-400",
+      };
+    case "violet":
+      return {
+        selectedBtn: "bg-white/[0.08] border-violet-400/50 shadow-[0_4px_20px_rgba(139,92,246,0.18)]",
+        checkIcon: "text-violet-400",
+        panelBorder: "border-violet-500/20 shadow-[0_8px_32px_rgba(139,92,246,0.08)]",
+        badge: "text-violet-300 bg-violet-500/10 border-violet-500/20",
+        philosophyAccent: "text-violet-300",
+        footerAccent: "text-violet-400",
+      };
+    case "indigo":
+    default:
+      return {
+        selectedBtn: "bg-white/[0.08] border-indigo-400/50 shadow-[0_4px_20px_rgba(99,102,241,0.18)]",
+        checkIcon: "text-indigo-400",
+        panelBorder: "border-indigo-500/20 shadow-[0_8px_32px_rgba(99,102,241,0.08)]",
+        badge: "text-indigo-300 bg-indigo-500/10 border-indigo-500/20",
+        philosophyAccent: "text-indigo-300",
+        footerAccent: "text-indigo-400",
+      };
+  }
+};
 
 export const TechnologySection: React.FC = () => {
   const [selectedTech, setSelectedTech] = useState<string>("ai");
 
   const activeDomain = TECH_DOMAINS.find((t) => t.id === selectedTech) || TECH_DOMAINS[0];
+  const activeTheme = getThemeClasses(activeDomain.theme);
 
   return (
     <section
@@ -46,13 +80,14 @@ export const TechnologySection: React.FC = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
               {TECH_DOMAINS.map((domain) => {
                 const isSelected = selectedTech === domain.id;
+                const itemTheme = getThemeClasses(domain.theme);
                 return (
                   <button
                     key={domain.id}
                     onClick={() => setSelectedTech(domain.id)}
                     className={`p-4 rounded-xl text-left transition-all duration-200 border flex items-center justify-between group ${
                       isSelected
-                        ? "bg-white/[0.08] border-indigo-400/50 shadow-[0_4px_20px_rgba(99,102,241,0.18)]"
+                        ? itemTheme.selectedBtn
                         : "bg-white/[0.02] border-white/[0.06] hover:bg-white/[0.04] hover:border-white/15"
                     }`}
                   >
@@ -71,7 +106,7 @@ export const TechnologySection: React.FC = () => {
                       </div>
                     </div>
                     {isSelected && (
-                      <Check strokeWidth={2} className="w-4 h-4 text-indigo-400 shrink-0 ml-2" />
+                      <Check strokeWidth={2} className={`w-4 h-4 shrink-0 ml-2 ${itemTheme.checkIcon}`} />
                     )}
                   </button>
                 );
@@ -86,7 +121,7 @@ export const TechnologySection: React.FC = () => {
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.35 }}
-              className="rounded-2xl bg-gradient-to-b from-white/[0.05] to-white/[0.02] border border-white/[0.1] p-7 sm:p-8 backdrop-blur-xl space-y-6 shadow-xl"
+              className={`rounded-2xl bg-gradient-to-b from-white/[0.05] to-white/[0.02] border p-7 sm:p-8 backdrop-blur-xl space-y-6 shadow-xl ${activeTheme.panelBorder}`}
             >
               <div className="flex items-center justify-between border-b border-white/[0.08] pb-4">
                 <div className="flex items-center gap-2.5">
@@ -98,7 +133,7 @@ export const TechnologySection: React.FC = () => {
                     Domain Focus &bull; {activeDomain.label}
                   </span>
                 </div>
-                <div className="text-[11px] font-sans text-indigo-300 bg-indigo-500/10 px-2.5 py-1 rounded-full border border-indigo-500/20">
+                <div className={`text-[11px] font-sans px-2.5 py-1 rounded-full border ${activeTheme.badge}`}>
                   Production Ready
                 </div>
               </div>
@@ -124,13 +159,13 @@ export const TechnologySection: React.FC = () => {
                 </div>
                 <div className="flex justify-between items-center text-slate-400">
                   <span>Development Philosophy</span>
-                  <span className="text-indigo-300 font-medium">Type-Safe, Tested, Deterministic</span>
+                  <span className={`font-medium ${activeTheme.philosophyAccent}`}>Type-Safe, Tested, Deterministic</span>
                 </div>
               </div>
 
               <div className="pt-1 flex items-center justify-between text-xs text-slate-400">
                 <span>Integrated into all Aadrut solutions</span>
-                <span className="text-indigo-400 font-medium">Built for tomorrow</span>
+                <span className={`font-medium ${activeTheme.footerAccent}`}>Built for tomorrow</span>
               </div>
             </motion.div>
           </div>

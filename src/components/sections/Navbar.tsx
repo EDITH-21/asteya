@@ -314,7 +314,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenContact }) => {
                 <ArrowUpRight strokeWidth={1.75} className="w-4 h-4" />
               </button>
 
-              <div className="text-center text-xs font-sans text-slate-500">
+              <div className="text-center text-xs font-sans text-slate-400">
                 &copy; 2026 Aadrut. All rights reserved.
               </div>
             </div>

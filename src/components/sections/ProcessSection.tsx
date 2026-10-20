@@ -127,7 +127,7 @@ export const ProcessSection: React.FC = () => {
                             Stage {stage.id}
                           </span>
                         </div>
-                        <span className="text-xs font-mono text-slate-500">
+                        <span className="text-xs font-mono text-slate-400">
                           {idx + 1} of 5
                         </span>
                       </div>
@@ -141,7 +141,7 @@ export const ProcessSection: React.FC = () => {
                       </p>
 
                       <div className="pt-3 border-t border-white/[0.06] flex items-center justify-between text-xs text-slate-400 font-sans">
-                        <span className="text-slate-500">Key Deliverable:</span>
+                        <span className="text-slate-400">Key Deliverable:</span>
                         <span className="text-slate-200 font-medium">{stage.deliverable}</span>
                       </div>
                     </div>

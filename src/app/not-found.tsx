@@ -67,7 +67,7 @@ export default function NotFound() {
       </main>
 
       {/* Footer */}
-      <footer className="w-full border-t border-white/[0.08] py-6 text-center text-xs font-sans text-slate-500">
+      <footer className="w-full border-t border-white/[0.08] py-6 text-center text-xs font-sans text-slate-400">
         &copy; 2026 Aadrut. All rights reserved.
       </footer>
     </div>

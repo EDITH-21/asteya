@@ -291,7 +291,7 @@ export const AboutSection: React.FC = () => {
                   <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
                   <span className="font-medium text-slate-300">Digital Architecture Mesh</span>
                 </div>
-                <span className="text-[11px] text-slate-500">Interactive topology</span>
+                <span className="text-[11px] text-slate-400">Interactive topology</span>
               </div>
 
               {/* Dynamic Interactive Canvas (hidden on mobile) */}
@@ -312,7 +312,7 @@ export const AboutSection: React.FC = () => {
               </div>
 
               {/* Bottom Subtle Note */}
-              <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between text-[11px] font-sans text-slate-500 z-10 border-t border-white/[0.06] pt-2">
+              <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between text-[11px] font-sans text-slate-400 z-10 border-t border-white/[0.06] pt-2">
                 <span>Aadrut Systems Architecture</span>
                 <span>Modular Core</span>
               </div>

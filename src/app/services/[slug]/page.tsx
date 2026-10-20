@@ -279,7 +279,7 @@ export default async function ServicePage({ params }: PageProps) {
                   className="p-5 rounded-xl bg-white/[0.02] border border-white/[0.06] hover:border-indigo-500/30 hover:bg-white/[0.04] transition-all group flex flex-col justify-between focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400"
                 >
                   <div className="space-y-1">
-                    <span className="text-xs font-mono text-slate-500 group-hover:text-indigo-400 transition-colors">
+                    <span className="text-xs font-mono text-slate-400 group-hover:text-indigo-400 transition-colors">
                       {other.number}
                     </span>
                     <h3 className="text-sm font-semibold text-white group-hover:text-indigo-200 transition-colors">

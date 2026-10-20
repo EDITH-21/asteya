@@ -151,7 +151,7 @@ export const VenturesSection: React.FC = () => {
                 </div>
 
                 {/* Subtle footer info */}
-                <div className="pt-2 text-[11px] font-sans text-slate-500 flex justify-between items-center border-t border-white/[0.06]">
+                <div className="pt-2 text-[11px] font-sans text-slate-400 flex justify-between items-center border-t border-white/[0.06]">
                   <span>Productivity-focused learning architecture</span>
                   <span>Early access pending</span>
                 </div>
