@@ -15,14 +15,13 @@ export async function GET(req: NextRequest, context: RouteContext) {
     }
 
     const { id } = await context.params;
-    const enquiry = getEnquiryById(id);
+    const enquiry = await getEnquiryById(id);
     if (!enquiry) {
       return NextResponse.json({ error: "Enquiry not found" }, { status: 404 });
     }
 
     return NextResponse.json({ success: true, enquiry });
-  } catch (err) {
-    console.error("[API] Error fetching enquiry:", err);
+  } catch {
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
@@ -43,14 +42,13 @@ export async function PATCH(req: NextRequest, context: RouteContext) {
       return NextResponse.json({ error: issue }, { status: 400 });
     }
 
-    const updated = updateEnquiry(id, parsed.data);
+    const updated = await updateEnquiry(id, parsed.data);
     if (!updated) {
       return NextResponse.json({ error: "Enquiry not found" }, { status: 404 });
     }
 
     return NextResponse.json({ success: true, enquiry: updated });
-  } catch (err) {
-    console.error("[API] Error updating enquiry:", err);
+  } catch {
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
@@ -63,7 +61,7 @@ export async function DELETE(req: NextRequest, context: RouteContext) {
     }
 
     const { id } = await context.params;
-    const deleted = deleteEnquiry(id);
+    const deleted = await deleteEnquiry(id);
 
     if (!deleted) {
       return NextResponse.json({ error: "Enquiry not found" }, { status: 404 });

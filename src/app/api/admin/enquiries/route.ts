@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
     const type = searchParams.get("type") || undefined;
     const search = searchParams.get("search") || undefined;
 
-    const enquiries = getEnquiries({ status, type, search });
+    const enquiries = await getEnquiries({ status, type, search });
 
     return NextResponse.json({
       success: true,

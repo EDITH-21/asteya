@@ -69,19 +69,19 @@ export async function getAuthenticatedAdmin(
   }
 
   const tokenHash = hashToken(token);
-  const session = getSessionByTokenHash(tokenHash);
+  const session = await getSessionByTokenHash(tokenHash);
   if (!session) {
     return null;
   }
 
-  const user = getAdminById(session.userId);
+  const user = await getAdminById(session.userId);
   if (!user || user.role !== "admin") {
-    deleteSession(tokenHash);
+    await deleteSession(tokenHash);
     return null;
   }
 
   // Strip sensitive hashes before returning
-  const safeUser: Omit<AdminUser, "passwordHash" | "passwordSalt"> = {
+  const safeUser: Omit<AdminUser, "passwordHash" | "passwordSalt" | "totpSecret" | "recoveryCodes"> = {
     id: user.id,
     email: user.email,
     username: user.username,
@@ -89,6 +89,7 @@ export async function getAuthenticatedAdmin(
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
     lastLoginAt: user.lastLoginAt,
+    totpEnabled: user.totpEnabled,
   };
 
   return {
@@ -111,7 +112,7 @@ export async function createAdminSession(
   const ipAddress = getClientIp(req);
   const userAgent = req?.headers.get("user-agent") || undefined;
 
-  const session = createSession(userId, tokenHash, expiresAt, ipAddress, userAgent);
+  const session = await createSession(userId, tokenHash, expiresAt, ipAddress, userAgent);
 
   return { token, expiresAt, session };
 }
@@ -121,7 +122,7 @@ export async function createAdminSession(
  */
 export async function invalidateSession(token: string): Promise<void> {
   const tokenHash = hashToken(token);
-  deleteSession(tokenHash);
+  await deleteSession(tokenHash);
 }
 
 /**

@@ -10,7 +10,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized access" }, { status: 401 });
     }
 
-    const stats = getDashboardStats();
+    const stats = await getDashboardStats();
     return NextResponse.json({ success: true, stats });
   } catch (err) {
     console.error("[API] Error fetching dashboard statistics:", err);

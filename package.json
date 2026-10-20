@@ -10,6 +10,7 @@
     "admin:seed": "node scripts/seed-admin.mjs"
   },
   "dependencies": {
+    "@upstash/redis": "^1.39.0",
     "clsx": "^2.1.1",
     "framer-motion": "^13.3.0",
     "lenis": "^1.3.26",

@@ -3,6 +3,23 @@ import path from "path";
 import crypto from "crypto";
 import { hashPassword } from "./crypto";
 import { SERVICES } from "@/lib/constants";
+import {
+  isRedisConfigured,
+  redisCheckLockout,
+  redisRecordFailedLogin,
+  redisResetLoginAttempts,
+  redisSaveAdminUser,
+  redisGetAdminUser,
+  redisGetAdminUserById,
+  redisCreateSession,
+  redisGetSession,
+  redisDeleteSession,
+  redisSaveEnquiry,
+  redisGetEnquiries,
+  redisGetEnquiryById,
+  redisUpdateEnquiry,
+  redisDeleteEnquiry,
+} from "./redis";
 
 export interface AdminUser {
   id: string;
@@ -14,6 +31,10 @@ export interface AdminUser {
   createdAt: string;
   updatedAt: string;
   lastLoginAt?: string;
+  // TOTP-based Multi-Factor Authentication
+  totpSecret?: string;
+  totpEnabled?: boolean;
+  recoveryCodes?: { hash: string; used: boolean }[];
 }
 
 export interface AdminSession {
@@ -115,7 +136,7 @@ function loadDatabase(): DatabaseSchema {
       return inMemoryDb!;
     }
   } catch (err) {
-    console.error("[DB] Error reading database file, using fallback:", err);
+    console.error("[DB] Error reading fallback database file:", err);
   }
 
   if (inMemoryDb) {
@@ -151,7 +172,7 @@ function saveDatabase(data: DatabaseSchema): void {
       lastLoadedTime = Date.now();
     }
   } catch (err) {
-    console.error("[DB] Error saving database file:", err);
+    console.error("[DB] Error saving fallback database file:", err);
     try {
       if (fs.existsSync(tempPath)) {
         fs.unlinkSync(tempPath);
@@ -164,17 +185,49 @@ function saveDatabase(data: DatabaseSchema): void {
 
 /**
  * Initialize database with admin user and service records if empty.
- * Never uses a hardcoded fallback password.
+ * Requires explicit ADMIN_EMAIL and ADMIN_INITIAL_PASSWORD (no hardcoded fallbacks).
  */
 export async function initializeDatabase(): Promise<void> {
+  const adminEmail = process.env.ADMIN_EMAIL;
+  const initialPassword = process.env.ADMIN_INITIAL_PASSWORD;
+
+  // 1. Redis shared store initialization
+  if (isRedisConfigured()) {
+    if (adminEmail && initialPassword && initialPassword.length >= 10) {
+      const existing = await redisGetAdminUser(adminEmail);
+      if (!existing) {
+        const { hash, salt } = await hashPassword(initialPassword);
+        const newAdmin: AdminUser = {
+          id: crypto.randomUUID(),
+          email: adminEmail.toLowerCase().trim(),
+          username: "Asteya Admin",
+          passwordHash: hash,
+          passwordSalt: salt,
+          role: "admin",
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          totpEnabled: false,
+        };
+        await redisSaveAdminUser(newAdmin);
+        console.log("[DB] Initialized administrator in shared Redis store.");
+      }
+    } else if (!adminEmail) {
+      console.warn(
+        "[Security Warning] ADMIN_EMAIL is not set in environment variables. Admin creation requires an explicit ADMIN_EMAIL."
+      );
+    }
+    return;
+  }
+
+  // 2. Local fallback initialization
   const db = loadDatabase();
 
-  // 1. Seed admin if no users exist AND explicit password is provided in env
   if (db.users.length === 0) {
-    const adminEmail = process.env.ADMIN_EMAIL || "admin@asteya.tech";
-    const initialPassword = process.env.ADMIN_INITIAL_PASSWORD;
-
-    if (initialPassword && initialPassword.length >= 10) {
+    if (!adminEmail) {
+      console.warn(
+        "[Security Warning] ADMIN_EMAIL is not set in environment variables. Admin creation requires an explicit ADMIN_EMAIL."
+      );
+    } else if (initialPassword && initialPassword.length >= 10) {
       const { hash, salt } = await hashPassword(initialPassword);
 
       const defaultAdmin: AdminUser = {
@@ -186,25 +239,21 @@ export async function initializeDatabase(): Promise<void> {
         role: "admin",
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
+        totpEnabled: false,
       };
 
       db.users.push(defaultAdmin);
-      console.log("[DB] Initialized default administrator account securely.");
-    } else {
-      console.warn(
-        "[DB] No administrator accounts registered. Set ADMIN_INITIAL_PASSWORD (min 10 chars) or execute 'npm run seed:admin <email> <password>' to securely configure credentials."
-      );
+      console.log("[DB] Initialized administrator account securely in local store.");
     }
   }
 
-  // 2. Seed services if none exist
+  // Seed default services if empty
   if (db.services.length === 0) {
-    const defaultServices: ServiceRecord[] = SERVICES.map((s) => ({
+    db.services = SERVICES.map((s) => ({
       ...s,
       active: true,
       updatedAt: new Date().toISOString(),
     }));
-    db.services = defaultServices;
   }
 
   saveDatabase(db);
@@ -216,7 +265,14 @@ export async function initializeDatabase(): Promise<void> {
 const MAX_FAILED_ATTEMPTS = 5;
 const LOCKOUT_DURATION_MS = 15 * 60 * 1000; // 15 minutes
 
-export function checkRateLimit(ip: string, identifier: string): { allowed: boolean; retryAfterSeconds?: number } {
+export async function checkRateLimit(
+  ip: string,
+  identifier: string
+): Promise<{ allowed: boolean; retryAfterSeconds?: number }> {
+  if (isRedisConfigured()) {
+    return await redisCheckLockout(ip, identifier);
+  }
+
   const db = loadDatabase();
   const key = `${ip}:${identifier.toLowerCase().trim()}`;
   const now = Date.now();
@@ -231,7 +287,6 @@ export function checkRateLimit(ip: string, identifier: string): { allowed: boole
     return { allowed: false, retryAfterSeconds: retryAfter };
   }
 
-  // Expired lockout
   if (attempt.lockedUntil && attempt.lockedUntil <= now) {
     attempt.count = 0;
     attempt.lockedUntil = undefined;
@@ -242,7 +297,12 @@ export function checkRateLimit(ip: string, identifier: string): { allowed: boole
   return { allowed: true };
 }
 
-export function recordFailedLogin(ip: string, identifier: string): void {
+export async function recordFailedLogin(ip: string, identifier: string): Promise<void> {
+  if (isRedisConfigured()) {
+    await redisRecordFailedLogin(ip, identifier);
+    return;
+  }
+
   const db = loadDatabase();
   const key = `${ip}:${identifier.toLowerCase().trim()}`;
   const now = Date.now();
@@ -252,7 +312,6 @@ export function recordFailedLogin(ip: string, identifier: string): void {
     attempt = { key, count: 1, lastAttempt: now };
     db.failedLogins.push(attempt);
   } else {
-    // If last attempt was more than 15 mins ago, reset count
     if (now - attempt.lastAttempt > LOCKOUT_DURATION_MS) {
       attempt.count = 1;
     } else {
@@ -268,7 +327,12 @@ export function recordFailedLogin(ip: string, identifier: string): void {
   saveDatabase(db);
 }
 
-export function resetLoginAttempts(ip: string, identifier: string): void {
+export async function resetLoginAttempts(ip: string, identifier: string): Promise<void> {
+  if (isRedisConfigured()) {
+    await redisResetLoginAttempts(ip, identifier);
+    return;
+  }
+
   const db = loadDatabase();
   const key = `${ip}:${identifier.toLowerCase().trim()}`;
   db.failedLogins = db.failedLogins.filter((a) => a.key !== key);
@@ -278,18 +342,34 @@ export function resetLoginAttempts(ip: string, identifier: string): void {
 // ========================
 // User / Auth Operations
 // ========================
-export function getAdminByEmail(email: string): AdminUser | null {
+export async function getAdminByEmail(email: string): Promise<AdminUser | null> {
+  if (isRedisConfigured()) {
+    return await redisGetAdminUser(email);
+  }
   const db = loadDatabase();
   const normalized = email.toLowerCase().trim();
   return db.users.find((u) => u.email === normalized && u.role === "admin") || null;
 }
 
-export function getAdminById(id: string): AdminUser | null {
+export async function getAdminById(id: string): Promise<AdminUser | null> {
+  if (isRedisConfigured()) {
+    return await redisGetAdminUserById(id);
+  }
   const db = loadDatabase();
   return db.users.find((u) => u.id === id && u.role === "admin") || null;
 }
 
-export function updateAdminPassword(id: string, hash: string, salt: string): boolean {
+export async function updateAdminPassword(id: string, hash: string, salt: string): Promise<boolean> {
+  if (isRedisConfigured()) {
+    const user = await redisGetAdminUserById(id);
+    if (!user) return false;
+    user.passwordHash = hash;
+    user.passwordSalt = salt;
+    user.updatedAt = new Date().toISOString();
+    await redisSaveAdminUser(user);
+    return true;
+  }
+
   const db = loadDatabase();
   const user = db.users.find((u) => u.id === id);
   if (!user) return false;
@@ -297,15 +377,54 @@ export function updateAdminPassword(id: string, hash: string, salt: string): boo
   user.passwordHash = hash;
   user.passwordSalt = salt;
   user.updatedAt = new Date().toISOString();
-
-  // Invalidate all active sessions for this user on password change
   db.sessions = db.sessions.filter((s) => s.userId !== id);
 
   saveDatabase(db);
   return true;
 }
 
-export function updateAdminLastLogin(id: string): void {
+export async function updateAdminMfa(
+  id: string,
+  mfa: {
+    totpSecret?: string;
+    totpEnabled?: boolean;
+    recoveryCodes?: { hash: string; used: boolean }[];
+  }
+): Promise<boolean> {
+  if (isRedisConfigured()) {
+    const user = await redisGetAdminUserById(id);
+    if (!user) return false;
+    if (mfa.totpSecret !== undefined) user.totpSecret = mfa.totpSecret;
+    if (mfa.totpEnabled !== undefined) user.totpEnabled = mfa.totpEnabled;
+    if (mfa.recoveryCodes !== undefined) user.recoveryCodes = mfa.recoveryCodes;
+    user.updatedAt = new Date().toISOString();
+    await redisSaveAdminUser(user);
+    return true;
+  }
+
+  const db = loadDatabase();
+  const user = db.users.find((u) => u.id === id);
+  if (!user) return false;
+
+  if (mfa.totpSecret !== undefined) user.totpSecret = mfa.totpSecret;
+  if (mfa.totpEnabled !== undefined) user.totpEnabled = mfa.totpEnabled;
+  if (mfa.recoveryCodes !== undefined) user.recoveryCodes = mfa.recoveryCodes;
+  user.updatedAt = new Date().toISOString();
+
+  saveDatabase(db);
+  return true;
+}
+
+export async function updateAdminLastLogin(id: string): Promise<void> {
+  if (isRedisConfigured()) {
+    const user = await redisGetAdminUserById(id);
+    if (user) {
+      user.lastLoginAt = new Date().toISOString();
+      await redisSaveAdminUser(user);
+    }
+    return;
+  }
+
   const db = loadDatabase();
   const user = db.users.find((u) => u.id === id);
   if (user) {
@@ -317,14 +436,13 @@ export function updateAdminLastLogin(id: string): void {
 // ========================
 // Session Management
 // ========================
-export function createSession(
+export async function createSession(
   userId: string,
   sessionTokenHash: string,
   expiresAt: string,
   ipAddress?: string,
   userAgent?: string
-): AdminSession {
-  const db = loadDatabase();
+): Promise<AdminSession> {
   const session: AdminSession = {
     id: crypto.randomUUID(),
     sessionTokenHash,
@@ -334,18 +452,29 @@ export function createSession(
     ipAddress,
     userAgent,
   };
+
+  if (isRedisConfigured()) {
+    const ttlSeconds = Math.max(1, Math.floor((new Date(expiresAt).getTime() - Date.now()) / 1000));
+    await redisCreateSession(session, ttlSeconds);
+    return session;
+  }
+
+  const db = loadDatabase();
   db.sessions.push(session);
   saveDatabase(db);
   return session;
 }
 
-export function getSessionByTokenHash(tokenHash: string): AdminSession | null {
+export async function getSessionByTokenHash(tokenHash: string): Promise<AdminSession | null> {
+  if (isRedisConfigured()) {
+    return await redisGetSession(tokenHash);
+  }
+
   const db = loadDatabase();
   const now = new Date().toISOString();
   const session = db.sessions.find((s) => s.sessionTokenHash === tokenHash);
   if (!session) return null;
 
-  // Check expiration
   if (session.expiresAt <= now) {
     deleteSession(tokenHash);
     return null;
@@ -354,29 +483,27 @@ export function getSessionByTokenHash(tokenHash: string): AdminSession | null {
   return session;
 }
 
-export function deleteSession(tokenHash: string): void {
+export async function deleteSession(tokenHash: string): Promise<void> {
+  if (isRedisConfigured()) {
+    await redisDeleteSession(tokenHash);
+    return;
+  }
+
   const db = loadDatabase();
   db.sessions = db.sessions.filter((s) => s.sessionTokenHash !== tokenHash);
-  saveDatabase(db);
-}
-
-export function deleteUserSessions(userId: string): void {
-  const db = loadDatabase();
-  db.sessions = db.sessions.filter((s) => s.userId !== userId);
   saveDatabase(db);
 }
 
 // ========================
 // Enquiry Management
 // ========================
-export function createEnquiry(data: {
+export async function createEnquiry(data: {
   name: string;
   email: string;
   type: string;
   message: string;
   ipAddress?: string;
-}): Enquiry {
-  const db = loadDatabase();
+}): Promise<Enquiry> {
   const enquiry: Enquiry = {
     id: crypto.randomUUID(),
     name: data.name.trim(),
@@ -389,18 +516,23 @@ export function createEnquiry(data: {
     ipAddress: data.ipAddress,
   };
 
-  db.enquiries.unshift(enquiry); // newest first
+  if (isRedisConfigured()) {
+    await redisSaveEnquiry(enquiry);
+    return enquiry;
+  }
+
+  const db = loadDatabase();
+  db.enquiries.unshift(enquiry);
   saveDatabase(db);
   return enquiry;
 }
 
-export function getEnquiries(params?: {
+export async function getEnquiries(params?: {
   status?: string;
   search?: string;
   type?: string;
-}): Enquiry[] {
-  const db = loadDatabase();
-  let list = [...db.enquiries];
+}): Promise<Enquiry[]> {
+  let list = isRedisConfigured() ? await redisGetEnquiries() : [...loadDatabase().enquiries];
 
   if (params?.status && params.status !== "all") {
     list = list.filter((e) => e.status === params.status);
@@ -424,36 +556,43 @@ export function getEnquiries(params?: {
   return list;
 }
 
-export function getEnquiryById(id: string): Enquiry | null {
+export async function getEnquiryById(id: string): Promise<Enquiry | null> {
+  if (isRedisConfigured()) {
+    return await redisGetEnquiryById(id);
+  }
   const db = loadDatabase();
   return db.enquiries.find((e) => e.id === id) || null;
 }
 
-export function updateEnquiry(
+export async function updateEnquiry(
   id: string,
   updates: { status?: EnquiryStatus; notes?: string }
-): Enquiry | null {
+): Promise<Enquiry | null> {
+  if (isRedisConfigured()) {
+    return await redisUpdateEnquiry(id, updates);
+  }
+
   const db = loadDatabase();
   const enquiry = db.enquiries.find((e) => e.id === id);
   if (!enquiry) return null;
 
-  if (updates.status !== undefined) {
-    enquiry.status = updates.status;
-  }
-  if (updates.notes !== undefined) {
-    enquiry.notes = updates.notes;
-  }
+  if (updates.status !== undefined) enquiry.status = updates.status;
+  if (updates.notes !== undefined) enquiry.notes = updates.notes;
   enquiry.updatedAt = new Date().toISOString();
 
   saveDatabase(db);
   return enquiry;
 }
 
-export function deleteEnquiry(id: string): boolean {
+export async function deleteEnquiry(id: string): Promise<boolean> {
+  if (isRedisConfigured()) {
+    return await redisDeleteEnquiry(id);
+  }
+
   const db = loadDatabase();
-  const initialLen = db.enquiries.length;
+  const initialLength = db.enquiries.length;
   db.enquiries = db.enquiries.filter((e) => e.id !== id);
-  if (db.enquiries.length !== initialLen) {
+  if (db.enquiries.length !== initialLength) {
     saveDatabase(db);
     return true;
   }
@@ -461,66 +600,50 @@ export function deleteEnquiry(id: string): boolean {
 }
 
 // ========================
-// Services Management
+// Service Management
 // ========================
-export function getServicesList(): ServiceRecord[] {
+export function getServiceRecords(): ServiceRecord[] {
   const db = loadDatabase();
   return db.services;
 }
 
+export function getServicesList(): ServiceRecord[] {
+  return getServiceRecords();
+}
+
 export function updateServiceRecord(
   id: string,
-  updates: Partial<Pick<ServiceRecord, "title" | "tagline" | "description" | "capabilities" | "active">>
+  updates: Partial<Omit<ServiceRecord, "id">>
 ): ServiceRecord | null {
   const db = loadDatabase();
   const service = db.services.find((s) => s.id === id);
   if (!service) return null;
 
-  if (updates.title !== undefined) service.title = updates.title;
-  if (updates.tagline !== undefined) service.tagline = updates.tagline;
-  if (updates.description !== undefined) service.description = updates.description;
-  if (updates.capabilities !== undefined) service.capabilities = updates.capabilities;
-  if (updates.active !== undefined) service.active = updates.active;
-  service.updatedAt = new Date().toISOString();
-
+  Object.assign(service, updates, { updatedAt: new Date().toISOString() });
   saveDatabase(db);
   return service;
 }
 
 // ========================
-// Telemetry & Extension Usage Tracking
+// Telemetry Ingestion & Stats
 // ========================
-export function recordTelemetry(data: {
-  extensionName: string;
-  version: string;
-  eventType: "install" | "ping" | "session_start" | "feature_use";
-  anonymousId: string;
-  metadata?: Record<string, string | number | boolean>;
-}): ExtensionTelemetry {
+export function recordTelemetry(data: Omit<ExtensionTelemetry, "id" | "timestamp">): ExtensionTelemetry {
   const db = loadDatabase();
-  if (!db.telemetry) {
-    db.telemetry = [];
-  }
+  if (!db.telemetry) db.telemetry = [];
 
-  const record: ExtensionTelemetry = {
+  const entry: ExtensionTelemetry = {
     id: crypto.randomUUID(),
-    extensionName: (data.extensionName || "attenza").toLowerCase().trim(),
-    version: data.version || "1.0.0",
-    eventType: data.eventType,
-    anonymousId: data.anonymousId,
     timestamp: new Date().toISOString(),
-    metadata: data.metadata,
+    ...data,
   };
 
-  db.telemetry.push(record);
-
-  // Keep a sliding window of recent telemetry (capped at 5,000 events to avoid unbounded file growth)
-  if (db.telemetry.length > 5000) {
-    db.telemetry = db.telemetry.slice(-5000);
+  db.telemetry.unshift(entry);
+  if (db.telemetry.length > 500) {
+    db.telemetry = db.telemetry.slice(0, 500);
   }
 
   saveDatabase(db);
-  return record;
+  return entry;
 }
 
 export function getTelemetryStats(extensionName = "attenza") {
@@ -549,7 +672,7 @@ export function getTelemetryStats(extensionName = "attenza") {
 
   const totalInstalls = records.filter((r) => r.eventType === "install").length;
   const totalPings = records.filter((r) => r.eventType === "ping").length;
-  const lastReportedAt = records.length > 0 ? records[records.length - 1].timestamp : null;
+  const lastReportedAt = records.length > 0 ? records[0].timestamp : null;
 
   return {
     extensionName,
@@ -567,19 +690,22 @@ export function getTelemetryStats(extensionName = "attenza") {
 // ========================
 // Dashboard Statistics
 // ========================
-export function getDashboardStats() {
+export async function getDashboardStats() {
+  const enquiries = await getEnquiries();
+  const services = getServiceRecords();
   const db = loadDatabase();
-  const totalEnquiries = db.enquiries.length;
-  const newEnquiries = db.enquiries.filter((e) => e.status === "new").length;
-  const inProgressEnquiries = db.enquiries.filter((e) => e.status === "in_progress").length;
-  const contactedEnquiries = db.enquiries.filter((e) => e.status === "contacted").length;
-  const archivedEnquiries = db.enquiries.filter((e) => e.status === "archived").length;
 
-  const totalServices = db.services.length;
-  const activeServices = db.services.filter((s) => s.active).length;
+  const totalEnquiries = enquiries.length;
+  const newEnquiries = enquiries.filter((e) => e.status === "new").length;
+  const inProgressEnquiries = enquiries.filter((e) => e.status === "in_progress").length;
+  const contactedEnquiries = enquiries.filter((e) => e.status === "contacted").length;
+  const archivedEnquiries = enquiries.filter((e) => e.status === "archived").length;
 
-  const recentEnquiries = db.enquiries.slice(0, 5);
-  const registeredAdmins = db.users.length;
+  const totalServices = services.length;
+  const activeServices = services.filter((s) => s.active).length;
+
+  const recentEnquiries = enquiries.slice(0, 5);
+  const registeredAdmins = isRedisConfigured() ? 1 : db.users.length;
   const attenzaStats = getTelemetryStats("attenza");
 
   return {

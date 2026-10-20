@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { EnquiryCreateSchema } from "@/lib/server/validations";
 import { createEnquiry, initializeDatabase } from "@/lib/server/db";
 import { getClientIp } from "@/lib/server/auth";
+import { isAllowedOrigin } from "@/lib/server/origin";
+import { isRedisConfigured, redisRateLimit } from "@/lib/server/redis";
 
 // Basic rate limiting for public contact endpoint (sliding window)
 const submissionTracker = new Map<string, { count: number; expiresAt: number }>();
@@ -111,31 +113,29 @@ async function sendResendNotification(enquiry: {
 
 export async function POST(req: NextRequest) {
   try {
-    // 1. Verify Origin/Host to prevent Cross-Site Request Forgery (CSRF)
+    // 1. Verify Origin against allowlist to prevent Cross-Site Request Forgery (CSRF)
     const origin = req.headers.get("origin");
     const host = req.headers.get("host");
-    if (origin && host) {
-      try {
-        const originHost = new URL(origin).host;
-        if (originHost !== host) {
-          return NextResponse.json(
-            { error: "Cross-origin submission rejected." },
-            { status: 403 }
-          );
-        }
-      } catch {
-        return NextResponse.json(
-          { error: "Invalid request origin." },
-          { status: 403 }
-        );
-      }
+    if (!isAllowedOrigin(origin, host)) {
+      return NextResponse.json(
+        { error: "Cross-origin submission rejected." },
+        { status: 403 }
+      );
     }
 
     await initializeDatabase();
 
-    // 2. Enforce IP-based rate limiting
+    // 2. Enforce IP-based rate limiting (Redis shared store or local sliding window)
     const ip = getClientIp(req);
-    if (!checkSubmissionRateLimit(ip)) {
+    if (isRedisConfigured()) {
+      const rateLimitResult = await redisRateLimit(`contact:${ip}`, 5, 600);
+      if (!rateLimitResult.allowed) {
+        return NextResponse.json(
+          { error: "Too many submissions. Please wait a few minutes before trying again." },
+          { status: 429 }
+        );
+      }
+    } else if (!checkSubmissionRateLimit(ip)) {
       return NextResponse.json(
         { error: "Too many submissions. Please wait a few minutes before trying again." },
         { status: 429 }
@@ -164,7 +164,7 @@ export async function POST(req: NextRequest) {
     }
 
     const { name, email, type, message } = result.data;
-    const enquiry = createEnquiry({
+    const enquiry = await createEnquiry({
       name,
       email,
       type,

@@ -15,9 +15,16 @@ import {
   resetLoginAttempts,
 } from "@/lib/server/db";
 import { verifyPassword, hashPassword } from "@/lib/server/crypto";
+import { isAllowedOrigin } from "@/lib/server/origin";
 
 export async function POST(req: NextRequest) {
   try {
+    const origin = req.headers.get("origin");
+    const host = req.headers.get("host");
+    if (!isAllowedOrigin(origin, host)) {
+      return NextResponse.json({ error: "Cross-origin request rejected." }, { status: 403 });
+    }
+
     const auth = await getAuthenticatedAdmin(req);
     if (!auth) {
       return NextResponse.json(
@@ -36,13 +43,13 @@ export async function POST(req: NextRequest) {
     const { currentPassword, newPassword } = parsed.data;
 
     // Fetch full admin user with password hashes
-    const admin = getAdminById(auth.user.id);
+    const admin = await getAdminById(auth.user.id);
     if (!admin) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     const ip = getClientIp(req);
-    const rateCheck = checkRateLimit(ip, admin.email);
+    const rateCheck = await checkRateLimit(ip, admin.email);
     if (!rateCheck.allowed) {
       return NextResponse.json(
         {
@@ -60,7 +67,7 @@ export async function POST(req: NextRequest) {
     );
 
     if (!isCurrentValid) {
-      recordFailedLogin(ip, admin.email);
+      await recordFailedLogin(ip, admin.email);
       return NextResponse.json(
         { error: "Current password does not match" },
         { status: 400 }
@@ -68,11 +75,11 @@ export async function POST(req: NextRequest) {
     }
 
     // Reset attempts on successful verification
-    resetLoginAttempts(ip, admin.email);
+    await resetLoginAttempts(ip, admin.email);
 
-    // Hash new password
+    // Hash new password using OWASP minimum cost (N=2^17)
     const { hash, salt } = await hashPassword(newPassword);
-    updateAdminPassword(admin.id, hash, salt);
+    await updateAdminPassword(admin.id, hash, salt);
 
     // Issue new session
     const { token, expiresAt } = await createAdminSession(admin.id, req);
@@ -94,8 +101,7 @@ export async function POST(req: NextRequest) {
     });
 
     return response;
-  } catch (err) {
-    console.error("[API] Error updating admin password:", err);
+  } catch {
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

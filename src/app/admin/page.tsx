@@ -27,6 +27,8 @@ import {
   Radio,
   Users,
   Terminal,
+  Smartphone,
+  Copy,
 } from "lucide-react";
 
 interface AdminUser {
@@ -36,6 +38,7 @@ interface AdminUser {
   role: string;
   createdAt: string;
   lastLoginAt?: string;
+  totpEnabled?: boolean;
 }
 
 interface Enquiry {
@@ -121,6 +124,18 @@ export default function AdminDashboardPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [pwdMessage, setPwdMessage] = useState<{ text: string; isError: boolean } | null>(null);
   const [changingPwd, setChangingPwd] = useState(false);
+
+  // MFA Management state
+  const [mfaSetupData, setMfaSetupData] = useState<{
+    secret: string;
+    otpauthUri: string;
+    recoveryCodes: string[];
+    _hashedRecoveryCodes: string[];
+  } | null>(null);
+  const [mfaCodeInput, setMfaCodeInput] = useState("");
+  const [mfaLoading, setMfaLoading] = useState(false);
+  const [mfaMessage, setMfaMessage] = useState<{ text: string; isError: boolean } | null>(null);
+  const [copiedCodes, setCopiedCodes] = useState(false);
 
   // Editing service state
   const [editingService, setEditingService] = useState<ServiceRecord | null>(null);
@@ -378,6 +393,60 @@ export default function AdminDashboardPage() {
       setPwdMessage({ text: "Network error occurred", isError: true });
     } finally {
       setChangingPwd(false);
+    }
+  };
+
+  // Start TOTP MFA Setup
+  const handleStartMfaSetup = async () => {
+    setMfaLoading(true);
+    setMfaMessage(null);
+    setCopiedCodes(false);
+    try {
+      const res = await fetch("/api/admin/auth/mfa/setup", { method: "POST" });
+      const data = await res.json();
+      if (!res.ok) {
+        setMfaMessage({ text: data.error || "Failed to initialize MFA setup", isError: true });
+      } else {
+        setMfaSetupData(data);
+      }
+    } catch {
+      setMfaMessage({ text: "Network error occurred while initializing MFA", isError: true });
+    } finally {
+      setMfaLoading(false);
+    }
+  };
+
+  // Confirm and Enable MFA
+  const handleEnableMfa = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!mfaSetupData || !mfaCodeInput.trim()) return;
+    setMfaLoading(true);
+    setMfaMessage(null);
+    try {
+      const res = await fetch("/api/admin/auth/mfa/enable", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          secret: mfaSetupData.secret,
+          code: mfaCodeInput.trim(),
+          hashedRecoveryCodes: mfaSetupData._hashedRecoveryCodes,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setMfaMessage({ text: data.error || "Failed to verify authenticator code", isError: true });
+      } else {
+        setMfaMessage({ text: "Two-factor authentication successfully enabled!", isError: false });
+        setMfaSetupData(null);
+        setMfaCodeInput("");
+        if (user) {
+          setUser({ ...user, totpEnabled: true });
+        }
+      }
+    } catch {
+      setMfaMessage({ text: "Network error occurred while enabling MFA", isError: true });
+    } finally {
+      setMfaLoading(false);
     }
   };
 
@@ -1207,6 +1276,143 @@ export default function AdminDashboardPage() {
                   </button>
                 </div>
               </form>
+            </div>
+
+            {/* Multi-Factor Authentication (MFA / TOTP) Card */}
+            <div className="bg-[#090d16] border border-white/[0.08] rounded-2xl p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <Smartphone strokeWidth={1.75} className="w-4 h-4 text-emerald-400" />
+                  <h3 className="text-sm font-bold text-white">Two-Factor Authentication (2FA)</h3>
+                </div>
+                <span
+                  className={`text-[10px] font-mono px-2 py-0.5 rounded-full font-semibold uppercase ${
+                    user?.totpEnabled
+                      ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                      : "bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                  }`}
+                >
+                  {user?.totpEnabled ? "Enforced & Active" : "Not Configured"}
+                </span>
+              </div>
+
+              {mfaMessage && (
+                <div
+                  className={`p-3 rounded-xl mb-4 text-xs flex items-center gap-2 ${
+                    mfaMessage.isError
+                      ? "bg-red-500/10 border border-red-500/30 text-red-300"
+                      : "bg-emerald-500/10 border border-emerald-500/30 text-emerald-300"
+                  }`}
+                >
+                  {mfaMessage.isError ? (
+                    <AlertTriangle strokeWidth={1.75} className="w-4 h-4 shrink-0 text-red-400" />
+                  ) : (
+                    <Check strokeWidth={1.75} className="w-4 h-4 shrink-0 text-emerald-400" />
+                  )}
+                  <span>{mfaMessage.text}</span>
+                </div>
+              )}
+
+              {user?.totpEnabled ? (
+                <div className="space-y-3">
+                  <p className="text-xs text-slate-300 leading-relaxed">
+                    RFC 6238 TOTP two-factor authentication is active on your account. Every login requires your password plus a time-synchronized 6-digit one-time code or single-use recovery code.
+                  </p>
+                  <div className="p-3 rounded-xl bg-emerald-500/05 border border-emerald-500/15 flex items-start gap-2.5 text-xs text-emerald-300">
+                    <Shield strokeWidth={1.75} className="w-4 h-4 shrink-0 mt-0.5 text-emerald-400" />
+                    <span>Your account is protected against credential stuffing and brute-force takeover.</span>
+                  </div>
+                </div>
+              ) : !mfaSetupData ? (
+                <div className="space-y-3">
+                  <p className="text-xs text-slate-400 leading-relaxed">
+                    Add an extra layer of defense to the Asteya Operations Control panel using Google Authenticator, 1Password, or any RFC 6238 compliant TOTP application.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={handleStartMfaSetup}
+                    disabled={mfaLoading}
+                    className="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-500 hover:to-emerald-600 text-white font-semibold text-xs tracking-wide shadow-md shadow-emerald-600/30 transition-all disabled:opacity-50"
+                  >
+                    {mfaLoading ? "Initializing..." : "Set Up Two-Factor Authentication"}
+                  </button>
+                </div>
+              ) : (
+                <form onSubmit={handleEnableMfa} className="space-y-4 pt-2">
+                  <div className="p-3.5 bg-black/40 border border-white/10 rounded-xl space-y-2">
+                    <span className="text-xs font-semibold text-white block">Step 1: Add to Authenticator App</span>
+                    <p className="text-[11px] text-slate-400">
+                      Enter this Base32 secret manually in Google Authenticator, 1Password, or Authy:
+                    </p>
+                    <div className="font-mono text-xs bg-white/[0.05] p-2 rounded-lg text-emerald-400 font-bold select-all break-all">
+                      {mfaSetupData.secret}
+                    </div>
+                  </div>
+
+                  <div className="p-3.5 bg-black/40 border border-white/10 rounded-xl space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-semibold text-white block">Step 2: Emergency Recovery Codes</span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          navigator.clipboard.writeText(mfaSetupData.recoveryCodes.join("\n"));
+                          setCopiedCodes(true);
+                          setTimeout(() => setCopiedCodes(false), 2000);
+                        }}
+                        className="inline-flex items-center gap-1 text-[11px] text-indigo-400 hover:text-indigo-300"
+                      >
+                        <Copy className="w-3 h-3" />
+                        <span>{copiedCodes ? "Copied!" : "Copy All Codes"}</span>
+                      </button>
+                    </div>
+                    <p className="text-[11px] text-slate-400">
+                      Store these 8 emergency codes in a secure password vault. Each code can only be used once if you lose device access:
+                    </p>
+                    <div className="grid grid-cols-2 gap-1.5 font-mono text-xs text-slate-300 bg-white/[0.03] p-2 rounded-lg">
+                      {mfaSetupData.recoveryCodes.map((code, idx) => (
+                        <div key={idx} className="tracking-wider text-center py-0.5 bg-black/20 rounded">
+                          {code}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <span className="text-xs font-semibold text-white block mb-1.5">
+                      Step 3: Confirm with 6-Digit Code
+                    </span>
+                    <input
+                      type="text"
+                      required
+                      maxLength={6}
+                      value={mfaCodeInput}
+                      onChange={(e) => setMfaCodeInput(e.target.value)}
+                      placeholder="123456"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-black/40 border border-white/10 text-center font-mono text-sm tracking-widest text-white placeholder:text-slate-600 focus:outline-none focus:border-emerald-400"
+                    />
+                  </div>
+
+                  <div className="flex items-center gap-2 pt-1">
+                    <button
+                      type="submit"
+                      disabled={mfaLoading || mfaCodeInput.length !== 6}
+                      className="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs tracking-wide shadow-md shadow-emerald-600/30 transition-all disabled:opacity-50"
+                    >
+                      {mfaLoading ? "Activating..." : "Verify & Activate 2FA"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMfaSetupData(null);
+                        setMfaCodeInput("");
+                      }}
+                      className="px-3 py-2 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] text-xs text-slate-400 hover:text-white transition-colors"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              )}
             </div>
           </div>
         )}
