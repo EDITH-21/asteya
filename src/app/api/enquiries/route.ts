@@ -3,7 +3,7 @@ import { EnquiryCreateSchema } from "@/lib/server/validations";
 import { createEnquiry, initializeDatabase } from "@/lib/server/db";
 import { getClientIp } from "@/lib/server/auth";
 
-// Basic rate limiting for public contact endpoint (in-memory map)
+// Basic rate limiting for public contact endpoint (sliding window)
 const submissionTracker = new Map<string, { count: number; expiresAt: number }>();
 
 function checkSubmissionRateLimit(ip: string): boolean {
@@ -13,11 +13,24 @@ function checkSubmissionRateLimit(ip: string): boolean {
     submissionTracker.set(ip, { count: 1, expiresAt: now + 10 * 60 * 1000 }); // 10 minutes window
     return true;
   }
-  if (record.count >= 10) {
+  // Enforce max 5 submissions per 10-minute window per IP
+  if (record.count >= 5) {
     return false;
   }
   record.count += 1;
   return true;
+}
+
+/**
+ * Escape HTML special characters to prevent HTML/script injection in email clients.
+ */
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 }
 
 async function sendResendNotification(enquiry: {
@@ -29,8 +42,35 @@ async function sendResendNotification(enquiry: {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) return;
 
-  const recipient = process.env.CONTACT_NOTIFICATION_EMAIL || process.env.NEXT_PUBLIC_CONTACT_EMAIL || "hello@asteya.tech";
+  const recipient =
+    process.env.CONTACT_NOTIFICATION_EMAIL ||
+    process.env.NEXT_PUBLIC_CONTACT_EMAIL ||
+    "hello@asteya.tech";
   const fromEmail = process.env.RESEND_FROM_EMAIL || "Asteya Inquiries <onboarding@resend.dev>";
+
+  // Strip CRLF to block header injection in Subject and Reply-To
+  const sanitizedName = enquiry.name.replace(/[\r\n]+/g, " ").trim();
+  const sanitizedType = enquiry.type.replace(/[\r\n]+/g, " ").trim();
+  const sanitizedEmail = enquiry.email.replace(/[\r\n]+/g, "").trim();
+  const safeSubject = `[Asteya Project Brief] ${sanitizedType} - ${sanitizedName}`;
+
+  const safeHtmlName = escapeHtml(sanitizedName);
+  const safeHtmlEmail = escapeHtml(sanitizedEmail);
+  const safeHtmlType = escapeHtml(sanitizedType);
+  const safeHtmlMessage = escapeHtml(enquiry.message);
+
+  const plainTextMessage = [
+    "New Asteya Project Brief",
+    "------------------------",
+    `Name: ${sanitizedName}`,
+    `Email: ${sanitizedEmail}`,
+    `Engagement Domain: ${sanitizedType}`,
+    "",
+    "Project Overview / Message:",
+    enquiry.message,
+    "",
+    "This notification was dispatched via Asteya contact systems.",
+  ].join("\n");
 
   try {
     const res = await fetch("https://api.resend.com/emails", {
@@ -42,37 +82,58 @@ async function sendResendNotification(enquiry: {
       body: JSON.stringify({
         from: fromEmail,
         to: recipient,
-        reply_to: enquiry.email,
-        subject: `[Asteya Project Brief] ${enquiry.type} - ${enquiry.name}`,
+        reply_to: sanitizedEmail,
+        subject: safeSubject,
+        text: plainTextMessage,
         html: `
-          <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #1e293b;">
-            <h2 style="color: #4338ca; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px;">New Asteya Inquiry</h2>
-            <p><strong>Name:</strong> ${enquiry.name}</p>
-            <p><strong>Email:</strong> <a href="mailto:${enquiry.email}">${enquiry.email}</a></p>
-            <p><strong>Engagement Domain:</strong> ${enquiry.type}</p>
+          <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #1e293b; background: #ffffff;">
+            <h2 style="color: #4338ca; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; margin-top: 0;">New Asteya Inquiry</h2>
+            <p><strong>Name:</strong> ${safeHtmlName}</p>
+            <p><strong>Email:</strong> <a href="mailto:${safeHtmlEmail}" style="color: #6366f1;">${safeHtmlEmail}</a></p>
+            <p><strong>Engagement Domain:</strong> ${safeHtmlType}</p>
             <div style="margin-top: 20px; padding: 15px; background: #f8fafc; border-radius: 8px; border-left: 4px solid #6366f1;">
-              <strong>Project Overview / Message:</strong>
-              <p style="white-space: pre-wrap; margin-top: 8px;">${enquiry.message}</p>
+              <strong style="color: #0f172a;">Project Overview / Message:</strong>
+              <p style="white-space: pre-wrap; margin-top: 8px; color: #334155; line-height: 1.5;">${safeHtmlMessage}</p>
             </div>
-            <p style="font-size: 12px; color: #64748b; margin-top: 30px;">This notification was dispatched via Asteya contact systems.</p>
+            <p style="font-size: 12px; color: #64748b; margin-top: 30px; border-top: 1px solid #e2e8f0; padding-top: 12px;">This notification was dispatched via Asteya contact systems.</p>
           </div>
         `,
       }),
     });
 
     if (!res.ok) {
-      const errText = await res.text();
-      console.warn("[Resend] Email dispatch warning:", errText);
+      console.warn("[Resend] Email dispatch returned non-200 status code:", res.status);
     }
-  } catch (resendError) {
-    console.error("[Resend] Network error sending notification:", resendError);
+  } catch {
+    console.error("[Resend] Network error sending notification");
   }
 }
 
 export async function POST(req: NextRequest) {
   try {
+    // 1. Verify Origin/Host to prevent Cross-Site Request Forgery (CSRF)
+    const origin = req.headers.get("origin");
+    const host = req.headers.get("host");
+    if (origin && host) {
+      try {
+        const originHost = new URL(origin).host;
+        if (originHost !== host) {
+          return NextResponse.json(
+            { error: "Cross-origin submission rejected." },
+            { status: 403 }
+          );
+        }
+      } catch {
+        return NextResponse.json(
+          { error: "Invalid request origin." },
+          { status: 403 }
+        );
+      }
+    }
+
     await initializeDatabase();
 
+    // 2. Enforce IP-based rate limiting
     const ip = getClientIp(req);
     if (!checkSubmissionRateLimit(ip)) {
       return NextResponse.json(
@@ -83,7 +144,7 @@ export async function POST(req: NextRequest) {
 
     const body = await req.json();
 
-    // Honeypot check: If the hidden honeypot field is filled by a bot, silently accept without storing
+    // 3. Honeypot check: If the hidden honeypot field is filled by a bot, silently accept without storing
     if (body._hp && typeof body._hp === "string" && body._hp.trim().length > 0) {
       return NextResponse.json(
         {
@@ -94,6 +155,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // 4. Validate input with Zod
     const result = EnquiryCreateSchema.safeParse(body);
 
     if (!result.success) {
@@ -110,7 +172,7 @@ export async function POST(req: NextRequest) {
       ipAddress: ip,
     });
 
-    // Optionally dispatch via Resend if configured
+    // 5. Dispatch sanitized email via Resend
     await sendResendNotification({ name, email, type, message });
 
     return NextResponse.json(
@@ -121,8 +183,7 @@ export async function POST(req: NextRequest) {
       },
       { status: 201 }
     );
-  } catch (err) {
-    console.error("[API] Error processing enquiry submission:", err);
+  } catch {
     return NextResponse.json(
       { error: "Internal server error while processing your request" },
       { status: 500 }

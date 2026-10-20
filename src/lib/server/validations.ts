@@ -1,21 +1,41 @@
 import { z } from "zod";
 
+export const ALLOWED_ENQUIRY_SERVICES = [
+  "Web Development",
+  "Digital Solutions",
+  "Brand & Design",
+  "Business Automation",
+  "Digital Presence",
+  "Technology Consulting",
+  "General Inquiry",
+  "Other",
+] as const;
+
 export const EnquiryCreateSchema = z.object({
   name: z
     .string()
     .trim()
     .min(2, "Name must be at least 2 characters")
-    .max(100, "Name cannot exceed 100 characters"),
+    .max(100, "Name cannot exceed 100 characters")
+    .regex(/^[^\r\n]+$/, "Name cannot contain newline characters"),
   email: z
     .string()
     .trim()
     .email("Invalid email address")
-    .max(150, "Email cannot exceed 150 characters"),
+    .max(150, "Email cannot exceed 150 characters")
+    .regex(/^[^\r\n]+$/, "Email cannot contain newline characters"),
   type: z
     .string()
     .trim()
     .min(2, "Service type is required")
-    .max(100, "Service type cannot exceed 100 characters"),
+    .max(100, "Service type cannot exceed 100 characters")
+    .regex(/^[^\r\n]+$/, "Service type cannot contain newline characters")
+    .refine(
+      (val) =>
+        ALLOWED_ENQUIRY_SERVICES.includes(val as (typeof ALLOWED_ENQUIRY_SERVICES)[number]) ||
+        /^[A-Za-z0-9 &+,/-]{2,100}$/.test(val),
+      { message: "Please select an authorized service capability." }
+    ),
   message: z
     .string()
     .trim()

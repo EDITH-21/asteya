@@ -1,6 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  poweredByHeader: false,
+  productionBrowserSourceMaps: false,
   async headers() {
     return [
       {
@@ -16,7 +18,7 @@ const nextConfig: NextConfig = {
           },
           {
             key: "X-Frame-Options",
-            value: "SAMEORIGIN",
+            value: "DENY",
           },
           {
             key: "X-Content-Type-Options",
@@ -28,18 +30,18 @@ const nextConfig: NextConfig = {
           },
           {
             key: "Permissions-Policy",
-            value: "camera=(), microphone=(), geolocation=()",
+            value: "camera=(), microphone=(), geolocation=(), browsing-topics=()",
           },
           {
             key: "Content-Security-Policy",
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+              "script-src 'self' 'unsafe-inline'",
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: blob: https:",
               "font-src 'self' data:",
-              "connect-src 'self'",
-              "frame-ancestors 'self'",
+              "connect-src 'self' https://vitals.vercel-insights.com",
+              "frame-ancestors 'none'",
               "base-uri 'self'",
               "form-action 'self'",
             ].join("; "),

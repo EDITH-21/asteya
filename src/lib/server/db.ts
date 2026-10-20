@@ -189,10 +189,10 @@ export async function initializeDatabase(): Promise<void> {
       };
 
       db.users.push(defaultAdmin);
-      console.log(`[DB] Initialized default admin account from ADMIN_INITIAL_PASSWORD: ${adminEmail}`);
+      console.log("[DB] Initialized default administrator account securely.");
     } else {
       console.warn(
-        `[DB] No administrator accounts registered. Set ADMIN_INITIAL_PASSWORD (min 10 chars) or execute 'npm run seed:admin <email> <password>' to securely configure credentials.`
+        "[DB] No administrator accounts registered. Set ADMIN_INITIAL_PASSWORD (min 10 chars) or execute 'npm run seed:admin <email> <password>' to securely configure credentials."
       );
     }
   }

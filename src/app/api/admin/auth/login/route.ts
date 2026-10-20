@@ -18,6 +18,26 @@ import {
 
 export async function POST(req: NextRequest) {
   try {
+    // 0. Defense-in-depth CSRF check: verify Origin matches Host
+    const origin = req.headers.get("origin");
+    const host = req.headers.get("host");
+    if (origin && host) {
+      try {
+        const originHost = new URL(origin).host;
+        if (originHost !== host) {
+          return NextResponse.json(
+            { error: "Cross-origin login request rejected." },
+            { status: 403 }
+          );
+        }
+      } catch {
+        return NextResponse.json(
+          { error: "Invalid origin header." },
+          { status: 403 }
+        );
+      }
+    }
+
     await initializeDatabase();
 
     const body = await req.json();

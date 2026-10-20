@@ -135,7 +135,7 @@ export default function RootLayout({
       <head>
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }}
         />
       </head>
       <body className="bg-[#05070b] text-[#f1f5f9] antialiased selection:bg-indigo-500/30 selection:text-white min-h-[100svh]">
