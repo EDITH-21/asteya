@@ -1,10 +1,24 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import Image from "next/image";
-import { Target, Compass, Cpu, Zap, ArrowUpRight, Users, Sparkles } from "lucide-react";
+import {
+  ArrowRight,
+  Code2,
+  Cpu,
+  Layers,
+  Palette,
+  Bot,
+  Globe2,
+  Lightbulb,
+  Search,
+  Compass,
+  ShieldCheck,
+  Rocket,
+  Zap,
+} from "lucide-react";
 import { useContactModal } from "@/components/layout/PublicLayout";
-import { SafeMarkdown } from "@/components/ui/SafeMarkdown";
 import type { AboutContent, TeamMember } from "@/lib/server/content-types";
 
 const LinkedInIcon: React.FC<{ className?: string }> = ({ className = "w-4 h-4" }) => (
@@ -33,6 +47,86 @@ function sanitizeRole(role: string): string {
   return role;
 }
 
+// Grounded in existing site services data (DETAILED_SERVICES)
+const CORE_SERVICES = [
+  {
+    num: "01",
+    title: "Web Development",
+    tagline: "Modern, responsive, and scalable web platforms engineered for longevity.",
+    href: "/services/web-development",
+    icon: Code2,
+  },
+  {
+    num: "02",
+    title: "Digital Solutions",
+    tagline: "Targeted engineering resolving complex operational bottlenecks.",
+    href: "/services/digital-solutions",
+    icon: Cpu,
+  },
+  {
+    num: "03",
+    title: "Brand & Design",
+    tagline: "Strategic visual identities and consistent digital design systems.",
+    href: "/services/brand-design",
+    icon: Palette,
+  },
+  {
+    num: "04",
+    title: "Business Automation",
+    tagline: "Autonomous workflows and custom operational pipelines.",
+    href: "/services/business-automation",
+    icon: Bot,
+  },
+  {
+    num: "05",
+    title: "Digital Presence",
+    tagline: "Comprehensive search visibility, technical SEO, and conversion optimization.",
+    href: "/services/digital-presence",
+    icon: Globe2,
+  },
+  {
+    num: "06",
+    title: "Technology Consulting",
+    tagline: "Architectural advisory, technology audits, and systems modernizations.",
+    href: "/services/technology-consulting",
+    icon: Lightbulb,
+  },
+];
+
+// Grounded in existing site process stages (UNIFIED_PROCESS_STAGES)
+const PROCESS_STAGES = [
+  {
+    step: "01",
+    name: "Discover & Strategy",
+    summary: "Deconstructing domain requirements, analyzing user needs, and establishing architecture milestones.",
+    icon: Search,
+  },
+  {
+    step: "02",
+    name: "Design & Systems",
+    summary: "Crafting intuitive UX workflows, responsive design systems, and interactive component prototypes.",
+    icon: Compass,
+  },
+  {
+    step: "03",
+    name: "Precision Engineering",
+    summary: "Building robust, type-safe full-stack software with modern frameworks, clean APIs, and scalable infrastructure.",
+    icon: Code2,
+  },
+  {
+    step: "04",
+    name: "Validation & QA",
+    summary: "Automated end-to-end testing, security audits, accessibility compliance, and cross-device verification.",
+    icon: ShieldCheck,
+  },
+  {
+    step: "05",
+    name: "Launch & Evolution",
+    summary: "Structured deployment, real-time observability, and ongoing iterative improvements based on user telemetry.",
+    icon: Rocket,
+  },
+];
+
 interface AboutPageClientProps {
   about: AboutContent;
   team: TeamMember[];
@@ -47,15 +141,15 @@ export const AboutPageClient: React.FC<AboutPageClientProps> = ({ about, team })
       : [
           {
             title: "Precision Engineering",
-            text: "High-speed, scalable, modern architectural foundations built for longevity.",
+            text: "High-speed, scalable, modern architectural foundations built for longevity and maintainability.",
           },
           {
             title: "Intelligent Velocity",
-            text: "Autonomous workflows and rapid continuous product deployment loops.",
+            text: "Autonomous workflows and rapid continuous product deployment loops without compromising stability.",
           },
           {
-            title: "Technical Stewardship",
-            text: "Direct ownership of every line of code without bureaucratic abstraction.",
+            title: "Transparent Ownership",
+            text: "Complete source code transfer, clean documentation, and honest technical collaboration at every phase.",
           },
           {
             title: "Human Utility",
@@ -66,149 +160,171 @@ export const AboutPageClient: React.FC<AboutPageClientProps> = ({ about, team })
   return (
     <div className="w-full">
       {/* 1. Hero Section */}
-      <section className="relative pt-28 sm:pt-36 pb-16 sm:pb-24 overflow-hidden border-b border-white/[0.04]">
-        {/* Subtle Ambient Glow */}
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[340px] sm:w-[600px] h-[280px] bg-indigo-600/10 rounded-full blur-2xl sm:blur-[140px] pointer-events-none" />
+      <section className="relative pt-28 sm:pt-36 pb-12 sm:pb-16 overflow-hidden border-b border-white/[0.04]">
+        {/* Subtle Ambient Background Light */}
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[320px] sm:w-[540px] h-[220px] bg-indigo-600/10 rounded-full blur-2xl sm:blur-[120px] pointer-events-none" />
 
-        <div className="site-container relative z-10 text-center max-w-4xl mx-auto space-y-6">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/10 text-indigo-300 font-sans text-xs font-medium tracking-wide">
+        <div className="site-container relative z-10 text-center max-w-4xl mx-auto space-y-4">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] border border-white/10 text-indigo-300 font-sans text-xs font-medium tracking-wide">
             <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
-            <span>Company &bull; Purpose &amp; Stewardship</span>
+            <span>Company &bull; Purpose</span>
           </div>
 
           <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold tracking-tight text-white uppercase leading-[1.08]">
-            {about.headline || "Technology should move humanity forward."}
+            About Aadrut
           </h1>
 
-          <p className="text-slate-300 text-base sm:text-lg font-normal leading-relaxed max-w-2xl mx-auto">
-            Aadrut transforms ideas into high-performance digital systems, modern web architectures, and future technology ventures.
+          <p className="text-slate-300 text-base sm:text-lg md:text-xl font-normal leading-relaxed max-w-2xl mx-auto">
+            Aadrut is a technology company creating digital products, intelligent solutions, and ventures designed for the future.
           </p>
         </div>
       </section>
 
-      {/* 2. Our Story Section */}
-      <section className="site-section relative py-16 sm:py-24 border-b border-white/[0.04]">
-        <div className="site-container">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-start">
-            <div className="lg:col-span-4 space-y-3">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] border border-white/10 text-indigo-300 font-sans text-xs font-medium">
-                <span>01 &bull; Narrative</span>
-              </div>
-              <h2 className="text-2xl sm:text-4xl font-bold tracking-tight text-white uppercase">
-                Our Story
-              </h2>
-              <p className="text-xs sm:text-sm text-slate-400">
-                Where engineering discipline meets entrepreneurial execution.
-              </p>
+      {/* 2. About Aadrut Details */}
+      <div className="space-y-12 sm:space-y-16 py-12 sm:py-16">
+        {/* Subsection A: What We Do (6 Core Services) */}
+        <section className="site-container">
+          <div className="max-w-3xl mb-8 space-y-2">
+            <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-white/[0.04] border border-white/10 text-indigo-300 font-sans text-xs font-medium">
+              <span>01 &bull; Capabilities</span>
             </div>
-
-            <div className="lg:col-span-8 bg-[#090d16] border border-white/[0.08] rounded-2xl p-6 sm:p-10 space-y-4 text-slate-300 text-sm sm:text-base leading-relaxed">
-              <SafeMarkdown content={about.story} />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 3. Mission & Vision */}
-      {(about.mission || about.vision) && (
-        <section className="site-section relative py-16 sm:py-24 border-b border-white/[0.04]">
-          <div className="site-container">
-            <div className="max-w-3xl mb-10 space-y-3">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] border border-white/10 text-indigo-300 font-sans text-xs font-medium">
-                <span>02 &bull; Trajectory</span>
-              </div>
-              <h2 className="text-2xl sm:text-4xl font-bold tracking-tight text-white uppercase">
-                Mission &amp; Vision
-              </h2>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {about.mission && (
-                <div className="p-6 sm:p-8 rounded-2xl bg-[#090d16] border border-white/[0.08] space-y-4 relative overflow-hidden group hover:border-indigo-500/30 transition-colors">
-                  <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
-                    <Target className="w-5 h-5" />
-                  </div>
-                  <h3 className="text-lg font-bold text-white uppercase tracking-wide">
-                    Our Mission
-                  </h3>
-                  <p className="text-slate-300 text-sm sm:text-base leading-relaxed">
-                    {about.mission}
-                  </p>
-                </div>
-              )}
-
-              {about.vision && (
-                <div className="p-6 sm:p-8 rounded-2xl bg-[#090d16] border border-white/[0.08] space-y-4 relative overflow-hidden group hover:border-cyan-500/30 transition-colors">
-                  <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400">
-                    <Compass className="w-5 h-5" />
-                  </div>
-                  <h3 className="text-lg font-bold text-white uppercase tracking-wide">
-                    Our Vision
-                  </h3>
-                  <p className="text-slate-300 text-sm sm:text-base leading-relaxed">
-                    {about.vision}
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* 4. Values Section */}
-      <section className="site-section relative py-16 sm:py-24 border-b border-white/[0.04]">
-        <div className="site-container">
-          <div className="max-w-3xl mb-10 space-y-3">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] border border-white/10 text-indigo-300 font-sans text-xs font-medium">
-              <span>03 &bull; Operating Values</span>
-            </div>
-            <h2 className="text-2xl sm:text-4xl font-bold tracking-tight text-white uppercase">
-              How We Operate
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-white uppercase">
+              What We Do
             </h2>
             <p className="text-slate-400 text-sm sm:text-base">
-              The non-negotiable principles that drive every architectural and product decision.
+              Comprehensive digital engineering disciplines designed to take products from concept to high-scale execution.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+            {CORE_SERVICES.map((service) => {
+              const Icon = service.icon;
+              return (
+                <Link
+                  key={service.href}
+                  href={service.href}
+                  className="p-5 sm:p-6 rounded-2xl bg-white/[0.02] border border-white/[0.08] hover:border-indigo-500/30 hover:bg-white/[0.03] transition-all group flex flex-col justify-between focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400"
+                >
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="w-9 h-9 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 group-hover:text-indigo-300 transition-colors">
+                        <Icon className="w-4 h-4" />
+                      </div>
+                      <span className="text-xs font-mono text-slate-500 group-hover:text-indigo-400 transition-colors">
+                        {service.num}
+                      </span>
+                    </div>
+
+                    <h3 className="text-base font-semibold text-white group-hover:text-indigo-200 transition-colors">
+                      {service.title}
+                    </h3>
+
+                    <p className="text-xs sm:text-sm text-slate-400 leading-relaxed font-normal">
+                      {service.tagline}
+                    </p>
+                  </div>
+
+                  <div className="pt-4 flex items-center gap-1.5 text-xs text-indigo-400 font-medium group-hover:translate-x-0.5 transition-transform">
+                    <span>Explore practice</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* Subsection B: How We Work (Execution Methodology) */}
+        <section className="site-container">
+          <div className="max-w-3xl mb-8 space-y-2">
+            <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-white/[0.04] border border-white/10 text-indigo-300 font-sans text-xs font-medium">
+              <span>02 &bull; Methodology</span>
+            </div>
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-white uppercase">
+              How We Work
+            </h2>
+            <p className="text-slate-400 text-sm sm:text-base">
+              A transparent, iterative 5-stage engineering pipeline built for velocity and resilience.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5 sm:gap-4">
+            {PROCESS_STAGES.map((stage) => {
+              const Icon = stage.icon;
+              return (
+                <div
+                  key={stage.step}
+                  className="p-5 rounded-2xl bg-white/[0.02] border border-white/[0.06] space-y-3 relative hover:border-white/[0.12] transition-colors"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-mono font-bold text-indigo-400">
+                      Stage {stage.step}
+                    </span>
+                    <Icon className="w-4 h-4 text-slate-400" />
+                  </div>
+                  <h3 className="text-sm font-semibold text-white tracking-tight">
+                    {stage.name}
+                  </h3>
+                  <p className="text-xs text-slate-400 leading-relaxed font-normal">
+                    {stage.summary}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* Subsection C: What We Value (Operating Values) */}
+        <section className="site-container">
+          <div className="max-w-3xl mb-8 space-y-2">
+            <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-white/[0.04] border border-white/10 text-indigo-300 font-sans text-xs font-medium">
+              <span>03 &bull; Principles</span>
+            </div>
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-white uppercase">
+              What We Value
+            </h2>
+            <p className="text-slate-400 text-sm sm:text-base">
+              Core operating principles that guide our technical decisions, codebase standards, and client stewardship.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {values.map((v, i) => (
               <div
                 key={i}
-                className="p-5 sm:p-6 rounded-2xl bg-white/[0.02] border border-white/[0.06] hover:border-white/10 transition-colors space-y-2.5"
+                className="p-5 sm:p-6 rounded-2xl bg-white/[0.02] border border-white/[0.06] space-y-2 hover:border-indigo-500/20 transition-colors"
               >
                 <div className="flex items-center gap-2 text-indigo-300 font-sans text-sm font-semibold">
-                  {i % 2 === 0 ? (
+                  {i === 0 ? (
                     <Cpu strokeWidth={1.75} className="w-4 h-4 text-indigo-400 shrink-0" />
-                  ) : (
+                  ) : i === 1 ? (
                     <Zap strokeWidth={1.75} className="w-4 h-4 text-cyan-400 shrink-0" />
+                  ) : (
+                    <Layers strokeWidth={1.75} className="w-4 h-4 text-violet-400 shrink-0" />
                   )}
                   <span>{v.title}</span>
                 </div>
-                <p className="text-xs text-slate-400 leading-relaxed">{v.text}</p>
+                <p className="text-xs text-slate-400 leading-relaxed font-normal">{v.text}</p>
               </div>
             ))}
           </div>
-        </div>
-      </section>
+        </section>
+      </div>
 
-      {/* 5. Team Section */}
+      {/* 3. Our Team Section */}
       {team.length > 0 && (
-        <section className="site-section relative py-16 sm:py-24 border-b border-white/[0.04]">
+        <section className="site-section relative py-12 sm:py-16 border-t border-white/[0.04] bg-[#05070b]">
           <div className="site-container">
-            <div className="max-w-3xl mb-10 space-y-3">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] border border-white/10 text-indigo-300 font-sans text-xs font-medium">
-                <Users className="w-3.5 h-3.5 text-indigo-400" />
-                <span>04 &bull; Core Leadership</span>
+            <div className="max-w-3xl mb-8 sm:mb-10 space-y-2">
+              <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-white/[0.04] border border-white/10 text-indigo-300 font-sans text-xs font-medium">
+                <span>Our Team</span>
               </div>
               <h2 className="text-2xl sm:text-4xl font-bold tracking-tight text-white uppercase">
-                The Minds Behind Aadrut
+                The people behind Aadrut
               </h2>
-              <p className="text-slate-400 text-sm sm:text-base">
-                Direct technical stewardship, precision execution, and dedicated accountability.
-              </p>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
               {team.map((member) => {
                 const initials = member.name
                   .split(" ")
@@ -222,7 +338,7 @@ export const AboutPageClient: React.FC<AboutPageClientProps> = ({ about, team })
                 return (
                   <div
                     key={member.id}
-                    className="p-6 rounded-2xl bg-[#090d16] border border-white/[0.08] backdrop-blur-sm flex flex-col justify-between hover:border-indigo-500/30 transition-colors group"
+                    className="p-6 rounded-2xl bg-white/[0.02] border border-white/[0.08] flex flex-col justify-between hover:border-indigo-500/30 transition-colors group"
                   >
                     <div className="space-y-4">
                       <div className="flex items-center justify-between">
@@ -246,25 +362,25 @@ export const AboutPageClient: React.FC<AboutPageClientProps> = ({ about, team })
                             href={member.linkedinUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="p-2.5 rounded-xl bg-white/[0.03] text-slate-400 hover:text-white hover:bg-white/[0.08] border border-white/[0.06] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400"
-                            aria-label={`${member.name} on LinkedIn`}
+                            className="w-8 h-8 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] text-slate-400 hover:text-white border border-white/10 flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400"
+                            aria-label={`${member.name}'s LinkedIn profile`}
                           >
-                            <LinkedInIcon className="w-4 h-4 text-indigo-400" />
+                            <LinkedInIcon className="w-4 h-4" />
                           </a>
                         )}
                       </div>
 
-                      <div>
-                        <h3 className="text-base font-semibold text-white group-hover:text-indigo-300 transition-colors">
+                      <div className="space-y-1">
+                        <h3 className="text-base font-semibold text-white tracking-tight">
                           {member.name}
                         </h3>
-                        <p className="text-xs font-medium text-cyan-400 mt-0.5">
+                        <p className="text-xs font-mono uppercase tracking-wider text-indigo-400 font-medium">
                           {safeRole}
                         </p>
                       </div>
 
                       {member.bio && (
-                        <p className="text-xs text-slate-400 leading-relaxed pt-1">
+                        <p className="text-xs sm:text-sm text-slate-400 leading-relaxed font-normal line-clamp-2">
                           {member.bio}
                         </p>
                       )}
@@ -277,29 +393,26 @@ export const AboutPageClient: React.FC<AboutPageClientProps> = ({ about, team })
         </section>
       )}
 
-      {/* 6. CTA Section */}
-      <section className="py-20 sm:py-28 relative overflow-hidden">
-        <div className="site-container relative z-10 text-center max-w-2xl mx-auto space-y-6">
-          <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center mx-auto text-indigo-400">
-            <Sparkles className="w-6 h-6" />
-          </div>
-
-          <h2 className="text-3xl sm:text-5xl font-bold tracking-tight text-white uppercase leading-tight">
-            Ready to Build What&apos;s Next?
-          </h2>
-
-          <p className="text-sm sm:text-base text-slate-300 leading-relaxed">
-            Whether you need modern digital product engineering, enterprise automation, or venture incubation, our team is ready to collaborate.
-          </p>
-
-          <div className="pt-2">
-            <button
-              onClick={openContactModal}
-              className="inline-flex items-center gap-2 px-6 py-3.5 rounded-full bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-500 hover:to-indigo-600 text-white font-sans text-sm font-semibold tracking-wide shadow-lg shadow-indigo-600/30 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400"
-            >
-              <span>Start a Conversation</span>
-              <ArrowUpRight strokeWidth={2} className="w-4 h-4 text-indigo-200" />
-            </button>
+      {/* 4. CTA Section */}
+      <section className="site-section relative py-12 sm:py-16 border-t border-white/[0.04]">
+        <div className="site-container max-w-4xl mx-auto">
+          <div className="p-8 sm:p-12 rounded-3xl bg-gradient-to-b from-indigo-950/30 to-white/[0.02] border border-indigo-500/20 text-center space-y-5">
+            <h2 className="text-2xl sm:text-4xl font-bold text-white tracking-tight uppercase">
+              Have a project in mind?
+            </h2>
+            <p className="text-sm sm:text-base text-slate-300 max-w-xl mx-auto font-normal leading-relaxed">
+              Let&apos;s discuss your requirements and build dependable digital systems for your business.
+            </p>
+            <div className="pt-2">
+              <button
+                type="button"
+                onClick={openContactModal}
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-white text-black font-semibold text-sm hover:bg-slate-100 transition-all duration-200 shadow-[0_0_24px_rgba(255,255,255,0.2)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400"
+              >
+                <span>Contact Our Team</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
           </div>
         </div>
       </section>

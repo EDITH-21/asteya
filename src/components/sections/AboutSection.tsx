@@ -177,7 +177,6 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ about }) => {
 
   return (
     <section
-      id="about"
       ref={containerRef}
       className="site-section relative w-full bg-[#05070b] overflow-hidden"
     >

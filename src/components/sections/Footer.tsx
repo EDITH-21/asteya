@@ -196,7 +196,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenContact, settings, hasFaqs
                   href="/about"
                   className="inline-flex items-center min-h-[40px] sm:min-h-[32px] text-slate-300 hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 rounded"
                 >
-                  About
+                  Our Team
                 </Link>
               </li>
               <li>

@@ -31,7 +31,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   const lockTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const navItems = [
-    { name: "About", href: "/about", isRoute: true },
+    { name: "Our Team", href: "/about", isRoute: true },
     { name: "Services", href: isHome ? "#services" : "/#services", isRoute: false, sectionId: "services" },
     { name: "Ventures", href: isHome ? "#ventures" : "/#ventures", isRoute: false, sectionId: "ventures" },
     { name: "Process", href: isHome ? "#process" : "/#process", isRoute: false, sectionId: "process" },
@@ -188,7 +188,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   };
 
   const getItemIsActive = (item: (typeof navItems)[0]) => {
-    if (item.name === "About") {
+    if (item.href === "/about") {
       return pathname === "/about";
     }
     if (item.name === "FAQ") {

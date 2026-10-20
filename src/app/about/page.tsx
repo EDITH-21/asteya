@@ -7,11 +7,9 @@ import { AboutPageClient } from "@/components/pages/AboutPageClient";
 export const revalidate = 60;
 
 export async function generateMetadata(): Promise<Metadata> {
-  const content = await getPublicSiteContent();
-  const title = "About Us | Aadrut";
+  const title = "About Aadrut | Aadrut";
   const description =
-    content.about.story?.slice(0, 160) ||
-    "Learn about Aadrut's mission, values, and the team engineering future-proof digital systems and technology ventures.";
+    "Aadrut is a technology company creating digital products, intelligent solutions, and ventures designed for the future.";
 
   return {
     title,

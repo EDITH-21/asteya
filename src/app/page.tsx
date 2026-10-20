@@ -8,9 +8,14 @@ export const dynamic = "force-dynamic";
 export default async function Home() {
   const content = await getPublicSiteContent();
 
+  const homeContent = {
+    ...content,
+    team: [],
+  };
+
   return (
-    <PublicLayout content={content}>
-      <HomePageClient content={content} />
+    <PublicLayout content={homeContent}>
+      <HomePageClient content={homeContent} />
     </PublicLayout>
   );
 }
