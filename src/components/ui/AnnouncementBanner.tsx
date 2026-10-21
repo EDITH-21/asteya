@@ -15,30 +15,36 @@ export const AnnouncementBanner: React.FC<AnnouncementBannerProps> = ({
   onHeightChange,
 }) => {
   const [isClientDismissed, setIsClientDismissed] = useState(false);
+  const [isDateValid, setIsDateValid] = useState(true);
   const bannerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    if (!announcement || !announcement.dismissible) return;
     const timer = setTimeout(() => {
-      try {
-        const key = `aadrut_announcement_dismissed_${announcement.id}`;
-        if (localStorage.getItem(key) === "true") {
-          setIsClientDismissed(true);
+      if (!announcement || !announcement.dismissible) {
+        setIsClientDismissed(false);
+      } else {
+        try {
+          const version = announcement.updatedAt || announcement.createdAt || "v1";
+          const key = `aadrut_announcement_dismissed_${announcement.id}_${version}`;
+          setIsClientDismissed(localStorage.getItem(key) === "true");
+        } catch {
+          // ignore storage errors
         }
-      } catch {
-        // ignore storage errors
+      }
+
+      if (announcement) {
+        const now = Date.now();
+        const valid =
+          Boolean(announcement.active) &&
+          (!announcement.startDate || new Date(announcement.startDate).getTime() <= now + 120000) &&
+          (!announcement.endDate || new Date(announcement.endDate).getTime() >= now);
+        setIsDateValid(valid);
       }
     }, 0);
     return () => clearTimeout(timer);
   }, [announcement]);
 
-  const now = new Date().toISOString();
-  const isWithinDates =
-    Boolean(announcement?.active) &&
-    (!announcement?.startDate || announcement.startDate <= now) &&
-    (!announcement?.endDate || announcement.endDate >= now);
-
-  const isVisible = Boolean(announcement) && isWithinDates && (!announcement?.dismissible || !isClientDismissed);
+  const isVisible = Boolean(announcement?.active) && isDateValid && (!announcement?.dismissible || !isClientDismissed);
 
   // Sync measured height with parent layout to offset fixed navbar
   useEffect(() => {
@@ -66,7 +72,8 @@ export const AnnouncementBanner: React.FC<AnnouncementBannerProps> = ({
     onHeightChange?.(0);
     if (announcement.dismissible && typeof window !== "undefined") {
       try {
-        localStorage.setItem(`aadrut_announcement_dismissed_${announcement.id}`, "true");
+        const version = announcement.updatedAt || announcement.createdAt || "v1";
+        localStorage.setItem(`aadrut_announcement_dismissed_${announcement.id}_${version}`, "true");
       } catch {
         // ignore
       }

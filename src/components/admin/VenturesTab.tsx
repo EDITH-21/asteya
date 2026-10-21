@@ -85,6 +85,7 @@ export const VenturesTab: React.FC = () => {
       status: "In development",
       label: "Aadrut Venture Labs",
       link: "",
+      imageUrl: "",
       featured: false,
       published: true,
       order: ventures.length + 1,
@@ -139,6 +140,7 @@ export const VenturesTab: React.FC = () => {
       status: editingVenture.status || "In development",
       label: editingVenture.label?.trim() || "",
       link: editingVenture.link?.trim() || "",
+      imageUrl: editingVenture.imageUrl?.trim() || "",
       tags: parsedTags,
       featured: Boolean(editingVenture.featured),
       published: Boolean(editingVenture.published),
@@ -585,16 +587,32 @@ export const VenturesTab: React.FC = () => {
 
                 <div>
                   <label className="block text-slate-300 font-semibold mb-1">
-                    Tags <span className="text-[10px] text-slate-400 font-normal">(comma-separated)</span>
+                    Image / Icon URL <span className="text-[10px] text-slate-400 font-normal">(Optional)</span>
                   </label>
                   <input
                     type="text"
-                    value={rawTags}
-                    onChange={(e) => setRawTags(e.target.value)}
-                    placeholder="Next.js, AI, Automation"
+                    maxLength={500}
+                    value={editingVenture.imageUrl || ""}
+                    onChange={(e) =>
+                      setEditingVenture({ ...editingVenture, imageUrl: e.target.value })
+                    }
+                    placeholder="https://example.com/logo.png"
                     className="w-full px-3 py-2 rounded-xl bg-black/40 border border-white/10 text-white placeholder:text-slate-400 focus:outline-none focus:border-indigo-500"
                   />
                 </div>
+              </div>
+
+              <div>
+                <label className="block text-slate-300 font-semibold mb-1">
+                  Tags <span className="text-[10px] text-slate-400 font-normal">(comma-separated)</span>
+                </label>
+                <input
+                  type="text"
+                  value={rawTags}
+                  onChange={(e) => setRawTags(e.target.value)}
+                  placeholder="Next.js, AI, Automation"
+                  className="w-full px-3 py-2 rounded-xl bg-black/40 border border-white/10 text-white placeholder:text-slate-400 focus:outline-none focus:border-indigo-500"
+                />
               </div>
 
               {/* Stats Section */}

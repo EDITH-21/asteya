@@ -5,7 +5,7 @@ import dynamic from "next/dynamic";
 import { Hero } from "@/components/sections/Hero";
 import { AboutSection } from "@/components/sections/AboutSection";
 import { ServicesSection } from "@/components/sections/ServicesSection";
-import { useContactModal } from "@/components/layout/PublicLayout";
+import { useContactModal, usePublicContent } from "@/components/layout/PublicLayout";
 import type { PublicSiteContent } from "@/lib/server/content-types";
 
 // Lazy-load below-the-fold sections with next/dynamic to minimize initial mobile JS payload
@@ -53,7 +53,9 @@ interface HomePageClientProps {
   content: PublicSiteContent;
 }
 
-export const HomePageClient: React.FC<HomePageClientProps> = ({ content }) => {
+export const HomePageClient: React.FC<HomePageClientProps> = ({ content: initialContent }) => {
+  const liveContent = usePublicContent();
+  const content = liveContent || initialContent;
   const { openContactModal } = useContactModal();
 
   return (

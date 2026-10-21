@@ -116,13 +116,23 @@ export const VenturesSection: React.FC<VenturesSectionProps> = ({ ventures = [] 
                 </div>
 
                 {/* Title & Tagline */}
-                <div>
-                  <h3 className="text-3xl sm:text-5xl font-bold tracking-tight text-white uppercase">
-                    {featuredVenture.name}
-                  </h3>
-                  <p className="text-lg sm:text-xl font-medium text-indigo-300 mt-1">
-                    {featuredVenture.tagline}
-                  </p>
+                <div className="flex items-start gap-4">
+                  {featuredVenture.imageUrl && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={featuredVenture.imageUrl}
+                      alt={featuredVenture.name}
+                      className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl object-cover border border-white/10 shrink-0"
+                    />
+                  )}
+                  <div>
+                    <h3 className="text-3xl sm:text-5xl font-bold tracking-tight text-white uppercase">
+                      {featuredVenture.name}
+                    </h3>
+                    <p className="text-lg sm:text-xl font-medium text-indigo-300 mt-1">
+                      {featuredVenture.tagline}
+                    </p>
+                  </div>
                 </div>
 
                 {/* Description */}
@@ -294,11 +304,21 @@ export const VenturesSection: React.FC<VenturesSectionProps> = ({ ventures = [] 
                     )}
                   </div>
 
-                  <div>
-                    <h4 className="text-xl font-bold text-white group-hover:text-indigo-300 transition-colors">
-                      {v.name}
-                    </h4>
-                    <p className="text-xs font-medium text-indigo-400 mt-1">{v.tagline}</p>
+                  <div className="flex items-start gap-3">
+                    {v.imageUrl && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={v.imageUrl}
+                        alt={v.name}
+                        className="w-10 h-10 rounded-xl object-cover border border-white/10 shrink-0 mt-0.5"
+                      />
+                    )}
+                    <div>
+                      <h4 className="text-xl font-bold text-white group-hover:text-indigo-300 transition-colors">
+                        {v.name}
+                      </h4>
+                      <p className="text-xs font-medium text-indigo-400 mt-1">{v.tagline}</p>
+                    </div>
                   </div>
 
                   <div className="text-xs text-slate-400 leading-relaxed font-normal">

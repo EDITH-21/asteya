@@ -287,6 +287,12 @@ export const VentureSchema = z.object({
     .refine(isHttpsOnly, "Venture link must use https:// protocol")
     .optional()
     .or(z.literal("")),
+  imageUrl: z
+    .string()
+    .trim()
+    .max(500)
+    .optional()
+    .or(z.literal("")),
   tags: z
     .array(
       z

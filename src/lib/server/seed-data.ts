@@ -270,6 +270,6 @@ export const SEED_SITE_SETTINGS: SiteSettings = {
   linkedinUrl: "https://www.linkedin.com/company/asteya",
   footerTagline: "Digital Products, Intelligent Solutions & Future Ventures.",
   maintenanceMode: false,
-  showTestimonials: false,
+  showTestimonials: true,
   updatedAt: "2026-10-20T18:00:00.000Z",
 };

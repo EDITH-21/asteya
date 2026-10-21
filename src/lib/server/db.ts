@@ -865,12 +865,12 @@ export async function getAnnouncements(): Promise<Announcement[]> {
 
 export async function getActiveAnnouncement(): Promise<Announcement | null> {
   const all = await getAnnouncements();
-  const now = new Date().toISOString();
+  const nowTime = Date.now();
   return (
     all.find((a) => {
       if (!a.active) return false;
-      if (a.startDate && a.startDate > now) return false;
-      if (a.endDate && a.endDate < now) return false;
+      if (a.startDate && new Date(a.startDate).getTime() > nowTime + 120000) return false;
+      if (a.endDate && new Date(a.endDate).getTime() < nowTime) return false;
       return true;
     }) || null
   );
@@ -878,11 +878,11 @@ export async function getActiveAnnouncement(): Promise<Announcement | null> {
 
 export async function getPublishedAnnouncements(): Promise<Announcement[]> {
   const all = await getAnnouncements();
-  const now = new Date().toISOString();
+  const nowTime = Date.now();
   return all.filter((a) => {
     if (!a.active) return false;
-    if (a.startDate && a.startDate > now) return false;
-    if (a.endDate && a.endDate < now) return false;
+    if (a.startDate && new Date(a.startDate).getTime() > nowTime + 120000) return false;
+    if (a.endDate && new Date(a.endDate).getTime() < nowTime) return false;
     return true;
   });
 }

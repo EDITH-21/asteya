@@ -15,7 +15,8 @@ export const TestimonialsSection: React.FC<TestimonialsSectionProps> = ({
   testimonials,
   showTestimonials,
 }) => {
-  if (!showTestimonials || testimonials.length === 0) {
+  // If no published testimonials or explicitly disabled, do not render
+  if (showTestimonials === false || !testimonials || testimonials.length === 0) {
     return null;
   }
 

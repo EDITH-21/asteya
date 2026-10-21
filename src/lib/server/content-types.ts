@@ -55,6 +55,7 @@ export interface Venture {
   status: VentureStatus;
   label?: string;
   link?: string;
+  imageUrl?: string;
   tags: string[];
   featured: boolean;
   order: number;
