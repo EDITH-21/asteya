@@ -52,6 +52,7 @@ export interface Venture {
   tagline: string;
   description: string;
   status: VentureStatus;
+  label?: string;
   link?: string;
   tags: string[];
   featured: boolean;

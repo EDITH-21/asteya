@@ -272,6 +272,13 @@ export const VentureSchema = z.object({
     .max(1000, "Description cannot exceed 1000 characters")
     .refine((val) => !NO_HTML_REGEX.test(val), noHtmlMessage),
   status: z.enum(["Live", "In development", "Coming soon"]),
+  label: z
+    .string()
+    .trim()
+    .max(60, "Label cannot exceed 60 characters")
+    .refine((val) => !NO_HTML_REGEX.test(val), noHtmlMessage)
+    .optional()
+    .or(z.literal("")),
   link: z
     .string()
     .trim()

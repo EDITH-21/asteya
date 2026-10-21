@@ -10,14 +10,14 @@ import { Menu, X, ArrowUpRight } from "lucide-react";
 interface NavbarProps {
   onOpenContact: () => void;
   hasFaqs?: boolean;
+  hasVentures?: boolean;
   topOffset?: number;
 }
-
-const SECTION_IDS = ["services", "ventures", "process", "technology", "why-aadrut"];
 
 export const Navbar: React.FC<NavbarProps> = ({
   onOpenContact,
   hasFaqs = false,
+  hasVentures = false,
   topOffset = 0,
 }) => {
   const pathname = usePathname();
@@ -30,10 +30,20 @@ export const Navbar: React.FC<NavbarProps> = ({
   const isLockedRef = useRef(false);
   const lockTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const sectionIds = React.useMemo(
+    () =>
+      hasVentures
+        ? ["services", "ventures", "process", "technology", "why-aadrut"]
+        : ["services", "process", "technology", "why-aadrut"],
+    [hasVentures]
+  );
+
   const navItems = [
     { name: "Our Team", href: "/about", isRoute: true },
     { name: "Services", href: isHome ? "#services" : "/#services", isRoute: false, sectionId: "services" },
-    { name: "Ventures", href: isHome ? "#ventures" : "/#ventures", isRoute: false, sectionId: "ventures" },
+    ...(hasVentures
+      ? [{ name: "Ventures", href: isHome ? "#ventures" : "/#ventures", isRoute: false, sectionId: "ventures" }]
+      : []),
     { name: "Process", href: isHome ? "#process" : "/#process", isRoute: false, sectionId: "process" },
     { name: "Technology", href: isHome ? "#technology" : "/#technology", isRoute: false, sectionId: "technology" },
     { name: "Why Aadrut", href: isHome ? "#why-aadrut" : "/#why-aadrut", isRoute: false, sectionId: "why-aadrut" },
@@ -65,7 +75,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
       // 1. Near the bottom of the page, the last link (Why Aadrut) becomes active
       if (windowHeight + scrollY >= docHeight - 80) {
-        setActiveSection(SECTION_IDS[SECTION_IDS.length - 1]);
+        setActiveSection(sectionIds[sectionIds.length - 1]);
         return;
       }
 
@@ -78,7 +88,7 @@ export const Navbar: React.FC<NavbarProps> = ({
       // 3. The active section is the last section whose top is <= (header height + 24px)
       const threshold = getHeaderThreshold();
       let currentActive = "";
-      for (const id of SECTION_IDS) {
+      for (const id of sectionIds) {
         const el = document.getElementById(id);
         if (el) {
           const rect = el.getBoundingClientRect();
@@ -119,7 +129,7 @@ export const Navbar: React.FC<NavbarProps> = ({
     const rafId = requestAnimationFrame(() => {
       if (window.location.hash) {
         const hashId = window.location.hash.substring(1);
-        if (SECTION_IDS.includes(hashId)) {
+        if (sectionIds.includes(hashId)) {
           setActiveSection(hashId);
           return;
         }
@@ -135,7 +145,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         clearTimeout(lockTimeoutRef.current);
       }
     };
-  }, [isHome]);
+  }, [isHome, sectionIds]);
 
   // Lock body scroll when mobile menu is open
   useEffect(() => {

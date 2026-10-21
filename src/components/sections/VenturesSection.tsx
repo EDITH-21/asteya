@@ -2,7 +2,7 @@
 
 import React from "react";
 import { motion } from "framer-motion";
-import { Clock, Sparkles, ExternalLink } from "lucide-react";
+import { Clock, ExternalLink } from "lucide-react";
 import type { Venture } from "@/lib/server/content-types";
 import { SafeMarkdown } from "@/components/ui/SafeMarkdown";
 
@@ -11,6 +11,7 @@ interface VenturesSectionProps {
 }
 
 export const VenturesSection: React.FC<VenturesSectionProps> = ({ ventures = [] }) => {
+  // If no published ventures, completely hide the section (no empty container or blank space)
   if (!ventures || ventures.length === 0) {
     return null;
   }
@@ -18,7 +19,39 @@ export const VenturesSection: React.FC<VenturesSectionProps> = ({ ventures = [] 
   const featuredVenture = ventures.find((v) => v.featured) || ventures[0];
   const otherVentures = featuredVenture
     ? ventures.filter((v) => v.id !== featuredVenture.id)
-    : ventures;
+    : [];
+
+  const hasStats = Boolean(
+    featuredVenture && featuredVenture.stats && featuredVenture.stats.length > 0
+  );
+
+  const getStatusStyles = (status: string) => {
+    switch (status) {
+      case "Live":
+        return {
+          dotBg: "bg-emerald-500",
+          pingBg: "bg-emerald-400",
+          badgeClass: "bg-emerald-500/10 border-emerald-400/30 text-emerald-300",
+          indicatorColor: "bg-emerald-400",
+        };
+      case "In development":
+        return {
+          dotBg: "bg-cyan-500",
+          pingBg: "bg-cyan-400",
+          badgeClass: "bg-cyan-500/10 border-cyan-400/30 text-cyan-300",
+          indicatorColor: "bg-cyan-400",
+        };
+      default: // Coming soon
+        return {
+          dotBg: "bg-purple-500",
+          pingBg: "bg-purple-400",
+          badgeClass: "bg-purple-500/10 border-purple-400/30 text-purple-300",
+          indicatorColor: "bg-purple-400",
+        };
+    }
+  };
+
+  const statusStyle = getStatusStyles(featuredVenture.status);
 
   return (
     <section
@@ -58,14 +91,26 @@ export const VenturesSection: React.FC<VenturesSectionProps> = ({ ventures = [] 
             {/* Subtle Corner Glow */}
             <div className="absolute -top-32 -right-32 w-80 h-80 bg-indigo-500/15 rounded-full blur-3xl pointer-events-none" />
 
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
-              {/* Left Info Column */}
-              <div className="lg:col-span-6 space-y-6">
+            <div
+              className={
+                hasStats
+                  ? "grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center"
+                  : "max-w-3xl space-y-6"
+              }
+            >
+              {/* Main Info Column */}
+              <div className={hasStats ? "lg:col-span-6 space-y-6" : "space-y-6"}>
                 {/* Status Badge */}
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-400/30 text-indigo-300 text-xs font-sans font-medium">
+                <div
+                  className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-sans font-medium border ${statusStyle.badgeClass}`}
+                >
                   <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-70" />
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500" />
+                    <span
+                      className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-70 ${statusStyle.pingBg}`}
+                    />
+                    <span
+                      className={`relative inline-flex rounded-full h-2 w-2 ${statusStyle.dotBg}`}
+                    />
                   </span>
                   <span>{featuredVenture.status} &bull; Venture Spotlight</span>
                 </div>
@@ -103,11 +148,13 @@ export const VenturesSection: React.FC<VenturesSectionProps> = ({ ventures = [] 
                 {/* Optional External Link & Stage Indicator */}
                 <div className="pt-2 flex flex-wrap items-center gap-4 text-xs font-sans text-slate-400">
                   <span className="flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                    <span
+                      className={`w-1.5 h-1.5 rounded-full ${statusStyle.indicatorColor}`}
+                    />
                     <span>{featuredVenture.status}</span>
                   </span>
                   <span>&bull;</span>
-                  <span>Aadrut Venture Labs</span>
+                  <span>{featuredVenture.label || "Aadrut Venture Labs"}</span>
 
                   {featuredVenture.link && (
                     <>
@@ -126,74 +173,94 @@ export const VenturesSection: React.FC<VenturesSectionProps> = ({ ventures = [] 
                 </div>
               </div>
 
-              {/* Right: Thoughtful Conceptual Interface or Stats */}
-              <div className="lg:col-span-6">
-                <div className="rounded-2xl bg-[#080c16]/90 border border-white/[0.1] p-6 backdrop-blur-xl shadow-2xl space-y-5">
-                  {/* Interface Header */}
-                  <div className="flex items-center justify-between border-b border-white/[0.08] pb-3.5">
-                    <div className="flex items-center gap-2.5">
-                      <div className="flex gap-1.5">
-                        <span className="w-2.5 h-2.5 rounded-full bg-white/10" />
-                        <span className="w-2.5 h-2.5 rounded-full bg-white/10" />
-                        <span className="w-2.5 h-2.5 rounded-full bg-white/10" />
-                      </div>
-                      <span className="text-xs font-sans text-slate-300 font-medium ml-2">
-                        {featuredVenture.name} Systems Architecture
-                      </span>
-                    </div>
-                    <div className="text-[11px] font-sans text-emerald-300 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 rounded-full">
-                      Active
-                    </div>
-                  </div>
-
-                  {/* Session Card */}
-                  <div className="p-4 rounded-xl bg-white/[0.03] border border-white/[0.06] space-y-3">
-                    <div className="flex items-center justify-between text-xs text-slate-400">
-                      <span className="flex items-center gap-1.5">
-                        <Clock strokeWidth={1.75} className="w-3.5 h-3.5 text-indigo-400" />
-                        <span>Execution Pipeline</span>
-                      </span>
-                      <span className="font-mono text-slate-300">Continuous Integration</span>
-                    </div>
-
-                    <div className="w-full bg-white/10 h-1.5 rounded-full overflow-hidden">
-                      <div className="h-full bg-gradient-to-r from-indigo-500 to-cyan-400 rounded-full w-3/4" />
-                    </div>
-
-                    <div className="flex justify-between items-center text-xs pt-1">
-                      <span className="text-slate-300 font-medium">{featuredVenture.tagline}</span>
-                      <span className="text-emerald-400 text-[11px] font-medium">99.9% Uptime</span>
-                    </div>
-                  </div>
-
-                  {/* Dynamic Stats Grid (ONLY rendered if stats are present and non-empty) */}
-                  {featuredVenture.stats && featuredVenture.stats.length > 0 && (
-                    <div className={`grid grid-cols-${Math.min(2, featuredVenture.stats.length)} gap-3 text-xs`}>
-                      {featuredVenture.stats.map((stat, sIdx) => (
-                        <div
-                          key={sIdx}
-                          className="p-3.5 rounded-xl bg-white/[0.02] border border-white/[0.06] space-y-1"
-                        >
-                          <div className="text-slate-400 text-[11px]">{stat.label}</div>
-                          <div className="text-base font-semibold text-white">{stat.value}</div>
+              {/* Decorative Architecture Mock Panel: Rendered ONLY if stats are present */}
+              {hasStats && (
+                <div className="lg:col-span-6">
+                  <div className="rounded-2xl bg-[#080c16]/90 border border-white/[0.1] p-6 backdrop-blur-xl shadow-2xl space-y-5">
+                    {/* Interface Header */}
+                    <div className="flex items-center justify-between border-b border-white/[0.08] pb-3.5">
+                      <div className="flex items-center gap-2.5">
+                        <div className="flex gap-1.5">
+                          <span className="w-2.5 h-2.5 rounded-full bg-white/10" />
+                          <span className="w-2.5 h-2.5 rounded-full bg-white/10" />
+                          <span className="w-2.5 h-2.5 rounded-full bg-white/10" />
                         </div>
-                      ))}
+                        <span className="text-xs font-sans text-slate-300 font-medium ml-2">
+                          {featuredVenture.name} Systems Architecture
+                        </span>
+                      </div>
+                      <div
+                        className={`text-[11px] font-sans px-2.5 py-0.5 rounded-full border ${statusStyle.badgeClass}`}
+                      >
+                        {featuredVenture.status}
+                      </div>
                     </div>
-                  )}
 
-                  {/* Subtle footer info */}
-                  <div className="pt-2 text-[11px] font-sans text-slate-400 flex justify-between items-center border-t border-white/[0.06]">
-                    <span>Productivity-focused learning architecture</span>
-                    <span>Incubating</span>
+                    {/* Session Card */}
+                    <div className="p-4 rounded-xl bg-white/[0.03] border border-white/[0.06] space-y-3">
+                      <div className="flex items-center justify-between text-xs text-slate-400">
+                        <span className="flex items-center gap-1.5">
+                          <Clock
+                            strokeWidth={1.75}
+                            className="w-3.5 h-3.5 text-indigo-400"
+                          />
+                          <span>Execution Pipeline</span>
+                        </span>
+                        <span className="font-mono text-slate-300">
+                          Continuous Integration
+                        </span>
+                      </div>
+
+                      <div className="w-full bg-white/10 h-1.5 rounded-full overflow-hidden">
+                        <div className="h-full bg-gradient-to-r from-indigo-500 to-cyan-400 rounded-full w-3/4" />
+                      </div>
+
+                      <div className="flex justify-between items-center text-xs pt-1">
+                        <span className="text-slate-300 font-medium truncate pr-2">
+                          {featuredVenture.tagline}
+                        </span>
+                        <span className="text-slate-400 text-[11px] font-mono shrink-0">
+                          {featuredVenture.status}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Dynamic Stats Grid */}
+                    {featuredVenture.stats && featuredVenture.stats.length > 0 && (
+                      <div
+                        className={`grid grid-cols-${Math.min(
+                          2,
+                          featuredVenture.stats.length
+                        )} gap-3 text-xs`}
+                      >
+                        {featuredVenture.stats.map((stat, sIdx) => (
+                          <div
+                            key={sIdx}
+                            className="p-3.5 rounded-xl bg-white/[0.02] border border-white/[0.06] space-y-1"
+                          >
+                            <div className="text-slate-400 text-[11px]">{stat.label}</div>
+                            <div className="text-base font-semibold text-white">
+                              {stat.value}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Subtle footer info */}
+                    <div className="pt-2 text-[11px] font-sans text-slate-400 flex justify-between items-center border-t border-white/[0.06]">
+                      <span>{featuredVenture.label || "Aadrut Venture Labs"}</span>
+                      <span>{featuredVenture.status}</span>
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
             </div>
           </motion.div>
         )}
 
-        {/* Other Ventures or Pipeline Roadmap */}
-        {otherVentures.length > 0 ? (
+        {/* Other Ventures (Rendered ONLY from DB if published items exist) */}
+        {otherVentures.length > 0 && (
           <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
             {otherVentures.map((v) => (
               <motion.div
@@ -206,7 +273,11 @@ export const VenturesSection: React.FC<VenturesSectionProps> = ({ ventures = [] 
               >
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <span className="px-2.5 py-0.5 rounded-full text-xs font-sans bg-cyan-500/10 border border-cyan-500/20 text-cyan-300">
+                    <span
+                      className={`px-2.5 py-0.5 rounded-full text-xs font-sans border ${
+                        getStatusStyles(v.status).badgeClass
+                      }`}
+                    >
                       {v.status}
                     </span>
 
@@ -230,9 +301,9 @@ export const VenturesSection: React.FC<VenturesSectionProps> = ({ ventures = [] 
                     <p className="text-xs font-medium text-indigo-400 mt-1">{v.tagline}</p>
                   </div>
 
-                  <p className="text-xs text-slate-400 leading-relaxed font-normal">
+                  <div className="text-xs text-slate-400 leading-relaxed font-normal">
                     <SafeMarkdown content={v.description} />
-                  </p>
+                  </div>
 
                   {v.tags && v.tags.length > 0 && (
                     <div className="flex flex-wrap gap-1.5 pt-1">
@@ -248,7 +319,7 @@ export const VenturesSection: React.FC<VenturesSectionProps> = ({ ventures = [] 
                   )}
                 </div>
 
-                {/* Hide stats block when empty as required */}
+                {/* Hide stats block when empty */}
                 {v.stats && v.stats.length > 0 && (
                   <div className="pt-4 mt-4 border-t border-white/[0.06] grid grid-cols-2 gap-2">
                     {v.stats.map((s, idx) => (
@@ -262,36 +333,8 @@ export const VenturesSection: React.FC<VenturesSectionProps> = ({ ventures = [] 
               </motion.div>
             ))}
           </div>
-        ) : (
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.15 }}
-            className="mt-6 rounded-2xl bg-white/[0.02] border border-white/[0.06] p-6 sm:p-7 flex flex-col sm:flex-row items-center justify-between gap-4"
-          >
-            <div className="flex items-center gap-3.5">
-              <div className="w-10 h-10 rounded-xl bg-white/[0.03] border border-white/10 flex items-center justify-center text-indigo-300">
-                <Sparkles strokeWidth={1.75} className="w-5 h-5" />
-              </div>
-              <div>
-                <h4 className="text-sm sm:text-base font-semibold text-slate-200">
-                  Additional Ventures in Pipeline
-                </h4>
-                <p className="text-xs text-slate-400">
-                  More technology ventures to be announced as development milestones are met.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2 text-xs font-sans text-slate-400">
-              <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
-              <span>Incubating &bull; Aadrut Roadmap</span>
-            </div>
-          </motion.div>
         )}
       </div>
     </section>
   );
 };
-

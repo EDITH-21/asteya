@@ -45,6 +45,7 @@ import {
   redisSaveTestimonialsList,
   redisGetFAQs,
   redisSaveFAQsList,
+  redisHasVenturesKey,
   redisGetVentures,
   redisSaveVenturesList,
   redisGetAboutContent,
@@ -165,7 +166,7 @@ let inMemoryDb: DatabaseSchema | null = null;
 let lastLoadedTime = 0;
 
 function ensureSeeds(db: DatabaseSchema): DatabaseSchema {
-  if (!db.users || db.users.length === 0) db.users = [...SEED_ADMIN_USERS];
+  if (!db.users) db.users = [];
   if (!db.services || db.services.length === 0) {
     db.services = SERVICES.map((s) => ({
       ...s,
@@ -175,8 +176,8 @@ function ensureSeeds(db: DatabaseSchema): DatabaseSchema {
   }
   if (!db.announcements) db.announcements = [];
   if (!db.testimonials) db.testimonials = [];
-  if (!db.faqs || db.faqs.length === 0) db.faqs = [...SEED_FAQS];
-  if (!db.ventures || db.ventures.length === 0) db.ventures = [...SEED_VENTURES];
+  if (!db.faqs) db.faqs = [...SEED_FAQS];
+  if (!db.ventures) db.ventures = [...SEED_VENTURES];
   if (!db.about) db.about = { ...SEED_ABOUT_CONTENT };
   if (!db.team || db.team.length === 0) db.team = [...SEED_TEAM_MEMBERS];
   if (!db.settings) db.settings = { ...SEED_SITE_SETTINGS };
@@ -268,17 +269,9 @@ export async function initializeDatabase(): Promise<void> {
 
   // 1. Redis shared store initialization
   if (isRedisConfigured()) {
-    // Seed default admins in Redis if not present
-    for (const seed of SEED_ADMIN_USERS) {
-      const existing = await redisGetAdminUser(seed.email);
-      if (!existing) {
-        await redisSaveAdminUser(seed);
-      }
-    }
-
-    // Seed default content in Redis if missing
-    const ventures = await redisGetVentures();
-    if (ventures.length === 0) await redisSaveVenturesList(SEED_VENTURES);
+    // Seed default content in Redis if key missing
+    const hasVentures = await redisHasVenturesKey();
+    if (!hasVentures) await redisSaveVenturesList(SEED_VENTURES);
     const about = await redisGetAboutContent();
     if (!about) await redisSaveAboutContent(SEED_ABOUT_CONTENT);
     const team = await redisGetTeamMembers();
@@ -439,22 +432,11 @@ export async function getAdminByEmail(email: string): Promise<AdminUser | null> 
   if (isRedisConfigured()) {
     const user = await redisGetAdminUser(normalized);
     if (user) return user;
-    const seed = SEED_ADMIN_USERS.find((u) => u.email === normalized);
-    if (seed) {
-      await redisSaveAdminUser(seed);
-      return seed;
-    }
     return null;
   }
   const db = loadDatabase();
   const found = db.users.find((u) => u.email === normalized && u.role === "admin");
   if (found) return found;
-  const seed = SEED_ADMIN_USERS.find((u) => u.email === normalized);
-  if (seed) {
-    db.users.push(seed);
-    saveDatabase(db);
-    return seed;
-  }
   return null;
 }
 
@@ -462,22 +444,11 @@ export async function getAdminById(id: string): Promise<AdminUser | null> {
   if (isRedisConfigured()) {
     const user = await redisGetAdminUserById(id);
     if (user) return user;
-    const seed = SEED_ADMIN_USERS.find((u) => u.id === id);
-    if (seed) {
-      await redisSaveAdminUser(seed);
-      return seed;
-    }
     return null;
   }
   const db = loadDatabase();
   const found = db.users.find((u) => u.id === id && u.role === "admin");
   if (found) return found;
-  const seed = SEED_ADMIN_USERS.find((u) => u.id === id);
-  if (seed) {
-    db.users.push(seed);
-    saveDatabase(db);
-    return seed;
-  }
   return null;
 }
 
@@ -1158,13 +1129,9 @@ export async function getVentures(): Promise<Venture[]> {
   let list: Venture[] = [];
   if (isRedisConfigured()) {
     list = await redisGetVentures();
-    if (list.length === 0) {
-      list = [...SEED_VENTURES];
-      await redisSaveVenturesList(list);
-    }
   } else {
     const db = loadDatabase();
-    list = db.ventures && db.ventures.length > 0 ? db.ventures : [...SEED_VENTURES];
+    list = db.ventures || [];
   }
   return [...list].sort((a, b) => a.order - b.order);
 }
@@ -1254,6 +1221,36 @@ export async function reorderVentures(orderedIds: string[]): Promise<Venture[]> 
     saveDatabase(db);
   }
   return updated;
+}
+
+export async function importExistingVentures(): Promise<Venture[]> {
+  const current = await getVentures();
+  const existingNames = new Set(current.map((v) => v.name.toLowerCase()));
+  let hasChanges = false;
+  const list = [...current];
+
+  for (const seed of SEED_VENTURES) {
+    if (!existingNames.has(seed.name.toLowerCase())) {
+      list.push({
+        ...seed,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      });
+      hasChanges = true;
+    }
+  }
+
+  if (hasChanges) {
+    if (isRedisConfigured()) {
+      await redisSaveVenturesList(list);
+    } else {
+      const db = loadDatabase();
+      db.ventures = list;
+      saveDatabase(db);
+    }
+  }
+
+  return list;
 }
 
 // 5. About Content & Team

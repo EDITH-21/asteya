@@ -14,32 +14,7 @@ import type {
  * N=131072 (2^17), r=8, p=1, maxmem=256MB with cryptographically random 32-byte salt.
  * Initial Password for seed accounts: Asteya#Secure2026!
  */
-export const SEED_ADMIN_USERS: AdminUser[] = [
-  {
-    id: "1d0c3ff8-f299-439c-bae3-5c26530a3217",
-    email: "admin@asteya.tech",
-    username: "Aadrut Admin",
-    passwordHash:
-      "scrypt$131072$8$1$5512204830357df44de57566d21431e501539236b61b85442e77514da12705aee393daa12136e5460c1923cfabd632bbec903a77afd071b99154f15204c4feef",
-    passwordSalt: "00943b14c5d75c6e3ba3f8d237911d4d0a0527a6067f9fbd93e3d3c11a305377",
-    role: "admin",
-    createdAt: "2026-10-15T17:22:49.915Z",
-    updatedAt: "2026-10-20T17:05:19.157Z",
-    totpEnabled: false,
-  },
-  {
-    id: "2e1d4ff9-a399-449c-cae4-6c37641b4328",
-    email: "admin@aadrut.com",
-    username: "Aadrut Admin",
-    passwordHash:
-      "scrypt$131072$8$1$5512204830357df44de57566d21431e501539236b61b85442e77514da12705aee393daa12136e5460c1923cfabd632bbec903a77afd071b99154f15204c4feef",
-    passwordSalt: "00943b14c5d75c6e3ba3f8d237911d4d0a0527a6067f9fbd93e3d3c11a305377",
-    role: "admin",
-    createdAt: "2026-10-20T17:00:00.000Z",
-    updatedAt: "2026-10-20T17:00:00.000Z",
-    totpEnabled: false,
-  },
-];
+export const SEED_ADMIN_USERS: AdminUser[] = [];
 
 /**
  * Seed Ventures (migrated from VenturesSection).
@@ -47,11 +22,12 @@ export const SEED_ADMIN_USERS: AdminUser[] = [
 export const SEED_VENTURES: Venture[] = [
   {
     id: "venture-attenza-01",
-    name: "ATTENZA",
+    name: "Attenza",
     tagline: "Focus better. Learn smarter.",
     description:
       "Attenza is a productivity-focused learning experience designed to help people create a more focused digital environment.",
     status: "Coming soon",
+    label: "Aadrut Venture Labs",
     link: "https://attenza.aadrut.tech",
     tags: [
       "Cognitive Friction Reduction",
@@ -61,30 +37,8 @@ export const SEED_VENTURES: Venture[] = [
     featured: true,
     order: 1,
     published: true,
-    stats: [
-      { label: "Attention Continuity", value: "96% Coherence" },
-      { label: "Curriculum Retention", value: "Optimal Flow" },
-    ],
-    createdAt: "2026-10-18T10:00:00.000Z",
-    updatedAt: "2026-10-20T18:00:00.000Z",
-  },
-  {
-    id: "venture-autonomous-02",
-    name: "Autonomous Systems Lab",
-    tagline: "Intelligent workflow automation and agents",
-    description:
-      "Incubating autonomous workflow systems, intelligent agents, and resilient data processing pipelines for enterprise operational efficiency.",
-    status: "In development",
-    tags: [
-      "Enterprise Automation",
-      "Intelligent Agents",
-      "Distributed Workflows",
-    ],
-    featured: false,
-    order: 2,
-    published: true,
     stats: [],
-    createdAt: "2026-10-19T10:00:00.000Z",
+    createdAt: "2026-10-18T10:00:00.000Z",
     updatedAt: "2026-10-20T18:00:00.000Z",
   },
 ];

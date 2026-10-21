@@ -263,6 +263,11 @@ export async function redisSaveFAQsList(list: FAQItem[]): Promise<void> {
 }
 
 // 4. Ventures
+export async function redisHasVenturesKey(): Promise<boolean> {
+  if (!redis) return false;
+  return (await redis.exists("content:ventures")) === 1;
+}
+
 export async function redisGetVentures(): Promise<Venture[]> {
   if (!redis) return [];
   const list = await redis.get<Venture[]>("content:ventures");

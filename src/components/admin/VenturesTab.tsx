@@ -24,6 +24,7 @@ export const VenturesTab: React.FC = () => {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [importing, setImporting] = useState(false);
   const [rawTags, setRawTags] = useState("");
   const [statsList, setStatsList] = useState<VentureStat[]>([]);
 
@@ -41,6 +42,26 @@ export const VenturesTab: React.FC = () => {
       setLoading(false);
     }
   }, []);
+
+  const handleImportDefaults = async () => {
+    setImporting(true);
+    setErrorMsg(null);
+    try {
+      const res = await fetch("/api/admin/ventures/import", {
+        method: "POST",
+      });
+      if (res.ok) {
+        await loadVentures();
+      } else {
+        const data = await res.json();
+        setErrorMsg(data.error || "Failed to import ventures");
+      }
+    } catch {
+      setErrorMsg("Network error importing ventures");
+    } finally {
+      setImporting(false);
+    }
+  };
 
   useEffect(() => {
     let mounted = true;
@@ -62,6 +83,7 @@ export const VenturesTab: React.FC = () => {
       tagline: "",
       description: "",
       status: "In development",
+      label: "Aadrut Venture Labs",
       link: "",
       featured: false,
       published: true,
@@ -115,6 +137,7 @@ export const VenturesTab: React.FC = () => {
       tagline: editingVenture.tagline?.trim(),
       description: editingVenture.description?.trim(),
       status: editingVenture.status || "In development",
+      label: editingVenture.label?.trim() || undefined,
       link: editingVenture.link?.trim() || undefined,
       tags: parsedTags,
       featured: Boolean(editingVenture.featured),
@@ -242,13 +265,23 @@ export const VenturesTab: React.FC = () => {
           <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
             Add internal ventures like Attenza or incubation concepts to showcase in the public portfolio.
           </p>
-          <button
-            onClick={handleOpenNew}
-            className="mt-4 inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-white/[0.06] hover:bg-white/[0.1] text-indigo-300 text-xs font-medium transition-colors"
-          >
-            <Plus className="w-3.5 h-3.5" />
-            <span>Create First Venture</span>
-          </button>
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
+            <button
+              onClick={handleOpenNew}
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-white/[0.06] hover:bg-white/[0.1] text-indigo-300 text-xs font-medium transition-colors"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>Create First Venture</span>
+            </button>
+            <button
+              onClick={handleImportDefaults}
+              disabled={importing}
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-indigo-600/20 border border-indigo-500/30 hover:bg-indigo-600/30 text-indigo-300 text-xs font-medium transition-colors disabled:opacity-50"
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>{importing ? "Importing..." : "Import existing ventures"}</span>
+            </button>
+          </div>
         </div>
       ) : (
         <div className="space-y-3">
@@ -298,6 +331,12 @@ export const VenturesTab: React.FC = () => {
                     >
                       {item.published ? "Published" : "Draft / Hidden"}
                     </span>
+
+                    {item.label && (
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-white/[0.04] text-slate-400 border border-white/10">
+                        {item.label}
+                      </span>
+                    )}
                   </div>
 
                   <div>
@@ -465,6 +504,22 @@ export const VenturesTab: React.FC = () => {
                     <option value="Coming soon">Coming soon</option>
                   </select>
                 </div>
+              </div>
+
+              <div>
+                <label className="block text-slate-300 font-semibold mb-1">
+                  Venture Label / Division <span className="text-[10px] text-slate-400 font-normal">(e.g., Aadrut Venture Labs)</span>
+                </label>
+                <input
+                  type="text"
+                  maxLength={80}
+                  value={editingVenture.label || ""}
+                  onChange={(e) =>
+                    setEditingVenture({ ...editingVenture, label: e.target.value })
+                  }
+                  placeholder="e.g., Aadrut Venture Labs"
+                  className="w-full px-3 py-2 rounded-xl bg-black/40 border border-white/10 text-white placeholder:text-slate-400 focus:outline-none focus:border-indigo-500"
+                />
               </div>
 
               <div>

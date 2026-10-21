@@ -45,9 +45,15 @@ interface FooterProps {
   onOpenContact?: () => void;
   settings?: SiteSettings;
   hasFaqs?: boolean;
+  hasVentures?: boolean;
 }
 
-export const Footer: React.FC<FooterProps> = ({ onOpenContact, settings, hasFaqs = false }) => {
+export const Footer: React.FC<FooterProps> = ({
+  onOpenContact,
+  settings,
+  hasFaqs = false,
+  hasVentures = false,
+}) => {
   const email = settings?.contactEmail || CONTACT_CONFIG.email;
   const instagram = settings?.instagramUrl || CONTACT_CONFIG.instagram;
   const linkedin = settings?.linkedinUrl || CONTACT_CONFIG.linkedin;
@@ -199,14 +205,16 @@ export const Footer: React.FC<FooterProps> = ({ onOpenContact, settings, hasFaqs
                   Our Team
                 </Link>
               </li>
-              <li>
-                <Link
-                  href="/#ventures"
-                  className="inline-flex items-center min-h-[40px] sm:min-h-[32px] text-slate-300 hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 rounded"
-                >
-                  Ventures
-                </Link>
-              </li>
+              {hasVentures && (
+                <li>
+                  <Link
+                    href="/#ventures"
+                    className="inline-flex items-center min-h-[40px] sm:min-h-[32px] text-slate-300 hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 rounded"
+                  >
+                    Ventures
+                  </Link>
+                </li>
+              )}
               <li>
                 <Link
                   href="/#process"

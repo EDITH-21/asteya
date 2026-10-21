@@ -43,6 +43,7 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({ content, children })
   }
 
   const hasFaqs = Boolean(content.faqs && content.faqs.length > 0);
+  const hasVentures = Boolean(content.ventures && content.ventures.length > 0);
 
   return (
     <ContactModalContext.Provider
@@ -62,6 +63,7 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({ content, children })
         <Navbar
           onOpenContact={handleOpenContact}
           hasFaqs={hasFaqs}
+          hasVentures={hasVentures}
           topOffset={announcementHeight}
         />
 
@@ -78,6 +80,7 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({ content, children })
           onOpenContact={handleOpenContact}
           settings={content.settings}
           hasFaqs={hasFaqs}
+          hasVentures={hasVentures}
         />
 
         {/* Interactive Contact & Inquiry Modal */}
