@@ -107,7 +107,7 @@ async function run() {
   console.log(`[Aadrut Admin Bootstrap] SUCCESS! Admin account is ready.`);
   console.log(`Email:    ${email}`);
   console.log(`Password: [CONFIGURED - HIDDEN FOR SECURITY]`);
-  console.log(`Login at: http://localhost:3000/admin/login`);
+  console.log(`Login at: http://localhost:3000/shikadu/login`);
 }
 
 run().catch((err) => {

@@ -292,7 +292,7 @@ async function main() {
   console.log(`  Storage Target:  ${redisSaved ? "Upstash Redis + Local" : "Local Store"}`);
   console.log("  Security Note:   Zero secrets or passwords were logged or printed.");
   console.log("=======================================================");
-  console.log("  Log in at: http://localhost:3000/admin/login\n");
+  console.log("  Log in at: http://localhost:3000/shikadu/login\n");
 }
 
 main().catch((err) => {

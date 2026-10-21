@@ -1,3 +1,4 @@
+import { ADMIN_BASE_PATH } from "@/lib/constants";
 import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { getAuthenticatedAdmin } from "@/lib/server/auth";
@@ -58,7 +59,7 @@ export async function POST(req: NextRequest) {
     });
 
     revalidatePath("/");
-    revalidatePath("/admin");
+    revalidatePath(ADMIN_BASE_PATH);
 
     return NextResponse.json({ success: true, venture }, { status: 201 });
   } catch (err) {

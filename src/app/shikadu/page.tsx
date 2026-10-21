@@ -45,6 +45,7 @@ import { FaqsTab } from "@/components/admin/FaqsTab";
 import { AboutAndTeamTab } from "@/components/admin/AboutAndTeamTab";
 import { SiteSettingsTab } from "@/components/admin/SiteSettingsTab";
 import { ActivityLogsTab } from "@/components/admin/ActivityLogsTab";
+import { ADMIN_BASE_PATH } from "@/lib/constants";
 
 interface AdminUser {
   id: string;
@@ -210,7 +211,7 @@ export default function AdminDashboardPage() {
       try {
         const res = await fetch("/api/admin/auth/me");
         if (!res.ok) {
-          router.replace("/admin/login");
+          router.replace(`${ADMIN_BASE_PATH}/login`);
           return;
         }
         const data = await res.json();
@@ -218,7 +219,7 @@ export default function AdminDashboardPage() {
           setUser(data.user);
         }
       } catch {
-        router.replace("/admin/login");
+        router.replace(`${ADMIN_BASE_PATH}/login`);
       } finally {
         if (mounted) {
           setLoadingAuth(false);
@@ -260,7 +261,7 @@ export default function AdminDashboardPage() {
     } catch {
       // ignore
     } finally {
-      router.replace("/admin/login");
+      router.replace(`${ADMIN_BASE_PATH}/login`);
     }
   };
 
@@ -275,7 +276,7 @@ export default function AdminDashboardPage() {
     } catch {
       // ignore
     } finally {
-      router.replace("/admin/login");
+      router.replace(`${ADMIN_BASE_PATH}/login`);
     }
   };
 

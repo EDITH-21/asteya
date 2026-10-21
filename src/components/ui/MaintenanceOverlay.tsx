@@ -1,9 +1,8 @@
 "use client";
 
 import React from "react";
-import Link from "next/link";
 import { AadrutLogo } from "@/components/ui/AadrutLogo";
-import { Mail, Lock } from "lucide-react";
+import { Mail } from "lucide-react";
 import { CONTACT_CONFIG } from "@/lib/constants";
 
 interface MaintenanceOverlayProps {
@@ -46,14 +45,6 @@ export const MaintenanceOverlay: React.FC<MaintenanceOverlayProps> = ({
             <Mail className="w-3.5 h-3.5 text-indigo-400" />
             <span>Contact Support: {contactEmail}</span>
           </a>
-
-          <Link
-            href="/admin/login"
-            className="inline-flex items-center gap-1.5 text-slate-500 hover:text-slate-400 transition-colors py-2"
-          >
-            <Lock className="w-3 h-3" />
-            <span>Administrator Access</span>
-          </Link>
         </div>
 
         <div className="text-[11px] font-sans text-slate-400 pt-6 border-t border-white/[0.06]">

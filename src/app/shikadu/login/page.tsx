@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { AadrutLogo } from "@/components/ui/AadrutLogo";
+import { ADMIN_BASE_PATH } from "@/lib/constants";
 import {
   Lock,
   Mail,
@@ -38,7 +39,7 @@ export default function AdminLoginPage() {
       try {
         const res = await fetch("/api/admin/auth/me");
         if (res.ok) {
-          router.replace("/admin");
+          router.replace(ADMIN_BASE_PATH);
           return;
         }
       } catch {
@@ -78,7 +79,7 @@ export default function AdminLoginPage() {
       }
 
       // Successful login without MFA
-      router.push("/admin");
+      router.push(ADMIN_BASE_PATH);
     } catch {
       setErrorMessage("Network error occurred. Please try again.");
       setIsLoading(false);
@@ -109,7 +110,7 @@ export default function AdminLoginPage() {
       }
 
       // Successful MFA authentication
-      router.push("/admin");
+      router.push(ADMIN_BASE_PATH);
     } catch {
       setErrorMessage("Network error occurred. Please try again.");
       setIsLoading(false);

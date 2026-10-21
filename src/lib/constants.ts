@@ -1,3 +1,5 @@
+export const ADMIN_BASE_PATH = "/shikadu";
+
 export interface NavItem {
   name: string;
   href: string;

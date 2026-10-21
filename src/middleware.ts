@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { isAllowedOrigin } from "@/lib/server/origin";
+import { ADMIN_BASE_PATH } from "@/lib/constants";
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -9,13 +10,17 @@ export function middleware(request: NextRequest) {
     request.cookies.get("aadrut_admin_session") ||
     request.cookies.get("asteya_admin_session");
 
-  // Protect /admin pages (except /admin/login)
-  if (pathname.startsWith("/admin") && pathname !== "/admin/login") {
+  // Protect /shikadu admin UI pages (except /shikadu/login)
+  if (pathname.startsWith(ADMIN_BASE_PATH) && pathname !== `${ADMIN_BASE_PATH}/login`) {
     if (!sessionCookie || !sessionCookie.value) {
-      const loginUrl = new URL("/admin/login", request.url);
+      const loginUrl = new URL(`${ADMIN_BASE_PATH}/login`, request.url);
       loginUrl.searchParams.set("from", pathname);
       const redirectResponse = NextResponse.redirect(loginUrl);
       redirectResponse.headers.set("X-Robots-Tag", "noindex, nofollow, noarchive");
+      redirectResponse.headers.set(
+        "Cache-Control",
+        "no-store, no-cache, must-revalidate, proxy-revalidate"
+      );
       return redirectResponse;
     }
   }
@@ -48,7 +53,7 @@ export function middleware(request: NextRequest) {
   const response = NextResponse.next();
 
   // Enforce noindex and no-cache headers on all admin pages and admin APIs
-  if (pathname.startsWith("/admin") || pathname.startsWith("/api/admin")) {
+  if (pathname.startsWith(ADMIN_BASE_PATH) || pathname.startsWith("/api/admin")) {
     response.headers.set("X-Robots-Tag", "noindex, nofollow, noarchive");
     response.headers.set(
       "Cache-Control",
@@ -60,5 +65,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*", "/api/admin/:path*"],
+  matcher: ["/shikadu/:path*", "/api/admin/:path*"],
 };

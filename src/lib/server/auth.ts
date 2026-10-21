@@ -16,6 +16,7 @@ import {
 export const SESSION_COOKIE_NAME = "aadrut_admin_session";
 export const LEGACY_SESSION_COOKIE_NAME = "asteya_admin_session";
 export const SESSION_MAX_AGE_SECONDS = 8 * 60 * 60; // 8 hours
+export { ADMIN_BASE_PATH } from "@/lib/constants";
 
 function getSessionSigningSecret(): string {
   const secret = process.env.SESSION_SECRET || process.env.ADMIN_INITIAL_PASSWORD;

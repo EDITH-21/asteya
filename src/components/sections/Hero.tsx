@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { AadrutLogo } from "../ui/AadrutLogo";
 import { ArrowRight } from "lucide-react";
@@ -10,6 +11,7 @@ interface HeroProps {
 }
 
 export const Hero: React.FC<HeroProps> = ({ onOpenContact }) => {
+  const router = useRouter();
   const sectionRef = useRef<HTMLElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [isMobile, setIsMobile] = useState(false);
@@ -228,12 +230,21 @@ export const Hero: React.FC<HeroProps> = ({ onOpenContact }) => {
     };
   }, []);
 
-  const scrollToAbout = () => {
-    const el = document.getElementById("about");
-    if (el) el.scrollIntoView({ behavior: "smooth" });
+  const scrollToServices = (e?: React.MouseEvent) => {
+    if (e) e.preventDefault();
+    const el = document.getElementById("services");
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth" });
+      if (typeof window !== "undefined" && window.history?.replaceState) {
+        window.history.replaceState(null, "", "#services");
+      }
+    } else {
+      router.push("/#services");
+    }
   };
 
-  const scrollToContact = () => {
+  const scrollToContact = (e?: React.MouseEvent) => {
+    if (e) e.preventDefault();
     if (onOpenContact) {
       onOpenContact();
     } else {
@@ -325,16 +336,18 @@ export const Hero: React.FC<HeroProps> = ({ onOpenContact }) => {
           className="mt-9 flex flex-col sm:flex-row items-center gap-3.5 w-full sm:w-auto"
         >
           {/* Primary CTA */}
-          <button
-            onClick={scrollToAbout}
+          <a
+            href="#services"
+            onClick={scrollToServices}
             className="w-full sm:w-auto min-h-[44px] px-7 py-3 rounded-full bg-white text-black font-semibold text-sm tracking-normal hover:bg-slate-100 transition-all duration-200 shadow-[0_0_24px_rgba(255,255,255,0.2)] hover:shadow-[0_0_32px_rgba(255,255,255,0.35)] flex items-center justify-center gap-2 group active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400"
           >
             <span>Explore Aadrut</span>
             <ArrowRight strokeWidth={1.75} className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-1" />
-          </button>
+          </a>
 
-          {/* Secondary CTA: Replaced "View Our Work" with "Start a Conversation" */}
+          {/* Secondary CTA: Opens Contact Modal / scrolls to #contact */}
           <button
+            type="button"
             onClick={scrollToContact}
             className="w-full sm:w-auto min-h-[44px] px-7 py-3 rounded-full bg-white/[0.04] hover:bg-white/[0.08] text-slate-200 hover:text-white border border-white/15 backdrop-blur-md font-semibold text-sm tracking-normal transition-all duration-200 flex items-center justify-center gap-2 group active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400"
           >

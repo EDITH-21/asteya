@@ -220,7 +220,7 @@ However, the audit identified key vulnerabilities and architectural hardening re
 
 | Audit Question | Result | Evidence / Details |
 | :--- | :---: | :--- |
-| **Where is admin login UI implemented?** | Confirmed | [`src/app/admin/login/page.tsx`](file:///C:/Users/shiva/.gemini/antigravity/scratch/asteya-website/src/app/admin/login/page.tsx) with client-side credential dispatch. |
+| **Where is admin login UI implemented?** | Confirmed | [`src/app/shikadu/login/page.tsx`](file:///C:/Users/shiva/.gemini/antigravity/scratch/asteya-website/src/app/shikadu/login/page.tsx) with client-side credential dispatch. |
 | **Which server function validates credentials?** | Confirmed | [`src/app/api/admin/auth/login/route.ts`](file:///C:/Users/shiva/.gemini/antigravity/scratch/asteya-website/src/app/api/admin/auth/login/route.ts#L48-L66) invoking `verifyPassword()` in [`src/lib/server/crypto.ts`](file:///C:/Users/shiva/.gemini/antigravity/scratch/asteya-website/src/lib/server/crypto.ts#L22-L38). |
 | **Are admin credentials hardcoded in frontend/backend?** | **None** | No fallback strings exist in source code. All fallbacks were eradicated. |
 | **Can admin role checks be bypassed?** | **No** | Server verifies `user.role === 'admin'` on every privileged API call ([`auth.ts#L78`](file:///C:/Users/shiva/.gemini/antigravity/scratch/asteya-website/src/lib/server/auth.ts#L78)). |
