@@ -3,6 +3,7 @@ import { cache } from "react";
 import {
   initializeDatabase,
   getActiveAnnouncement,
+  getPublishedAnnouncements,
   getPublishedTestimonials,
   getPublishedFAQs,
   getPublishedVentures,
@@ -20,9 +21,10 @@ import type { PublicSiteContent } from "./content-types";
 export const getPublicSiteContent = cache(async (): Promise<PublicSiteContent> => {
   await initializeDatabase();
 
-  const [activeAnnouncement, testimonials, faqs, ventures, about, team, settings] =
+  const [activeAnnouncement, publishedAnnouncements, testimonials, faqs, ventures, about, team, settings] =
     await Promise.all([
       getActiveAnnouncement(),
+      getPublishedAnnouncements(),
       getPublishedTestimonials(),
       getPublishedFAQs(),
       getPublishedVentures(),
@@ -32,7 +34,8 @@ export const getPublicSiteContent = cache(async (): Promise<PublicSiteContent> =
     ]);
 
   return {
-    activeAnnouncement,
+    activeAnnouncement: activeAnnouncement || (publishedAnnouncements.length > 0 ? publishedAnnouncements[0] : null),
+    announcements: publishedAnnouncements,
     testimonials,
     faqs,
     ventures,

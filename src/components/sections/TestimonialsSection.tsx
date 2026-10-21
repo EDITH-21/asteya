@@ -2,7 +2,7 @@
 
 import React from "react";
 import { motion } from "framer-motion";
-import { Quote } from "lucide-react";
+import { Quote, Star } from "lucide-react";
 import type { Testimonial } from "@/lib/server/content-types";
 import { SafeMarkdown } from "@/components/ui/SafeMarkdown";
 
@@ -30,7 +30,7 @@ export const TestimonialsSection: React.FC<TestimonialsSectionProps> = ({
         <div className="max-w-3xl mb-10 space-y-3">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] border border-white/10 text-indigo-300 font-sans text-xs font-medium tracking-wide">
             <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
-            <span>07 &bull; Client Perspectives</span>
+            <span>08 &bull; Client Perspectives</span>
           </div>
 
           <h2 className="text-3xl sm:text-5xl font-bold tracking-tight text-white uppercase">
@@ -53,10 +53,19 @@ export const TestimonialsSection: React.FC<TestimonialsSectionProps> = ({
               className="p-6 rounded-2xl bg-white/[0.02] border border-white/[0.08] backdrop-blur-sm flex flex-col justify-between hover:border-indigo-500/30 transition-colors group"
             >
               <div className="space-y-4">
-                <Quote className="w-6 h-6 text-indigo-400/40 group-hover:text-indigo-400/80 transition-colors" />
-                <p className="text-sm sm:text-base text-slate-300 leading-relaxed font-normal">
+                <div className="flex items-center justify-between">
+                  <Quote className="w-6 h-6 text-indigo-400/40 group-hover:text-indigo-400/80 transition-colors" />
+                  {typeof t.rating === "number" && t.rating > 0 && (
+                    <div className="flex items-center gap-0.5">
+                      {Array.from({ length: Math.min(5, Math.max(1, t.rating)) }).map((_, rIdx) => (
+                        <Star key={rIdx} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <div className="text-sm sm:text-base text-slate-300 leading-relaxed font-normal">
                   &ldquo;<SafeMarkdown content={t.quote} />&rdquo;
-                </p>
+                </div>
               </div>
 
               <div className="pt-6 mt-4 border-t border-white/[0.06] flex items-center justify-between">

@@ -206,6 +206,7 @@ export const TestimonialSchema = z.object({
     .refine((val) => !NO_HTML_REGEX.test(val), noHtmlMessage),
   order: z.number().int().default(0),
   published: z.boolean().default(false),
+  rating: z.number().int().min(1).max(5).optional(),
 });
 
 // ==========================================

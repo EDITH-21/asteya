@@ -137,13 +137,13 @@ export const VenturesTab: React.FC = () => {
       tagline: editingVenture.tagline?.trim(),
       description: editingVenture.description?.trim(),
       status: editingVenture.status || "In development",
-      label: editingVenture.label?.trim() || undefined,
-      link: editingVenture.link?.trim() || undefined,
+      label: editingVenture.label?.trim() || "",
+      link: editingVenture.link?.trim() || "",
       tags: parsedTags,
       featured: Boolean(editingVenture.featured),
       published: Boolean(editingVenture.published),
       order: editingVenture.order ?? 1,
-      stats: validStats.length > 0 ? validStats : undefined,
+      stats: validStats,
     };
 
     try {
@@ -158,15 +158,22 @@ export const VenturesTab: React.FC = () => {
         body: JSON.stringify(payload),
       });
 
-      const data = await res.json();
+      let data: { error?: string } | null = null;
+      try {
+        data = await res.json();
+      } catch {
+        // response was not JSON
+      }
+
       if (!res.ok) {
-        setErrorMsg(data.error || "Failed to save venture");
+        setErrorMsg(data?.error || `Failed to save venture (${res.status})`);
       } else {
         setEditingVenture(null);
         await loadVentures();
       }
-    } catch {
-      setErrorMsg("Network error saving venture");
+    } catch (err) {
+      console.error("Venture save error:", err);
+      setErrorMsg("Network error saving venture: " + (err instanceof Error ? err.message : String(err)));
     } finally {
       setSaving(false);
     }
@@ -187,6 +194,9 @@ export const VenturesTab: React.FC = () => {
         setVentures((prev) =>
           prev.map((v) => (v.id === item.id ? { ...v, published: updatedPublished } : v))
         );
+      } else {
+        const data = await res.json().catch(() => null);
+        console.error("Failed to toggle publish status:", data?.error || res.status);
       }
     } catch (err) {
       console.error("Failed to toggle publish status:", err);

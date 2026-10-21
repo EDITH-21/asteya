@@ -56,6 +56,10 @@ export async function PATCH(req: NextRequest, context: RouteContext) {
   }
 }
 
+export async function PUT(req: NextRequest, context: RouteContext) {
+  return PATCH(req, context);
+}
+
 export async function DELETE(req: NextRequest, context: RouteContext) {
   try {
     if (!isAllowedOrigin(req.headers.get("origin"), req.headers.get("host"))) {

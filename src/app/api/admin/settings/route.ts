@@ -39,7 +39,7 @@ export async function PUT(req: NextRequest) {
     }
 
     const body = await req.json();
-    const parsed = SiteSettingsSchema.safeParse(body);
+    const parsed = SiteSettingsSchema.partial().safeParse(body);
     if (!parsed.success) {
       return NextResponse.json(
         { error: parsed.error.issues[0]?.message || "Invalid site settings" },
@@ -67,4 +67,8 @@ export async function PUT(req: NextRequest) {
     console.error("[API] Error updating site settings:", err);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
+}
+
+export async function PATCH(req: NextRequest) {
+  return PUT(req);
 }

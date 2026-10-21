@@ -24,6 +24,7 @@ export interface Testimonial {
   quote: string;
   order: number;
   published: boolean;
+  rating?: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -114,6 +115,7 @@ export interface ActivityLog {
 
 export interface PublicSiteContent {
   activeAnnouncement: Announcement | null;
+  announcements: Announcement[];
   testimonials: Testimonial[];
   faqs: FAQItem[];
   ventures: Venture[];

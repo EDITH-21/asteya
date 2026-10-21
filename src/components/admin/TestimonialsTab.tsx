@@ -74,6 +74,9 @@ export const TestimonialsTab: React.FC = () => {
       });
       if (res.ok) {
         setShowOnSite(updated);
+      } else {
+        const data = await res.json().catch(() => null);
+        console.error("Failed to toggle global testimonials setting:", data?.error || res.status);
       }
     } catch (err) {
       console.error("Failed to toggle global testimonials setting:", err);
@@ -90,6 +93,7 @@ export const TestimonialsTab: React.FC = () => {
       quote: "",
       published: true,
       order: testimonials.length + 1,
+      rating: 5,
     });
     setErrorMsg(null);
   };
@@ -112,6 +116,7 @@ export const TestimonialsTab: React.FC = () => {
       quote: editingItem.quote?.trim(),
       published: Boolean(editingItem.published),
       order: editingItem.order ?? 1,
+      rating: editingItem.rating ? Number(editingItem.rating) : undefined,
     };
 
     try {
@@ -126,15 +131,22 @@ export const TestimonialsTab: React.FC = () => {
         body: JSON.stringify(payload),
       });
 
-      const data = await res.json();
+      let data: { error?: string } | null = null;
+      try {
+        data = await res.json();
+      } catch {
+        // body was not JSON
+      }
+
       if (!res.ok) {
-        setErrorMsg(data.error || "Failed to save testimonial");
+        setErrorMsg(data?.error || `Failed to save testimonial (${res.status})`);
       } else {
         setEditingItem(null);
         await loadData();
       }
-    } catch {
-      setErrorMsg("Network error saving testimonial");
+    } catch (err) {
+      console.error("Testimonial save error:", err);
+      setErrorMsg("Network error saving testimonial: " + (err instanceof Error ? err.message : String(err)));
     } finally {
       setSaving(false);
     }
@@ -155,6 +167,9 @@ export const TestimonialsTab: React.FC = () => {
         setTestimonials((prev) =>
           prev.map((t) => (t.id === item.id ? { ...t, published: updated } : t))
         );
+      } else {
+        const data = await res.json().catch(() => null);
+        console.error("Failed to toggle testimonial publish:", data?.error || res.status);
       }
     } catch (err) {
       console.error("Failed to toggle testimonial publish:", err);
@@ -441,6 +456,23 @@ export const TestimonialsTab: React.FC = () => {
                   placeholder="Write client endorsement quote..."
                   className="w-full px-3 py-2 rounded-xl bg-black/40 border border-white/10 text-white placeholder:text-slate-400 focus:outline-none focus:border-indigo-500"
                 />
+              </div>
+
+              <div>
+                <label className="block text-slate-300 font-semibold mb-1">
+                  Rating <span className="text-[10px] text-slate-400 font-normal">(Optional 1-5 Stars)</span>
+                </label>
+                <select
+                  value={editingItem.rating || 5}
+                  onChange={(e) =>
+                    setEditingItem({ ...editingItem, rating: Number(e.target.value) })
+                  }
+                  className="w-full px-3 py-2 rounded-xl bg-black/40 border border-white/10 text-white focus:outline-none focus:border-indigo-500"
+                >
+                  <option value={5}>★★★★★ (5 Stars)</option>
+                  <option value={4}>★★★★☆ (4 Stars)</option>
+                  <option value={3}>★★★☆☆ (3 Stars)</option>
+                </select>
               </div>
 
               <div className="pt-1">

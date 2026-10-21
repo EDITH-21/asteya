@@ -105,15 +105,22 @@ export const AnnouncementsTab: React.FC = () => {
         body: JSON.stringify(payload),
       });
 
-      const data = await res.json();
+      let data: { error?: string } | null = null;
+      try {
+        data = await res.json();
+      } catch {
+        // body was not JSON
+      }
+
       if (!res.ok) {
-        setErrorMsg(data.error || "Failed to save announcement");
+        setErrorMsg(data?.error || `Failed to save announcement (${res.status})`);
       } else {
         setEditingItem(null);
         await loadAnnouncements();
       }
-    } catch {
-      setErrorMsg("Network error saving announcement");
+    } catch (err) {
+      console.error("Announcement save error:", err);
+      setErrorMsg("Network error saving announcement: " + (err instanceof Error ? err.message : String(err)));
     } finally {
       setSaving(false);
     }
@@ -132,6 +139,9 @@ export const AnnouncementsTab: React.FC = () => {
       });
       if (res.ok) {
         await loadAnnouncements();
+      } else {
+        const data = await res.json().catch(() => null);
+        console.error("Failed to toggle announcement:", data?.error || res.status);
       }
     } catch (err) {
       console.error("Failed to toggle announcement:", err);

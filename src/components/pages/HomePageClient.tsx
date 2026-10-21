@@ -14,11 +14,6 @@ const VenturesSection = dynamic(
   { ssr: true }
 );
 
-const TestimonialsSection = dynamic(
-  () => import("@/components/sections/TestimonialsSection").then((mod) => mod.TestimonialsSection),
-  { ssr: true }
-);
-
 const ProcessSection = dynamic(
   () => import("@/components/sections/ProcessSection").then((mod) => mod.ProcessSection),
   { ssr: true }
@@ -36,6 +31,16 @@ const WhyAadrutSection = dynamic(
 
 const PhilosophySection = dynamic(
   () => import("@/components/sections/PhilosophySection").then((mod) => mod.PhilosophySection),
+  { ssr: true }
+);
+
+const AnnouncementsSection = dynamic(
+  () => import("@/components/sections/AnnouncementsSection").then((mod) => mod.AnnouncementsSection),
+  { ssr: true }
+);
+
+const TestimonialsSection = dynamic(
+  () => import("@/components/sections/TestimonialsSection").then((mod) => mod.TestimonialsSection),
   { ssr: true }
 );
 
@@ -65,25 +70,28 @@ export const HomePageClient: React.FC<HomePageClientProps> = ({ content }) => {
       {/* 4. Ventures Spotlight: Attenza & Incubation Pipeline (Only if ventures exist) */}
       <VenturesSection ventures={content.ventures} />
 
-      {/* 5. Client Testimonials (Rendered ONLY if toggle ON and has items) */}
+      {/* 5. Concept to Reality: Unified 5-Stage Engineering Process */}
+      <ProcessSection />
+
+      {/* 6. Built For The Future: Interactive Technology System */}
+      <TechnologySection />
+
+      {/* 7. Why Aadrut: Purpose-Driven Architecture */}
+      <WhyAadrutSection />
+
+      {/* 8. Minimalist Philosophy Climax Statement */}
+      <PhilosophySection />
+
+      {/* 9. Updates / Announcements Section (Rendered ONLY if published announcements exist) */}
+      <AnnouncementsSection announcements={content.announcements} />
+
+      {/* 10. Client Testimonials (Rendered directly below Updates & immediately before Conversion) */}
       <TestimonialsSection
         testimonials={content.testimonials}
         showTestimonials={content.settings.showTestimonials}
       />
 
-      {/* 6. Concept to Reality: Unified 5-Stage Engineering Process */}
-      <ProcessSection />
-
-      {/* 7. Built For The Future: Interactive Technology System */}
-      <TechnologySection />
-
-      {/* 8. Why Aadrut: Purpose-Driven Architecture */}
-      <WhyAadrutSection />
-
-      {/* 9. Minimalist Philosophy Climax Statement */}
-      <PhilosophySection />
-
-      {/* 10. Direct In-Page Contact & Inquiry Form */}
+      {/* 11. Direct In-Page Contact & Inquiry Form (Conversion section) */}
       <CtaSection onOpenContact={openContactModal} />
     </main>
   );

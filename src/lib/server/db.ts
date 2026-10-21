@@ -876,6 +876,17 @@ export async function getActiveAnnouncement(): Promise<Announcement | null> {
   );
 }
 
+export async function getPublishedAnnouncements(): Promise<Announcement[]> {
+  const all = await getAnnouncements();
+  const now = new Date().toISOString();
+  return all.filter((a) => {
+    if (!a.active) return false;
+    if (a.startDate && a.startDate > now) return false;
+    if (a.endDate && a.endDate < now) return false;
+    return true;
+  });
+}
+
 export async function createAnnouncement(data: Omit<Announcement, "id" | "createdAt" | "updatedAt">): Promise<Announcement> {
   const now = new Date().toISOString();
   const announcement: Announcement = {
@@ -886,8 +897,8 @@ export async function createAnnouncement(data: Omit<Announcement, "id" | "create
   };
 
   let list = await getAnnouncements();
-  if (announcement.active) {
-    list = list.map((a) => ({ ...a, active: false }));
+  if (announcement.active && announcement.displayStyle === "top_bar") {
+    list = list.map((a) => (a.displayStyle === "top_bar" ? { ...a, active: false } : a));
   }
   list.unshift(announcement);
 
@@ -908,8 +919,8 @@ export async function updateAnnouncement(id: string, updates: Partial<Omit<Annou
   if (idx === -1) return null;
 
   const now = new Date().toISOString();
-  if (updates.active) {
-    list = list.map((a) => (a.id === id ? a : { ...a, active: false }));
+  if (updates.active && (updates.displayStyle === "top_bar" || (!updates.displayStyle && list[idx]?.displayStyle === "top_bar"))) {
+    list = list.map((a) => (a.id === id || a.displayStyle !== "top_bar" ? a : { ...a, active: false }));
   }
 
   const updated: Announcement = {
