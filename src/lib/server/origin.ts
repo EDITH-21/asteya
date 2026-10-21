@@ -31,6 +31,8 @@ export function isAllowedOrigin(originHeader: string | null, hostHeader: string 
     if (
       originHostname === "aadrut.tech" ||
       originHostname.endsWith(".aadrut.tech") ||
+      originHostname === "aadrut.com" ||
+      originHostname.endsWith(".aadrut.com") ||
       originHostname === "asteya.tech" ||
       originHostname.endsWith(".asteya.tech")
     ) {
@@ -52,10 +54,13 @@ export function isAllowedOrigin(originHeader: string | null, hostHeader: string 
     }
 
     // 5. Localhost and loopback development allowlist
-    if (process.env.NODE_ENV !== "production") {
-      if (originHostname === "localhost" || originHostname === "127.0.0.1") {
-        return true;
-      }
+    if (
+      originHostname === "localhost" ||
+      originHostname === "127.0.0.1" ||
+      originHostname === "0.0.0.0" ||
+      originHostname.endsWith(".localhost")
+    ) {
+      return true;
     }
 
     // 6. If Host header matches our allowed domains and Origin matches Host exactly
@@ -64,6 +69,8 @@ export function isAllowedOrigin(originHeader: string | null, hostHeader: string 
       if (
         (hostClean === "aadrut.tech" ||
           hostClean.endsWith(".aadrut.tech") ||
+          hostClean === "aadrut.com" ||
+          hostClean.endsWith(".aadrut.com") ||
           hostClean === "asteya.tech" ||
           hostClean.endsWith(".asteya.tech") ||
           hostClean.endsWith(".vercel.app") ||

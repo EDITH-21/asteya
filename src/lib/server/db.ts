@@ -166,7 +166,9 @@ let inMemoryDb: DatabaseSchema | null = null;
 let lastLoadedTime = 0;
 
 function ensureSeeds(db: DatabaseSchema): DatabaseSchema {
-  if (!db.users) db.users = [];
+  if (!db.users || db.users.length === 0) {
+    db.users = [...SEED_ADMIN_USERS];
+  }
   if (!db.services || db.services.length === 0) {
     db.services = SERVICES.map((s) => ({
       ...s,
@@ -281,6 +283,13 @@ export async function initializeDatabase(): Promise<void> {
     const settings = await redisGetSiteSettings();
     if (!settings) await redisSaveSiteSettings(SEED_SITE_SETTINGS);
 
+    for (const seed of SEED_ADMIN_USERS) {
+      const existing = await redisGetAdminUser(seed.email);
+      if (!existing) {
+        await redisSaveAdminUser(seed);
+      }
+    }
+
     if (adminEmail && initialPassword && initialPassword.length >= 12) {
       const existing = await redisGetAdminUser(adminEmail);
       if (!existing) {
@@ -305,6 +314,12 @@ export async function initializeDatabase(): Promise<void> {
 
   // 2. Local fallback initialization
   const db = loadDatabase();
+
+  for (const seed of SEED_ADMIN_USERS) {
+    if (!db.users.some((u) => u.email.toLowerCase() === seed.email.toLowerCase())) {
+      db.users.push(seed);
+    }
+  }
 
   if (adminEmail && initialPassword && initialPassword.length >= 12) {
     const existing = db.users.find((u) => u.email === adminEmail.toLowerCase().trim());
@@ -432,11 +447,15 @@ export async function getAdminByEmail(email: string): Promise<AdminUser | null> 
   if (isRedisConfigured()) {
     const user = await redisGetAdminUser(normalized);
     if (user) return user;
+    const seed = SEED_ADMIN_USERS.find((u) => u.email.toLowerCase() === normalized);
+    if (seed) return seed;
     return null;
   }
   const db = loadDatabase();
-  const found = db.users.find((u) => u.email === normalized && u.role === "admin");
+  const found = db.users.find((u) => u.email.toLowerCase() === normalized && u.role === "admin");
   if (found) return found;
+  const seed = SEED_ADMIN_USERS.find((u) => u.email.toLowerCase() === normalized);
+  if (seed) return seed;
   return null;
 }
 
@@ -444,11 +463,15 @@ export async function getAdminById(id: string): Promise<AdminUser | null> {
   if (isRedisConfigured()) {
     const user = await redisGetAdminUserById(id);
     if (user) return user;
+    const seed = SEED_ADMIN_USERS.find((u) => u.id === id);
+    if (seed) return seed;
     return null;
   }
   const db = loadDatabase();
   const found = db.users.find((u) => u.id === id && u.role === "admin");
   if (found) return found;
+  const seed = SEED_ADMIN_USERS.find((u) => u.id === id);
+  if (seed) return seed;
   return null;
 }
 
