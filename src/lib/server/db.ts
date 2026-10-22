@@ -5,7 +5,6 @@ import crypto from "crypto";
 import { hashPassword } from "./crypto";
 import { SERVICES } from "@/lib/constants";
 import {
-  SEED_ADMIN_USERS,
   SEED_VENTURES,
   SEED_ABOUT_CONTENT,
   SEED_TEAM_MEMBERS,
@@ -30,6 +29,7 @@ import {
   redisSaveAdminUser,
   redisGetAdminUser,
   redisGetAdminUserById,
+  redisDeleteAdminUserKey,
   redisCreateSession,
   redisGetSession,
   redisDeleteSession,
@@ -166,8 +166,8 @@ let inMemoryDb: DatabaseSchema | null = null;
 let lastLoadedTime = 0;
 
 function ensureSeeds(db: DatabaseSchema): DatabaseSchema {
-  if (!db.users || db.users.length === 0) {
-    db.users = [...SEED_ADMIN_USERS];
+  if (!db.users) {
+    db.users = [];
   }
   if (!db.services || db.services.length === 0) {
     db.services = SERVICES.map((s) => ({
@@ -212,7 +212,7 @@ function loadDatabase(): DatabaseSchema {
   // Initial structure with built-in seeds
   inMemoryDb = ensureSeeds({
     version: 1,
-    users: [...SEED_ADMIN_USERS],
+    users: [],
     sessions: [],
     enquiries: [],
     services: SERVICES.map((s) => ({
@@ -283,13 +283,8 @@ export async function initializeDatabase(): Promise<void> {
     const settings = await redisGetSiteSettings();
     if (!settings) await redisSaveSiteSettings(SEED_SITE_SETTINGS);
 
-    for (const seed of SEED_ADMIN_USERS) {
-      const existing = await redisGetAdminUser(seed.email);
-      if (!existing) {
-        await redisSaveAdminUser(seed);
-      }
-    }
-
+    // Bootstrap administrator strictly when ADMIN_EMAIL is explicitly configured.
+    // If unset, refuse to create any default fallback administrator.
     if (adminEmail && initialPassword && initialPassword.length >= 12) {
       const existing = await redisGetAdminUser(adminEmail);
       if (!existing) {
@@ -306,8 +301,10 @@ export async function initializeDatabase(): Promise<void> {
           totpEnabled: false,
         };
         await redisSaveAdminUser(newAdmin);
-        console.log("[DB] Initialized administrator in shared Redis store.");
+        console.log("[DB] Initialized administrator from ADMIN_EMAIL in shared Redis store.");
       }
+    } else if (!adminEmail) {
+      console.log("[DB] ADMIN_EMAIL is unset. Refusing to create default admin account.");
     }
     return;
   }
@@ -315,12 +312,8 @@ export async function initializeDatabase(): Promise<void> {
   // 2. Local fallback initialization
   const db = loadDatabase();
 
-  for (const seed of SEED_ADMIN_USERS) {
-    if (!db.users.some((u) => u.email.toLowerCase() === seed.email.toLowerCase())) {
-      db.users.push(seed);
-    }
-  }
-
+  // Bootstrap administrator strictly when ADMIN_EMAIL is explicitly configured.
+  // If unset, refuse to create any default fallback administrator.
   if (adminEmail && initialPassword && initialPassword.length >= 12) {
     const existing = db.users.find((u) => u.email === adminEmail.toLowerCase().trim());
     if (!existing) {
@@ -338,7 +331,10 @@ export async function initializeDatabase(): Promise<void> {
       };
       db.users.push(customAdmin);
       saveDatabase(db);
+      console.log("[DB] Initialized administrator from ADMIN_EMAIL in local database.");
     }
+  } else if (!adminEmail) {
+    console.log("[DB] ADMIN_EMAIL is unset. Refusing to create default admin account.");
   }
 
   // Seed default services if empty
@@ -445,34 +441,20 @@ export async function resetLoginAttempts(ip: string, identifier: string): Promis
 export async function getAdminByEmail(email: string): Promise<AdminUser | null> {
   const normalized = email.toLowerCase().trim();
   if (isRedisConfigured()) {
-    const user = await redisGetAdminUser(normalized);
-    if (user) return user;
-    const seed = SEED_ADMIN_USERS.find((u) => u.email.toLowerCase() === normalized);
-    if (seed) return seed;
-    return null;
+    return await redisGetAdminUser(normalized);
   }
   const db = loadDatabase();
   const found = db.users.find((u) => u.email.toLowerCase() === normalized && u.role === "admin");
-  if (found) return found;
-  const seed = SEED_ADMIN_USERS.find((u) => u.email.toLowerCase() === normalized);
-  if (seed) return seed;
-  return null;
+  return found || null;
 }
 
 export async function getAdminById(id: string): Promise<AdminUser | null> {
   if (isRedisConfigured()) {
-    const user = await redisGetAdminUserById(id);
-    if (user) return user;
-    const seed = SEED_ADMIN_USERS.find((u) => u.id === id);
-    if (seed) return seed;
-    return null;
+    return await redisGetAdminUserById(id);
   }
   const db = loadDatabase();
   const found = db.users.find((u) => u.id === id && u.role === "admin");
-  if (found) return found;
-  const seed = SEED_ADMIN_USERS.find((u) => u.id === id);
-  if (seed) return seed;
-  return null;
+  return found || null;
 }
 
 export async function updateAdminPassword(id: string, hash: string, salt: string): Promise<boolean> {
@@ -496,6 +478,36 @@ export async function updateAdminPassword(id: string, hash: string, salt: string
   user.updatedAt = new Date().toISOString();
   db.sessions = db.sessions.filter((s) => s.userId !== id);
 
+  saveDatabase(db);
+  return true;
+}
+
+export async function updateAdminEmail(id: string, newEmail: string): Promise<boolean> {
+  const normalizedEmail = newEmail.toLowerCase().trim();
+  if (isRedisConfigured()) {
+    const user = await redisGetAdminUserById(id);
+    if (!user) return false;
+    const existing = await redisGetAdminUser(normalizedEmail);
+    if (existing && existing.id !== id) return false;
+
+    await redisDeleteAdminUserKey(user.email);
+    user.email = normalizedEmail;
+    user.updatedAt = new Date().toISOString();
+    await redisSaveAdminUser(user);
+    return true;
+  }
+
+  const db = loadDatabase();
+  const existing = db.users.find(
+    (u) => u.email.toLowerCase() === normalizedEmail && u.id !== id
+  );
+  if (existing) return false;
+
+  const user = db.users.find((u) => u.id === id);
+  if (!user) return false;
+
+  user.email = normalizedEmail;
+  user.updatedAt = new Date().toISOString();
   saveDatabase(db);
   return true;
 }

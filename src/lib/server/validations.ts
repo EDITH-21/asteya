@@ -107,6 +107,16 @@ export const ChangePasswordSchema = z.object({
     .regex(/[^A-Za-z0-9]/, "Password must contain at least one special character"),
 });
 
+export const ChangeEmailSchema = z.object({
+  currentPassword: z.string().min(1, "Current password is required"),
+  newEmail: z
+    .string()
+    .trim()
+    .toLowerCase()
+    .email("A valid email address is required")
+    .max(120, "Email must not exceed 120 characters"),
+});
+
 export const VerifyMfaSchema = z.object({
   mfaToken: z.string().min(1, "Pre-auth token is required"),
   code: z.string().min(6, "Code must be 6 digits or recovery code format").max(20),

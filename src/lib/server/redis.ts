@@ -128,6 +128,11 @@ export async function redisGetAdminUser(email: string): Promise<AdminUser | null
   return await redis.get<AdminUser>(`admin:user:${email.toLowerCase().trim()}`);
 }
 
+export async function redisDeleteAdminUserKey(email: string): Promise<void> {
+  if (!redis) return;
+  await redis.del(`admin:user:${email.toLowerCase().trim()}`);
+}
+
 export async function redisGetAdminUserById(id: string): Promise<AdminUser | null> {
   if (!redis) return null;
   const email = await redis.get<string>(`admin:user_id:${id}`);

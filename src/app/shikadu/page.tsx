@@ -154,6 +154,12 @@ export default function AdminDashboardPage() {
   const [pwdMessage, setPwdMessage] = useState<{ text: string; isError: boolean } | null>(null);
   const [changingPwd, setChangingPwd] = useState(false);
 
+  // Email change state
+  const [newAdminEmail, setNewAdminEmail] = useState("");
+  const [emailCurrentPassword, setEmailCurrentPassword] = useState("");
+  const [emailMessage, setEmailMessage] = useState<{ text: string; isError: boolean } | null>(null);
+  const [changingEmail, setChangingEmail] = useState(false);
+
   // MFA Management state
   const [mfaSetupData, setMfaSetupData] = useState<{
     secret: string;
@@ -437,6 +443,46 @@ export default function AdminDashboardPage() {
       setPwdMessage({ text: "Network error occurred", isError: true });
     } finally {
       setChangingPwd(false);
+    }
+  };
+
+  const handleChangeEmail = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setEmailMessage(null);
+    if (!newAdminEmail.trim() || !newAdminEmail.includes("@")) {
+      setEmailMessage({ text: "Please enter a valid email address", isError: true });
+      return;
+    }
+    if (!emailCurrentPassword) {
+      setEmailMessage({ text: "Current password is required to change email", isError: true });
+      return;
+    }
+
+    setChangingEmail(true);
+    try {
+      const res = await fetch("/api/admin/auth/change-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          currentPassword: emailCurrentPassword,
+          newEmail: newAdminEmail.trim().toLowerCase(),
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setEmailMessage({ text: data.error || "Failed to update email address", isError: true });
+      } else {
+        setEmailMessage({ text: data.message || "Email address updated successfully!", isError: false });
+        if (user) {
+          setUser({ ...user, email: newAdminEmail.trim().toLowerCase() });
+        }
+        setNewAdminEmail("");
+        setEmailCurrentPassword("");
+      }
+    } catch {
+      setEmailMessage({ text: "Network error occurred while updating email", isError: true });
+    } finally {
+      setChangingEmail(false);
     }
   };
 
@@ -1412,6 +1458,83 @@ export default function AdminDashboardPage() {
                     className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs tracking-wide shadow-md shadow-indigo-600/30 transition-all disabled:opacity-50"
                   >
                     {changingPwd ? "Updating..." : "Update Password"}
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            {/* Change Admin Email Card */}
+            <div className="bg-[#090d16] border border-white/[0.08] rounded-2xl p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <Mail strokeWidth={1.75} className="w-4 h-4 text-indigo-400" />
+                <h3 className="text-sm font-bold text-white">Update Administrator Email</h3>
+              </div>
+
+              {emailMessage && (
+                <div
+                  className={`p-3 rounded-xl mb-4 text-xs flex items-center gap-2 ${
+                    emailMessage.isError
+                      ? "bg-red-500/10 border border-red-500/30 text-red-300"
+                      : "bg-emerald-500/10 border border-emerald-500/30 text-emerald-300"
+                  }`}
+                >
+                  {emailMessage.isError ? (
+                    <AlertTriangle strokeWidth={1.75} className="w-4 h-4 shrink-0 text-red-400" />
+                  ) : (
+                    <Check strokeWidth={1.75} className="w-4 h-4 shrink-0 text-emerald-400" />
+                  )}
+                  <span>{emailMessage.text}</span>
+                </div>
+              )}
+
+              <form onSubmit={handleChangeEmail} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-sans text-slate-300 font-medium mb-1.5">
+                    Current Admin Email
+                  </label>
+                  <input
+                    type="email"
+                    disabled
+                    value={user?.email || ""}
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white/[0.02] border border-white/5 text-xs text-slate-400 font-mono cursor-not-allowed"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-sans text-slate-300 font-medium mb-1.5">
+                    New Admin Email
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    value={newAdminEmail}
+                    onChange={(e) => setNewAdminEmail(e.target.value)}
+                    placeholder="Enter new email address"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-black/40 border border-white/10 text-xs text-white placeholder:text-slate-400 focus:outline-none focus:border-indigo-400 font-mono"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-sans text-slate-300 font-medium mb-1.5">
+                    Verify Current Password
+                  </label>
+                  <input
+                    type="password"
+                    required
+                    value={emailCurrentPassword}
+                    onChange={(e) => setEmailCurrentPassword(e.target.value)}
+                    placeholder="Enter current password to authorize email change"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-black/40 border border-white/10 text-xs text-white placeholder:text-slate-400 focus:outline-none focus:border-indigo-400 font-mono"
+                  />
+                </div>
+
+                <div className="pt-2">
+                  <button
+                    type="submit"
+                    disabled={changingEmail}
+                    className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs tracking-wide shadow-md shadow-indigo-600/30 transition-all disabled:opacity-50"
+                  >
+                    {changingEmail ? "Updating..." : "Update Email Address"}
                   </button>
                 </div>
               </form>

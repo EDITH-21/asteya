@@ -9,52 +9,12 @@ import type {
 } from "./content-types";
 
 /**
- * Pre-seeded Administrative Users.
- * Password hashes are pre-computed using OWASP recommended scrypt parameters:
- * N=131072 (2^17), r=8, p=1, maxmem=256MB with cryptographically random 32-byte salt.
- * Initial Passwords:
- *   admin@aadrut.com  -> Aadrut#Secure2026!
- *   admin@aadrut.tech -> Aadrut#Secure2026!
- *   admin@asteya.tech -> Asteya#Secure2026!
+ * Administrative Users Seed Configuration.
+ * No hardcoded default credentials or seed users.
+ * Administrator accounts are created exclusively when explicit ADMIN_EMAIL and
+ * ADMIN_INITIAL_PASSWORD environment variables are supplied.
  */
-export const SEED_ADMIN_USERS: AdminUser[] = [
-  {
-    id: "2e1d4ff9-a399-449c-cae4-6c37641b4328",
-    email: "admin@aadrut.com",
-    username: "Aadrut Admin",
-    passwordHash:
-      "scrypt$131072$8$1$6aa8a9b6eb2a85e0223c0329eb7babdfb0912046c72e97daaf091d48f59a0c7c9b751424dd4470f1df2536678df7dc385d94509e919c37d36462ffdb14f324bd",
-    passwordSalt: "2f27ec125f9614f927ae4c8438bc223d9b42ae4f426696e7bed2386e6d42cc13",
-    role: "admin",
-    createdAt: "2026-10-20T17:00:00.000Z",
-    updatedAt: "2026-10-20T17:00:00.000Z",
-    totpEnabled: false,
-  },
-  {
-    id: "3f2e5aa0-b4aa-45ad-dbf5-7d48752c5439",
-    email: "admin@aadrut.tech",
-    username: "Aadrut Admin",
-    passwordHash:
-      "scrypt$131072$8$1$6aa8a9b6eb2a85e0223c0329eb7babdfb0912046c72e97daaf091d48f59a0c7c9b751424dd4470f1df2536678df7dc385d94509e919c37d36462ffdb14f324bd",
-    passwordSalt: "2f27ec125f9614f927ae4c8438bc223d9b42ae4f426696e7bed2386e6d42cc13",
-    role: "admin",
-    createdAt: "2026-10-20T17:00:00.000Z",
-    updatedAt: "2026-10-20T17:00:00.000Z",
-    totpEnabled: false,
-  },
-  {
-    id: "1d0c3ff8-f299-439c-bae3-5c26530a3217",
-    email: "admin@asteya.tech",
-    username: "Asteya Admin",
-    passwordHash:
-      "scrypt$131072$8$1$5512204830357df44de57566d21431e501539236b61b85442e77514da12705aee393daa12136e5460c1923cfabd632bbec903a77afd071b99154f15204c4feef",
-    passwordSalt: "00943b14c5d75c6e3ba3f8d237911d4d0a0527a6067f9fbd93e3d3c11a305377",
-    role: "admin",
-    createdAt: "2026-10-15T17:22:49.915Z",
-    updatedAt: "2026-10-20T17:05:19.157Z",
-    totpEnabled: false,
-  },
-];
+export const SEED_ADMIN_USERS: AdminUser[] = [];
 
 /**
  * Seed Ventures (migrated from VenturesSection).
