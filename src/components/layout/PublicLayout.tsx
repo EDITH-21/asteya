@@ -5,6 +5,7 @@ import dynamic from "next/dynamic";
 import { Navbar } from "@/components/sections/Navbar";
 import { Footer } from "@/components/sections/Footer";
 import { AnnouncementBanner } from "@/components/ui/AnnouncementBanner";
+import { MobileBottomNav } from "@/components/ui/MobileBottomNav";
 import { MaintenanceOverlay } from "@/components/ui/MaintenanceOverlay";
 import type { PublicSiteContent } from "@/lib/server/content-types";
 
@@ -112,12 +113,20 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({ content: initialCont
             {children}
           </div>
 
-          {/* Shared Footer across ALL public pages */}
-          <Footer
+          {/* Shared Footer across ALL public pages with mobile clearance for bottom bar */}
+          <div className="pb-[calc(64px+env(safe-area-inset-bottom,0px))] lg:pb-0">
+            <Footer
+              onOpenContact={handleOpenContact}
+              settings={content.settings}
+              hasFaqs={hasFaqs}
+              hasVentures={hasVentures}
+            />
+          </div>
+
+          {/* Fixed Mobile Bottom Navigation Bar (< 1024px) */}
+          <MobileBottomNav
             onOpenContact={handleOpenContact}
-            settings={content.settings}
-            hasFaqs={hasFaqs}
-            hasVentures={hasVentures}
+            isModalOpen={contactModalOpen}
           />
 
           {/* Interactive Contact & Inquiry Modal */}
