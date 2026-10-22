@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
+import { formatAdminErrorMessage } from "@/lib/client/admin-errors";
 import {
   Megaphone,
   Plus,
@@ -113,14 +114,14 @@ export const AnnouncementsTab: React.FC = () => {
       }
 
       if (!res.ok) {
-        setErrorMsg(data?.error || `Failed to save announcement (${res.status})`);
+        setErrorMsg(formatAdminErrorMessage(res, data, null, "save announcement"));
       } else {
         setEditingItem(null);
         await loadAnnouncements();
       }
     } catch (err) {
       console.error("Announcement save error:", err);
-      setErrorMsg("Network error saving announcement: " + (err instanceof Error ? err.message : String(err)));
+      setErrorMsg(formatAdminErrorMessage(null, null, err, "save announcement"));
     } finally {
       setSaving(false);
     }

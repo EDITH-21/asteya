@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
+import { formatAdminErrorMessage } from "@/lib/client/admin-errors";
 import {
   Users,
   Plus,
@@ -91,15 +92,15 @@ export const AboutAndTeamTab: React.FC = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(about),
       });
-      const data = await res.json();
+      const data = await res.json().catch(() => null);
       if (!res.ok) {
-        setAboutMsg({ text: data.error || "Failed to update About content", isError: true });
+        setAboutMsg({ text: formatAdminErrorMessage(res, data, null, "update About content"), isError: true });
       } else {
         setAboutMsg({ text: "About page content successfully saved!", isError: false });
         setTimeout(() => setAboutMsg(null), 3000);
       }
-    } catch {
-      setAboutMsg({ text: "Network error saving about content", isError: true });
+    } catch (err) {
+      setAboutMsg({ text: formatAdminErrorMessage(null, null, err, "save about content"), isError: true });
     } finally {
       setSavingAbout(false);
     }
@@ -180,15 +181,15 @@ export const AboutAndTeamTab: React.FC = () => {
         body: JSON.stringify(payload),
       });
 
-      const data = await res.json();
+      const data = await res.json().catch(() => null);
       if (!res.ok) {
-        setTeamErrorMsg(data.error || "Failed to save team member");
+        setTeamErrorMsg(formatAdminErrorMessage(res, data, null, "save team member"));
       } else {
         setEditingMember(null);
         await loadTeamData();
       }
-    } catch {
-      setTeamErrorMsg("Network error saving team member");
+    } catch (err) {
+      setTeamErrorMsg(formatAdminErrorMessage(null, null, err, "save team member"));
     } finally {
       setSavingMember(false);
     }

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
+import { formatAdminErrorMessage } from "@/lib/client/admin-errors";
 import {
   Sliders,
   Mail,
@@ -93,15 +94,15 @@ export const SiteSettingsTab: React.FC = () => {
         body: JSON.stringify(settings),
       });
 
-      const data = await res.json();
+      const data = await res.json().catch(() => null);
       if (!res.ok) {
-        setFeedback({ text: data.error || "Failed to update settings", isError: true });
+        setFeedback({ text: formatAdminErrorMessage(res, data, null, "update settings"), isError: true });
       } else {
         setFeedback({ text: "Global settings successfully updated!", isError: false });
         setTimeout(() => setFeedback(null), 3000);
       }
-    } catch {
-      setFeedback({ text: "Network error saving settings", isError: true });
+    } catch (err) {
+      setFeedback({ text: formatAdminErrorMessage(null, null, err, "save settings"), isError: true });
     } finally {
       setSaving(false);
     }

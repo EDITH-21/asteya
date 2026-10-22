@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
+import { formatAdminErrorMessage } from "@/lib/client/admin-errors";
 import {
   HelpCircle,
   Plus,
@@ -107,15 +108,15 @@ export const FaqsTab: React.FC = () => {
         body: JSON.stringify(payload),
       });
 
-      const data = await res.json();
+      const data = await res.json().catch(() => null);
       if (!res.ok) {
-        setErrorMsg(data.error || "Failed to save FAQ");
+        setErrorMsg(formatAdminErrorMessage(res, data, null, "save FAQ"));
       } else {
         setEditingItem(null);
         await loadFaqs();
       }
-    } catch {
-      setErrorMsg("Network error saving FAQ item");
+    } catch (err) {
+      setErrorMsg(formatAdminErrorMessage(null, null, err, "save FAQ item"));
     } finally {
       setSaving(false);
     }

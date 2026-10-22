@@ -13,8 +13,21 @@ export function isAllowedOrigin(originHeader: string | null, hostHeader: string 
   try {
     const originUrl = new URL(originHeader);
     const originHostname = originUrl.hostname.toLowerCase();
+    const originHost = originUrl.host.toLowerCase(); // includes port if non-standard
 
-    // 1. Check explicitly configured production site URL
+    // 0. Exact same-origin match (Origin host matches Host header directly)
+    if (hostHeader) {
+      const cleanHost = hostHeader.trim().toLowerCase();
+      if (originHost === cleanHost) {
+        return true;
+      }
+      // Also match hostname if ports differ due to local reverse proxy
+      if (originHostname === cleanHost.split(":")[0]) {
+        return true;
+      }
+    }
+
+    // 1. Check explicitly configured production and app URLs
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
     if (siteUrl) {
       try {
@@ -23,7 +36,19 @@ export function isAllowedOrigin(originHeader: string | null, hostHeader: string 
           return true;
         }
       } catch {
-        // Invalid URL in env, continue to other checks
+        // Invalid URL in env, continue
+      }
+    }
+
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL;
+    if (appUrl) {
+      try {
+        const configuredAppHost = new URL(appUrl).hostname.toLowerCase();
+        if (originHostname === configuredAppHost) {
+          return true;
+        }
+      } catch {
+        // Invalid URL in env, continue
       }
     }
 
@@ -44,12 +69,18 @@ export function isAllowedOrigin(originHeader: string | null, hostHeader: string 
       return true;
     }
 
-    // 4. Vercel system environment variables (VERCEL_URL or VERCEL_PROJECT_PRODUCTION_URL)
-    const vercelUrl = process.env.VERCEL_URL || process.env.VERCEL_PROJECT_PRODUCTION_URL;
-    if (vercelUrl) {
-      const cleanVercelHost = vercelUrl.replace(/^https?:\/\//, "").split("/")[0].toLowerCase();
-      if (originHostname === cleanVercelHost) {
-        return true;
+    // 4. Vercel system environment variables
+    const vercelUrls = [
+      process.env.VERCEL_URL,
+      process.env.VERCEL_PROJECT_PRODUCTION_URL,
+      process.env.VERCEL_BRANCH_URL,
+    ];
+    for (const vUrl of vercelUrls) {
+      if (vUrl) {
+        const cleanVercelHost = vUrl.replace(/^https?:\/\//, "").split("/")[0].toLowerCase();
+        if (originHostname === cleanVercelHost) {
+          return true;
+        }
       }
     }
 
@@ -58,28 +89,10 @@ export function isAllowedOrigin(originHeader: string | null, hostHeader: string 
       originHostname === "localhost" ||
       originHostname === "127.0.0.1" ||
       originHostname === "0.0.0.0" ||
+      originHostname === "::1" ||
       originHostname.endsWith(".localhost")
     ) {
       return true;
-    }
-
-    // 6. If Host header matches our allowed domains and Origin matches Host exactly
-    if (hostHeader) {
-      const hostClean = hostHeader.split(":")[0].toLowerCase();
-      if (
-        (hostClean === "aadrut.tech" ||
-          hostClean.endsWith(".aadrut.tech") ||
-          hostClean === "aadrut.com" ||
-          hostClean.endsWith(".aadrut.com") ||
-          hostClean === "asteya.tech" ||
-          hostClean.endsWith(".asteya.tech") ||
-          hostClean.endsWith(".vercel.app") ||
-          hostClean === "localhost" ||
-          hostClean === "127.0.0.1") &&
-        originHostname === hostClean
-      ) {
-        return true;
-      }
     }
 
     return false;

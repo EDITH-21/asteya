@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
+import { formatAdminErrorMessage } from "@/lib/client/admin-errors";
 import {
   Quote,
   Plus,
@@ -139,14 +140,14 @@ export const TestimonialsTab: React.FC = () => {
       }
 
       if (!res.ok) {
-        setErrorMsg(data?.error || `Failed to save testimonial (${res.status})`);
+        setErrorMsg(formatAdminErrorMessage(res, data, null, "save testimonial"));
       } else {
         setEditingItem(null);
         await loadData();
       }
     } catch (err) {
       console.error("Testimonial save error:", err);
-      setErrorMsg("Network error saving testimonial: " + (err instanceof Error ? err.message : String(err)));
+      setErrorMsg(formatAdminErrorMessage(null, null, err, "save testimonial"));
     } finally {
       setSaving(false);
     }

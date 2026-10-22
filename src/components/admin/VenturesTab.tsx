@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
+import { formatAdminErrorMessage } from "@/lib/client/admin-errors";
 import {
   Rocket,
   Plus,
@@ -53,11 +54,11 @@ export const VenturesTab: React.FC = () => {
       if (res.ok) {
         await loadVentures();
       } else {
-        const data = await res.json();
-        setErrorMsg(data.error || "Failed to import ventures");
+        const data = await res.json().catch(() => null);
+        setErrorMsg(formatAdminErrorMessage(res, data, null, "import ventures"));
       }
-    } catch {
-      setErrorMsg("Network error importing ventures");
+    } catch (err) {
+      setErrorMsg(formatAdminErrorMessage(null, null, err, "import ventures"));
     } finally {
       setImporting(false);
     }
@@ -168,14 +169,14 @@ export const VenturesTab: React.FC = () => {
       }
 
       if (!res.ok) {
-        setErrorMsg(data?.error || `Failed to save venture (${res.status})`);
+        setErrorMsg(formatAdminErrorMessage(res, data, null, "save venture"));
       } else {
         setEditingVenture(null);
         await loadVentures();
       }
     } catch (err) {
       console.error("Venture save error:", err);
-      setErrorMsg("Network error saving venture: " + (err instanceof Error ? err.message : String(err)));
+      setErrorMsg(formatAdminErrorMessage(null, null, err, "save venture"));
     } finally {
       setSaving(false);
     }
