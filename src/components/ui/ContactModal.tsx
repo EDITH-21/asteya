@@ -223,7 +223,7 @@ export const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose, con
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
                   <div className="flex items-center gap-1.5 text-xs text-slate-400">
                     <ShieldCheck strokeWidth={1.75} className="w-4 h-4 text-emerald-400 shrink-0" />
-                    <span>Strict confidentiality guaranteed</span>
+                    <span>Your details are used only to respond to your enquiry.</span>
                   </div>
 
                   <button
