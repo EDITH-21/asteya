@@ -1,6 +1,5 @@
 import React from "react";
 import type { Metadata } from "next";
-import { CONTACT_CONFIG } from "@/lib/constants";
 import { getPublicSiteContent } from "@/lib/server/content";
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import { getSiteUrl } from "@/lib/site-url";

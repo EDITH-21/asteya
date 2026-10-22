@@ -18,11 +18,6 @@ const spaceGrotesk = Space_Grotesk({
 });
 
 const siteUrl = getSiteUrl();
-const contactEmail = process.env.NEXT_PUBLIC_CONTACT_EMAIL || "hello@aadrut.com";
-const socialSameAs = [
-  process.env.NEXT_PUBLIC_INSTAGRAM_URL,
-  process.env.NEXT_PUBLIC_LINKEDIN_URL,
-].filter(Boolean) as string[];
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),

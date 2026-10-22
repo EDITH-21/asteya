@@ -48,7 +48,6 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
   // Track active visible section on homepage
   useEffect(() => {
     if (pathname !== "/") {
-      setActiveSection("");
       return;
     }
 

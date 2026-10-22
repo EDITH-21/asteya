@@ -1,4 +1,3 @@
-import { ADMIN_BASE_PATH } from "@/lib/constants";
 import { NextRequest, NextResponse } from "next/server";
 import { revalidatePublicSite } from "@/lib/server/revalidate";
 import { getAuthenticatedAdmin } from "@/lib/server/auth";
