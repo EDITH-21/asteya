@@ -1,6 +1,6 @@
 import { ADMIN_BASE_PATH } from "@/lib/constants";
 import { NextRequest, NextResponse } from "next/server";
-import { revalidatePath } from "next/cache";
+import { revalidatePublicSite } from "@/lib/server/revalidate";
 import { getAuthenticatedAdmin } from "@/lib/server/auth";
 import { isAllowedOrigin } from "@/lib/server/origin";
 import {
@@ -58,9 +58,7 @@ export async function POST(req: NextRequest) {
       details: `Created FAQ: "${faq.question}" (${faq.category})`,
     });
 
-    revalidatePath("/");
-    revalidatePath("/faq");
-    revalidatePath(ADMIN_BASE_PATH);
+    revalidatePublicSite("faqs");
 
     return NextResponse.json({ success: true, faq }, { status: 201 });
   } catch (err) {

@@ -1,6 +1,6 @@
 import { ADMIN_BASE_PATH } from "@/lib/constants";
 import { NextRequest, NextResponse } from "next/server";
-import { revalidatePath } from "next/cache";
+import { revalidatePublicSite } from "@/lib/server/revalidate";
 import { getAuthenticatedAdmin } from "@/lib/server/auth";
 import { isAllowedOrigin } from "@/lib/server/origin";
 import { updateTeamMember, deleteTeamMember, recordActivityLog } from "@/lib/server/db";
@@ -45,9 +45,7 @@ export async function PATCH(req: NextRequest, context: RouteContext) {
       details: `Updated team member: "${updated.name}" (${updated.displayRole}, Published: ${updated.published})`,
     });
 
-    revalidatePath("/");
-    revalidatePath("/about");
-    revalidatePath(ADMIN_BASE_PATH);
+    revalidatePublicSite("team");
 
     return NextResponse.json({ success: true, member: updated });
   } catch (err) {
@@ -86,9 +84,7 @@ export async function DELETE(req: NextRequest, context: RouteContext) {
       details: `Deleted team member ID: ${id}`,
     });
 
-    revalidatePath("/");
-    revalidatePath("/about");
-    revalidatePath(ADMIN_BASE_PATH);
+    revalidatePublicSite("team");
 
     return NextResponse.json({ success: true });
   } catch (err) {

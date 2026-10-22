@@ -24,6 +24,8 @@ export async function generateStaticParams() {
   return Object.keys(DETAILED_SERVICES).map((slug) => ({ slug }));
 }
 
+export const revalidate = 60;
+
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
   const service = DETAILED_SERVICES[slug];

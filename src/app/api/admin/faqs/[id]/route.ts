@@ -1,6 +1,6 @@
 import { ADMIN_BASE_PATH } from "@/lib/constants";
 import { NextRequest, NextResponse } from "next/server";
-import { revalidatePath } from "next/cache";
+import { revalidatePublicSite } from "@/lib/server/revalidate";
 import { getAuthenticatedAdmin } from "@/lib/server/auth";
 import { isAllowedOrigin } from "@/lib/server/origin";
 import { updateFAQ, deleteFAQ, recordActivityLog } from "@/lib/server/db";
@@ -45,9 +45,7 @@ export async function PATCH(req: NextRequest, context: RouteContext) {
       details: `Updated FAQ: "${updated.question}" (Published: ${updated.published})`,
     });
 
-    revalidatePath("/");
-    revalidatePath("/faq");
-    revalidatePath(ADMIN_BASE_PATH);
+    revalidatePublicSite("faqs");
 
     return NextResponse.json({ success: true, faq: updated });
   } catch (err) {
@@ -86,9 +84,7 @@ export async function DELETE(req: NextRequest, context: RouteContext) {
       details: `Deleted FAQ ID: ${id}`,
     });
 
-    revalidatePath("/");
-    revalidatePath("/faq");
-    revalidatePath(ADMIN_BASE_PATH);
+    revalidatePublicSite("faqs");
 
     return NextResponse.json({ success: true });
   } catch (err) {

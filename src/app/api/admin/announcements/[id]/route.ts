@@ -1,6 +1,6 @@
 import { ADMIN_BASE_PATH } from "@/lib/constants";
 import { NextRequest, NextResponse } from "next/server";
-import { revalidatePath } from "next/cache";
+import { revalidatePublicSite } from "@/lib/server/revalidate";
 import { getAuthenticatedAdmin } from "@/lib/server/auth";
 import { isAllowedOrigin } from "@/lib/server/origin";
 import {
@@ -49,10 +49,7 @@ export async function PATCH(req: NextRequest, context: RouteContext) {
       details: `Updated announcement: "${updated.title}" (Active: ${updated.active})`,
     });
 
-    revalidatePath("/");
-    revalidatePath("/about");
-    revalidatePath("/faq");
-    revalidatePath(ADMIN_BASE_PATH);
+    revalidatePublicSite("announcements");
 
     return NextResponse.json({ success: true, announcement: updated });
   } catch (err) {
@@ -91,10 +88,7 @@ export async function DELETE(req: NextRequest, context: RouteContext) {
       details: `Deleted announcement ID: ${id}`,
     });
 
-    revalidatePath("/");
-    revalidatePath("/about");
-    revalidatePath("/faq");
-    revalidatePath(ADMIN_BASE_PATH);
+    revalidatePublicSite("announcements");
 
     return NextResponse.json({ success: true });
   } catch (err) {

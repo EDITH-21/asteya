@@ -4,6 +4,8 @@ import { CONTACT_CONFIG } from "@/lib/constants";
 import { getPublicSiteContent } from "@/lib/server/content";
 import { PublicLayout } from "@/components/layout/PublicLayout";
 
+export const revalidate = 60;
+
 export const metadata: Metadata = {
   title: "Terms of Service | Aadrut",
   description: "Aadrut's terms and conditions governing the use of our website, consulting services, and digital products.",

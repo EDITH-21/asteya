@@ -1,6 +1,6 @@
 import { ADMIN_BASE_PATH } from "@/lib/constants";
 import { NextRequest, NextResponse } from "next/server";
-import { revalidatePath } from "next/cache";
+import { revalidatePublicSite } from "@/lib/server/revalidate";
 import { getAuthenticatedAdmin } from "@/lib/server/auth";
 import { isAllowedOrigin } from "@/lib/server/origin";
 import {
@@ -57,9 +57,7 @@ export async function PUT(req: NextRequest) {
       details: `Updated editorial about content: "${updated.headline}"`,
     });
 
-    revalidatePath("/");
-    revalidatePath("/about");
-    revalidatePath(ADMIN_BASE_PATH);
+    revalidatePublicSite("about");
 
     return NextResponse.json({ success: true, about: updated });
   } catch (err) {

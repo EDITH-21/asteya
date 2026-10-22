@@ -1,6 +1,6 @@
 import { ADMIN_BASE_PATH } from "@/lib/constants";
 import { NextRequest, NextResponse } from "next/server";
-import { revalidatePath } from "next/cache";
+import { revalidatePublicSite } from "@/lib/server/revalidate";
 import { getAuthenticatedAdmin } from "@/lib/server/auth";
 import { isAllowedOrigin } from "@/lib/server/origin";
 import {
@@ -58,8 +58,7 @@ export async function POST(req: NextRequest) {
       details: `Created testimonial from "${testimonial.name}" (${testimonial.roleOrCompany})`,
     });
 
-    revalidatePath("/");
-    revalidatePath(ADMIN_BASE_PATH);
+    revalidatePublicSite("testimonials");
 
     return NextResponse.json({ success: true, testimonial }, { status: 201 });
   } catch (err) {

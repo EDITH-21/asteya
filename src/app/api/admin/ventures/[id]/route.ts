@@ -1,6 +1,6 @@
 import { ADMIN_BASE_PATH } from "@/lib/constants";
 import { NextRequest, NextResponse } from "next/server";
-import { revalidatePath } from "next/cache";
+import { revalidatePublicSite } from "@/lib/server/revalidate";
 import { getAuthenticatedAdmin } from "@/lib/server/auth";
 import { isAllowedOrigin } from "@/lib/server/origin";
 import { updateVenture, deleteVenture, recordActivityLog } from "@/lib/server/db";
@@ -45,8 +45,7 @@ export async function PATCH(req: NextRequest, context: RouteContext) {
       details: `Updated venture: "${updated.name}" (${updated.status}, Published: ${updated.published})`,
     });
 
-    revalidatePath("/");
-    revalidatePath(ADMIN_BASE_PATH);
+    revalidatePublicSite("ventures");
 
     return NextResponse.json({ success: true, venture: updated });
   } catch (err) {
@@ -85,8 +84,7 @@ export async function DELETE(req: NextRequest, context: RouteContext) {
       details: `Deleted venture ID: ${id}`,
     });
 
-    revalidatePath("/");
-    revalidatePath(ADMIN_BASE_PATH);
+    revalidatePublicSite("ventures");
 
     return NextResponse.json({ success: true });
   } catch (err) {

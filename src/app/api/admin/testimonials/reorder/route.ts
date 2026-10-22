@@ -1,6 +1,6 @@
 import { ADMIN_BASE_PATH } from "@/lib/constants";
 import { NextRequest, NextResponse } from "next/server";
-import { revalidatePath } from "next/cache";
+import { revalidatePublicSite } from "@/lib/server/revalidate";
 import { getAuthenticatedAdmin } from "@/lib/server/auth";
 import { isAllowedOrigin } from "@/lib/server/origin";
 import { reorderTestimonials, recordActivityLog } from "@/lib/server/db";
@@ -33,8 +33,7 @@ export async function POST(req: NextRequest) {
       details: `Reordered ${parsed.data.ids.length} testimonials`,
     });
 
-    revalidatePath("/");
-    revalidatePath(ADMIN_BASE_PATH);
+    revalidatePublicSite("testimonials");
 
     return NextResponse.json({ success: true, testimonials: updated });
   } catch (err) {

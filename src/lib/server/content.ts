@@ -1,5 +1,6 @@
 import "server-only";
 import { cache } from "react";
+import { unstable_cache } from "next/cache";
 import {
   initializeDatabase,
   getActiveAnnouncement,
@@ -14,11 +15,9 @@ import {
 import type { PublicSiteContent } from "./content-types";
 
 /**
- * Fetch all public-facing site content on the server.
- * Enables zero-flicker Server-Side Rendering (SSR) without layout shift.
- * Wrapped in React cache() to deduplicate queries across a single render tree.
+ * Raw database query to assemble all public site content.
  */
-export const getPublicSiteContent = cache(async (): Promise<PublicSiteContent> => {
+async function fetchPublicSiteContentRaw(): Promise<PublicSiteContent> {
   await initializeDatabase();
 
   const [activeAnnouncement, publishedAnnouncements, testimonials, faqs, ventures, about, team, settings] =
@@ -43,4 +42,28 @@ export const getPublicSiteContent = cache(async (): Promise<PublicSiteContent> =
     team,
     settings,
   };
-});
+}
+
+/**
+ * Fetch all public-facing site content on the server with cache tags and ISR.
+ * Revalidated via revalidateTag("site-content") or revalidatePath.
+ */
+export const getPublicSiteContent = cache(
+  unstable_cache(
+    fetchPublicSiteContentRaw,
+    ["public-site-content-cache"],
+    {
+      revalidate: 60,
+      tags: [
+        "site-content",
+        "ventures",
+        "testimonials",
+        "announcements",
+        "faqs",
+        "about",
+        "team",
+        "settings",
+      ],
+    }
+  )
+);

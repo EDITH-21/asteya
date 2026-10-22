@@ -3,8 +3,7 @@ import { getPublicSiteContent } from "@/lib/server/content";
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import { HomePageClient } from "@/components/pages/HomePageClient";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+export const revalidate = 60;
 
 export default async function Home() {
   const content = await getPublicSiteContent();

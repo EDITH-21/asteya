@@ -1,6 +1,6 @@
 import { ADMIN_BASE_PATH } from "@/lib/constants";
 import { NextRequest, NextResponse } from "next/server";
-import { revalidatePath } from "next/cache";
+import { revalidatePublicSite } from "@/lib/server/revalidate";
 import { getAuthenticatedAdmin } from "@/lib/server/auth";
 import { isAllowedOrigin } from "@/lib/server/origin";
 import {
@@ -49,8 +49,7 @@ export async function PATCH(req: NextRequest, context: RouteContext) {
       details: `Updated testimonial from "${updated.name}" (Published: ${updated.published})`,
     });
 
-    revalidatePath("/");
-    revalidatePath(ADMIN_BASE_PATH);
+    revalidatePublicSite("testimonials");
 
     return NextResponse.json({ success: true, testimonial: updated });
   } catch (err) {
@@ -89,8 +88,7 @@ export async function DELETE(req: NextRequest, context: RouteContext) {
       details: `Deleted testimonial ID: ${id}`,
     });
 
-    revalidatePath("/");
-    revalidatePath(ADMIN_BASE_PATH);
+    revalidatePublicSite("testimonials");
 
     return NextResponse.json({ success: true });
   } catch (err) {

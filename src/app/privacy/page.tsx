@@ -4,6 +4,8 @@ import { CONTACT_CONFIG } from "@/lib/constants";
 import { getPublicSiteContent } from "@/lib/server/content";
 import { PublicLayout } from "@/components/layout/PublicLayout";
 
+export const revalidate = 60;
+
 export const metadata: Metadata = {
   title: "Privacy Policy | Aadrut",
   description: "Aadrut's commitment to protecting user privacy, data security, and client confidentiality.",
