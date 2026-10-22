@@ -34,11 +34,6 @@ const PhilosophySection = dynamic(
   { ssr: true }
 );
 
-const AnnouncementsSection = dynamic(
-  () => import("@/components/sections/AnnouncementsSection").then((mod) => mod.AnnouncementsSection),
-  { ssr: true }
-);
-
 const TestimonialsSection = dynamic(
   () => import("@/components/sections/TestimonialsSection").then((mod) => mod.TestimonialsSection),
   { ssr: true }
@@ -84,16 +79,13 @@ export const HomePageClient: React.FC<HomePageClientProps> = ({ content: initial
       {/* 8. Minimalist Philosophy Climax Statement */}
       <PhilosophySection />
 
-      {/* 9. Updates / Announcements Section (Rendered ONLY if published announcements exist) */}
-      <AnnouncementsSection announcements={content.announcements} />
-
-      {/* 10. Client Testimonials (Rendered directly below Updates & immediately before Conversion) */}
+      {/* 9. Client Testimonials (Rendered directly after Philosophy & immediately before Contact) */}
       <TestimonialsSection
         testimonials={content.testimonials}
         showTestimonials={content.settings.showTestimonials}
       />
 
-      {/* 11. Direct In-Page Contact & Inquiry Form (Conversion section) */}
+      {/* 10. Direct In-Page Contact & Inquiry Form (Conversion section) */}
       <CtaSection onOpenContact={openContactModal} />
     </main>
   );
