@@ -26,7 +26,23 @@ export const AnnouncementBanner: React.FC<AnnouncementBannerProps> = ({
         try {
           const version = announcement.updatedAt || announcement.createdAt || "v1";
           const key = `aadrut_announcement_dismissed_${announcement.id}_${version}`;
-          setIsClientDismissed(localStorage.getItem(key) === "true");
+          const raw = localStorage.getItem(key);
+          if (raw) {
+            try {
+              const data = JSON.parse(raw);
+              const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
+              if (Date.now() - (data.dismissedAt || 0) < sevenDaysMs && data.version === version) {
+                setIsClientDismissed(true);
+              } else {
+                localStorage.removeItem(key);
+                setIsClientDismissed(false);
+              }
+            } catch {
+              setIsClientDismissed(raw === "true");
+            }
+          } else {
+            setIsClientDismissed(false);
+          }
         } catch {
           // ignore storage errors
         }
@@ -46,12 +62,15 @@ export const AnnouncementBanner: React.FC<AnnouncementBannerProps> = ({
 
   const isVisible = Boolean(announcement?.active) && isDateValid && (!announcement?.dismissible || !isClientDismissed);
 
-  // Sync measured height with parent layout to offset fixed navbar
+  // Sync measured height with parent layout and CSS variables to offset fixed navbar
   useEffect(() => {
     if (isVisible && announcement?.displayStyle === "top_bar") {
       const updateHeight = () => {
         if (bannerRef.current && onHeightChange) {
-          onHeightChange(bannerRef.current.offsetHeight);
+          const h = bannerRef.current.offsetHeight;
+          onHeightChange(h);
+          document.documentElement.style.setProperty("--announcement-h", `${h}px`);
+          document.documentElement.style.setProperty("--header-h", `calc(64px + ${h}px)`);
         }
       };
       updateHeight();
@@ -59,9 +78,13 @@ export const AnnouncementBanner: React.FC<AnnouncementBannerProps> = ({
       return () => {
         window.removeEventListener("resize", updateHeight);
         onHeightChange?.(0);
+        document.documentElement.style.removeProperty("--announcement-h");
+        document.documentElement.style.removeProperty("--header-h");
       };
     } else {
       onHeightChange?.(0);
+      document.documentElement.style.removeProperty("--announcement-h");
+      document.documentElement.style.removeProperty("--header-h");
     }
   }, [isVisible, announcement?.displayStyle, onHeightChange]);
 
@@ -70,10 +93,19 @@ export const AnnouncementBanner: React.FC<AnnouncementBannerProps> = ({
   const handleDismiss = () => {
     setIsClientDismissed(true);
     onHeightChange?.(0);
+    document.documentElement.style.removeProperty("--announcement-h");
+    document.documentElement.style.removeProperty("--header-h");
     if (announcement.dismissible && typeof window !== "undefined") {
       try {
         const version = announcement.updatedAt || announcement.createdAt || "v1";
-        localStorage.setItem(`aadrut_announcement_dismissed_${announcement.id}_${version}`, "true");
+        const key = `aadrut_announcement_dismissed_${announcement.id}_${version}`;
+        localStorage.setItem(
+          key,
+          JSON.stringify({
+            dismissedAt: Date.now(),
+            version,
+          })
+        );
       } catch {
         // ignore
       }

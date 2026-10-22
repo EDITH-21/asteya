@@ -12,8 +12,85 @@ import {
   AlertTriangle,
   X,
   Save,
+  Eye,
+  Info,
+  CheckCircle2,
+  ArrowRight,
 } from "lucide-react";
 import type { Announcement, AnnouncementType, AnnouncementDisplayStyle } from "@/lib/server/content-types";
+import { SafeMarkdown } from "@/components/ui/SafeMarkdown";
+
+/**
+ * Indian Standard Time (IST) Helpers (UTC+05:30)
+ */
+function utcToIstInput(utcIsoString?: string): string {
+  if (!utcIsoString) return "";
+  const d = new Date(utcIsoString);
+  if (isNaN(d.getTime())) return "";
+  // IST is UTC + 5h30m (330 minutes)
+  const istOffsetMs = 330 * 60 * 1000;
+  const istDate = new Date(d.getTime() + istOffsetMs);
+  return istDate.toISOString().slice(0, 16);
+}
+
+function istInputToUtc(istLocalString: string): string {
+  if (!istLocalString) return "";
+  const [datePart, timePart] = istLocalString.split("T");
+  if (!datePart || !timePart) return "";
+  const [year, month, day] = datePart.split("-").map(Number);
+  const [hour, minute] = timePart.split(":").map(Number);
+  const utcDate = new Date(Date.UTC(year, month - 1, day, hour - 5, minute - 30));
+  return utcDate.toISOString();
+}
+
+function formatInIst(utcIsoString?: string): string {
+  if (!utcIsoString) return "";
+  const d = new Date(utcIsoString);
+  if (isNaN(d.getTime())) return "";
+  return (
+    d.toLocaleString("en-IN", {
+      timeZone: "Asia/Kolkata",
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    }) + " IST"
+  );
+}
+
+type AnnouncementStatusType = "Live now" | "Scheduled" | "Expired" | "Off";
+
+function getAnnouncementStatus(item: Announcement, now = new Date()): {
+  label: AnnouncementStatusType;
+  badgeClass: string;
+  dotColor?: string;
+} {
+  if (item.endDate && new Date(item.endDate).getTime() < now.getTime()) {
+    return {
+      label: "Expired",
+      badgeClass: "bg-rose-500/10 text-rose-300 border-rose-500/30",
+    };
+  }
+  if (!item.active) {
+    return {
+      label: "Off",
+      badgeClass: "bg-slate-500/10 text-slate-400 border-slate-500/30",
+    };
+  }
+  if (item.startDate && new Date(item.startDate).getTime() > now.getTime()) {
+    return {
+      label: "Scheduled",
+      badgeClass: "bg-cyan-500/10 text-cyan-300 border-cyan-500/30",
+    };
+  }
+  return {
+    label: "Live now",
+    badgeClass: "bg-emerald-500/15 text-emerald-300 border-emerald-500/30",
+    dotColor: "bg-emerald-400",
+  };
+}
 
 export const AnnouncementsTab: React.FC = () => {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
@@ -23,6 +100,7 @@ export const AnnouncementsTab: React.FC = () => {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [previewItem, setPreviewItem] = useState<Partial<Announcement> | null>(null);
 
   const loadAnnouncements = useCallback(async () => {
     setLoading(true);
@@ -106,22 +184,15 @@ export const AnnouncementsTab: React.FC = () => {
         body: JSON.stringify(payload),
       });
 
-      let data: { error?: string } | null = null;
-      try {
-        data = await res.json();
-      } catch {
-        // body was not JSON
-      }
-
-      if (!res.ok) {
-        setErrorMsg(formatAdminErrorMessage(res, data, null, "save announcement"));
-      } else {
+      if (res.ok) {
         setEditingItem(null);
         await loadAnnouncements();
+      } else {
+        const data = await res.json().catch(() => null);
+        setErrorMsg(formatAdminErrorMessage(res, data, null, "saving announcement"));
       }
     } catch (err) {
-      console.error("Announcement save error:", err);
-      setErrorMsg(formatAdminErrorMessage(null, null, err, "save announcement"));
+      setErrorMsg(formatAdminErrorMessage(null, null, err, "saving announcement"));
     } finally {
       setSaving(false);
     }
@@ -129,23 +200,19 @@ export const AnnouncementsTab: React.FC = () => {
 
   const handleToggleActive = async (item: Announcement) => {
     try {
-      const updatedActive = !item.active;
       const res = await fetch(`/api/admin/announcements/${item.id}`, {
-        method: "PUT",
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...item,
-          active: updatedActive,
-        }),
+        body: JSON.stringify({ active: !item.active }),
       });
       if (res.ok) {
         await loadAnnouncements();
       } else {
         const data = await res.json().catch(() => null);
-        console.error("Failed to toggle announcement:", data?.error || res.status);
+        console.error("Failed to toggle status:", formatAdminErrorMessage(res, data, null, "toggling status"));
       }
     } catch (err) {
-      console.error("Failed to toggle announcement:", err);
+      console.error("Failed to toggle status:", formatAdminErrorMessage(null, null, err, "toggling status"));
     }
   };
 
@@ -175,7 +242,7 @@ export const AnnouncementsTab: React.FC = () => {
             <span>Announcements &amp; Alerts</span>
           </h2>
           <p className="text-xs text-slate-400 mt-0.5">
-            Broadcast high-priority notices, launch updates, or service banners across the website. Only one announcement can be active at a time.
+            Broadcast high-priority notices, launch updates, or service banners across the website. Managed in Indian Standard Time (IST).
           </p>
         </div>
 
@@ -198,7 +265,7 @@ export const AnnouncementsTab: React.FC = () => {
           <Megaphone className="w-8 h-8 text-slate-400 mx-auto mb-3" />
           <h3 className="text-sm font-semibold text-white">No announcements configured</h3>
           <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
-            Create an announcement to show an alert banner or modal popup to visitors on the live site.
+            Create an announcement to show an alert banner or popup modal to visitors on the live site.
           </p>
           <button
             onClick={handleOpenNew}
@@ -210,110 +277,125 @@ export const AnnouncementsTab: React.FC = () => {
         </div>
       ) : (
         <div className="space-y-3">
-          {announcements.map((item) => (
-            <div
-              key={item.id}
-              className={`p-4 rounded-xl border transition-all ${
-                item.active
-                  ? "bg-indigo-950/20 border-indigo-500/30 shadow-lg shadow-indigo-500/5"
-                  : "bg-[#090d16] border-white/[0.06] opacity-75 hover:opacity-100"
-              }`}
-            >
-              <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
-                <div className="space-y-1.5 flex-1">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span
-                      className={`text-[10px] uppercase font-mono px-2 py-0.5 rounded-md font-bold ${
-                        item.type === "warning"
-                          ? "bg-amber-500/20 text-amber-300 border border-amber-500/30"
-                          : item.type === "success"
-                          ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
-                          : "bg-indigo-500/20 text-indigo-300 border border-indigo-500/30"
-                      }`}
-                    >
-                      {item.type}
-                    </span>
-
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-white/[0.04] text-slate-400 border border-white/10">
-                      {item.displayStyle === "top_bar" ? "Top Banner" : "Popup Modal"}
-                    </span>
-
-                    {item.active ? (
-                      <span className="inline-flex items-center gap-1 text-[10px] font-sans px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-semibold">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                        Live on Site
+          {announcements.map((item) => {
+            const status = getAnnouncementStatus(item);
+            return (
+              <div
+                key={item.id}
+                className={`p-4 rounded-xl border transition-all ${
+                  status.label === "Live now"
+                    ? "bg-indigo-950/20 border-indigo-500/30 shadow-lg shadow-indigo-500/5"
+                    : "bg-[#090d16] border-white/[0.06] opacity-80 hover:opacity-100"
+                }`}
+              >
+                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                  <div className="space-y-1.5 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      {/* State Chip: Live now / Scheduled / Expired / Off */}
+                      <span
+                        className={`inline-flex items-center gap-1.5 text-[10px] font-sans px-2.5 py-0.5 rounded-md border font-semibold ${status.badgeClass}`}
+                      >
+                        {status.dotColor && (
+                          <span className={`w-1.5 h-1.5 rounded-full ${status.dotColor} animate-pulse`} />
+                        )}
+                        <span>{status.label}</span>
                       </span>
-                    ) : (
-                      <span className="text-[10px] font-sans px-2 py-0.5 rounded-md bg-white/[0.02] text-slate-400 border border-white/[0.06]">
-                        Inactive
-                      </span>
-                    )}
 
-                    {item.dismissible && (
-                      <span className="text-[10px] font-sans text-slate-400">
-                        Dismissible
+                      {/* Tone Type */}
+                      <span
+                        className={`text-[10px] uppercase font-mono px-2 py-0.5 rounded-md font-bold ${
+                          item.type === "warning"
+                            ? "bg-amber-500/20 text-amber-300 border border-amber-500/30"
+                            : item.type === "success"
+                            ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
+                            : "bg-indigo-500/20 text-indigo-300 border border-indigo-500/30"
+                        }`}
+                      >
+                        {item.type}
                       </span>
+
+                      {/* Display Style */}
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-white/[0.04] text-slate-400 border border-white/10">
+                        {item.displayStyle === "top_bar" ? "Top Banner" : "Popup Modal"}
+                      </span>
+
+                      {item.dismissible && (
+                        <span className="text-[10px] font-sans text-slate-400">
+                          Dismissible (7d memory)
+                        </span>
+                      )}
+                    </div>
+
+                    <h3 className="text-sm font-bold text-white">{item.title}</h3>
+                    <div className="text-xs text-slate-300 leading-relaxed max-w-3xl">
+                      <SafeMarkdown content={item.message} />
+                    </div>
+
+                    {(item.buttonLabel || item.startDate || item.endDate) && (
+                      <div className="flex flex-wrap items-center gap-3 pt-1 text-[11px] text-slate-400 font-sans">
+                        {item.buttonLabel && item.buttonLink && (
+                          <div className="inline-flex items-center gap-1 text-indigo-300">
+                            <ExternalLink className="w-3 h-3" />
+                            <span>
+                              Button: &ldquo;{item.buttonLabel}&rdquo; &rarr; {item.buttonLink}
+                            </span>
+                          </div>
+                        )}
+                        {(item.startDate || item.endDate) && (
+                          <div className="inline-flex items-center gap-1 text-slate-300">
+                            <Calendar className="w-3 h-3 text-indigo-400" />
+                            <span>
+                              {item.startDate ? `From: ${formatInIst(item.startDate)}` : "Immediate"}
+                              {item.endDate ? ` &bull; To: ${formatInIst(item.endDate)}` : ""}
+                            </span>
+                          </div>
+                        )}
+                      </div>
                     )}
                   </div>
 
-                  <h3 className="text-sm font-bold text-white">{item.title}</h3>
-                  <p className="text-xs text-slate-300 leading-relaxed max-w-3xl">
-                    {item.message}
-                  </p>
+                  {/* Actions */}
+                  <div className="flex items-center gap-2 self-end sm:self-start shrink-0 pt-1 sm:pt-0">
+                    <button
+                      onClick={() => setPreviewItem(item)}
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-white/[0.04] hover:bg-white/[0.08] text-slate-300 hover:text-white transition-colors border border-white/[0.08]"
+                      title="Preview announcement layout"
+                    >
+                      <Eye className="w-3.5 h-3.5 text-indigo-400" />
+                      <span>Preview</span>
+                    </button>
 
-                  {(item.buttonLabel || item.startDate || item.endDate) && (
-                    <div className="flex flex-wrap items-center gap-3 pt-1 text-[11px] text-slate-400 font-sans">
-                      {item.buttonLabel && item.buttonLink && (
-                        <div className="inline-flex items-center gap-1 text-indigo-300">
-                          <ExternalLink className="w-3 h-3" />
-                          <span>Button: &ldquo;{item.buttonLabel}&rdquo; &rarr; {item.buttonLink}</span>
-                        </div>
-                      )}
-                      {(item.startDate || item.endDate) && (
-                        <div className="inline-flex items-center gap-1">
-                          <Calendar className="w-3 h-3" />
-                          <span>
-                            {item.startDate ? `From: ${new Date(item.startDate).toLocaleDateString()}` : "Immediate"}
-                            {item.endDate ? ` &bull; To: ${new Date(item.endDate).toLocaleDateString()}` : ""}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
+                    <button
+                      onClick={() => handleToggleActive(item)}
+                      className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${
+                        item.active
+                          ? "bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/20"
+                          : "bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border border-emerald-500/20"
+                      }`}
+                    >
+                      {item.active ? "Turn Off" : "Turn On"}
+                    </button>
 
-                {/* Actions */}
-                <div className="flex items-center gap-2 self-end sm:self-start shrink-0 pt-1 sm:pt-0">
-                  <button
-                    onClick={() => handleToggleActive(item)}
-                    className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${
-                      item.active
-                        ? "bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/20"
-                        : "bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border border-emerald-500/20"
-                    }`}
-                  >
-                    {item.active ? "Deactivate" : "Activate"}
-                  </button>
+                    <button
+                      onClick={() => handleOpenEdit(item)}
+                      className="p-1.5 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] text-slate-300 hover:text-white transition-colors"
+                      title="Edit Announcement"
+                    >
+                      <Edit3 className="w-3.5 h-3.5" />
+                    </button>
 
-                  <button
-                    onClick={() => handleOpenEdit(item)}
-                    className="p-1.5 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] text-slate-300 hover:text-white transition-colors"
-                    title="Edit Announcement"
-                  >
-                    <Edit3 className="w-3.5 h-3.5" />
-                  </button>
-
-                  <button
-                    onClick={() => setDeletingId(item.id)}
-                    className="p-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 transition-colors"
-                    title="Delete Announcement"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
+                    <button
+                      onClick={() => setDeletingId(item.id)}
+                      className="p-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 transition-colors"
+                      title="Delete Announcement"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
@@ -406,7 +488,7 @@ export const AnnouncementsTab: React.FC = () => {
                     className="w-full px-3 py-2 rounded-xl bg-black/40 border border-white/10 text-white focus:outline-none focus:border-indigo-500"
                   >
                     <option value="top_bar">Top Sticky Bar</option>
-                    <option value="popup">Center Popup Modal</option>
+                    <option value="popup">Center/Corner Popup Modal</option>
                   </select>
                 </div>
               </div>
@@ -445,47 +527,46 @@ export const AnnouncementsTab: React.FC = () => {
                 </div>
               </div>
 
+              {/* Start and End Times in IST */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-slate-300 font-semibold mb-1">
-                    Start Date/Time <span className="text-[10px] text-slate-400 font-normal">(Optional)</span>
+                    Start Date / Time (IST)
                   </label>
                   <input
                     type="datetime-local"
-                    value={
-                      editingItem.startDate
-                        ? new Date(editingItem.startDate).toISOString().slice(0, 16)
-                        : ""
-                    }
+                    value={utcToIstInput(editingItem.startDate)}
                     onChange={(e) =>
                       setEditingItem({
                         ...editingItem,
-                        startDate: e.target.value ? new Date(e.target.value).toISOString() : "",
+                        startDate: istInputToUtc(e.target.value),
                       })
                     }
                     className="w-full px-3 py-2 rounded-xl bg-black/40 border border-white/10 text-white focus:outline-none focus:border-indigo-500"
                   />
+                  <span className="text-[10px] text-indigo-400/80 block mt-1">
+                    Indian Standard Time (UTC+05:30)
+                  </span>
                 </div>
 
                 <div>
                   <label className="block text-slate-300 font-semibold mb-1">
-                    End Date/Time <span className="text-[10px] text-slate-400 font-normal">(Optional)</span>
+                    End Date / Time (IST)
                   </label>
                   <input
                     type="datetime-local"
-                    value={
-                      editingItem.endDate
-                        ? new Date(editingItem.endDate).toISOString().slice(0, 16)
-                        : ""
-                    }
+                    value={utcToIstInput(editingItem.endDate)}
                     onChange={(e) =>
                       setEditingItem({
                         ...editingItem,
-                        endDate: e.target.value ? new Date(e.target.value).toISOString() : "",
+                        endDate: istInputToUtc(e.target.value),
                       })
                     }
                     className="w-full px-3 py-2 rounded-xl bg-black/40 border border-white/10 text-white focus:outline-none focus:border-indigo-500"
                   />
+                  <span className="text-[10px] text-indigo-400/80 block mt-1">
+                    Indian Standard Time (UTC+05:30)
+                  </span>
                 </div>
               </div>
 
@@ -509,28 +590,175 @@ export const AnnouncementsTab: React.FC = () => {
                     }
                     className="w-4 h-4 rounded text-indigo-600 focus:ring-0 bg-black/40 border-white/20"
                   />
-                  <span className="text-slate-300 font-medium">Allow user to dismiss</span>
+                  <span className="text-slate-300 font-medium">Allow user to dismiss (7 days)</span>
                 </label>
               </div>
 
-              <div className="flex justify-end gap-2.5 pt-3 border-t border-white/[0.08]">
+              <div className="flex items-center justify-between pt-3 border-t border-white/[0.08]">
                 <button
                   type="button"
-                  onClick={() => setEditingItem(null)}
-                  className="px-3.5 py-2 rounded-xl bg-white/[0.06] hover:bg-white/[0.1] text-slate-300 transition-colors"
+                  onClick={() => setPreviewItem(editingItem)}
+                  className="px-3 py-2 rounded-xl bg-white/[0.06] hover:bg-white/[0.1] text-indigo-300 text-xs font-medium transition-colors inline-flex items-center gap-1.5"
                 >
-                  Cancel
+                  <Eye className="w-3.5 h-3.5" />
+                  <span>Preview</span>
                 </button>
-                <button
-                  type="submit"
-                  disabled={saving}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold shadow-md shadow-indigo-600/30 transition-all disabled:opacity-50"
-                >
-                  <Save className="w-3.5 h-3.5" />
-                  <span>{saving ? "Saving..." : "Save Announcement"}</span>
-                </button>
+
+                <div className="flex gap-2.5">
+                  <button
+                    type="button"
+                    onClick={() => setEditingItem(null)}
+                    className="px-3.5 py-2 rounded-xl bg-white/[0.06] hover:bg-white/[0.1] text-slate-300 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={saving}
+                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold shadow-md shadow-indigo-600/30 transition-all disabled:opacity-50"
+                  >
+                    <Save className="w-3.5 h-3.5" />
+                    <span>{saving ? "Saving..." : "Save Announcement"}</span>
+                  </button>
+                </div>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Interactive Public Site Preview Modal */}
+      {previewItem && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
+          <div className="max-w-xl w-full bg-[#05070b] border border-white/15 rounded-2xl p-6 shadow-2xl relative space-y-5">
+            <div className="flex items-center justify-between pb-3 border-b border-white/10">
+              <div className="flex items-center gap-2">
+                <Eye className="w-4 h-4 text-indigo-400" />
+                <span className="text-xs font-mono uppercase tracking-wider text-white font-bold">
+                  Public Website Preview ({previewItem.displayStyle === "top_bar" ? "Top Slim Bar" : "Corner Popup"})
+                </span>
+              </div>
+              <button
+                onClick={() => setPreviewItem(null)}
+                className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-white/[0.06]"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <p className="text-xs text-slate-400">
+              This preview reflects how visitors on the public site will view this announcement:
+            </p>
+
+            {/* Preview Banner Container */}
+            <div className="p-4 rounded-xl border border-white/10 bg-[#090d16] space-y-4">
+              {previewItem.displayStyle === "top_bar" ? (
+                <div
+                  className={`w-full border rounded-xl px-4 py-3 flex items-center justify-between gap-3 text-xs sm:text-sm ${
+                    previewItem.type === "warning"
+                      ? "bg-amber-950/90 border-amber-500/30 text-amber-200"
+                      : previewItem.type === "success"
+                      ? "bg-emerald-950/90 border-emerald-500/30 text-emerald-200"
+                      : "bg-indigo-950/90 border-indigo-500/30 text-indigo-200"
+                  }`}
+                >
+                  <div className="flex items-center gap-2 min-w-0 flex-1">
+                    {previewItem.type === "warning" ? (
+                      <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />
+                    ) : previewItem.type === "success" ? (
+                      <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                    ) : (
+                      <Info className="w-4 h-4 text-indigo-400 shrink-0" />
+                    )}
+                    <div className="leading-tight">
+                      <span className="font-semibold text-white mr-1.5">{previewItem.title || "Announcement Title"}:</span>
+                      <SafeMarkdown content={previewItem.message || "Announcement message will appear here."} />
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 shrink-0">
+                    {previewItem.buttonLabel && (
+                      <span
+                        className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${
+                          previewItem.type === "warning"
+                            ? "bg-amber-600 text-slate-950"
+                            : previewItem.type === "success"
+                            ? "bg-emerald-600 text-white"
+                            : "bg-indigo-600 text-white"
+                        }`}
+                      >
+                        <span>{previewItem.buttonLabel}</span>
+                        <ArrowRight className="w-3 h-3" />
+                      </span>
+                    )}
+                    {previewItem.dismissible && (
+                      <button
+                        type="button"
+                        onClick={() => setPreviewItem(null)}
+                        className="p-1 rounded-md text-slate-400 hover:text-white"
+                        title="Dismiss preview"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <div
+                  className={`max-w-sm ml-auto border rounded-2xl p-4 shadow-xl ${
+                    previewItem.type === "warning"
+                      ? "bg-amber-950/95 border-amber-500/30 text-amber-200"
+                      : previewItem.type === "success"
+                      ? "bg-emerald-950/95 border-emerald-500/30 text-emerald-200"
+                      : "bg-indigo-950/95 border-indigo-500/30 text-indigo-200"
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-2 mb-2">
+                    <div className="flex items-center gap-2">
+                      <Info className="w-4 h-4 text-indigo-400" />
+                      <span className="font-semibold text-sm text-white">
+                        {previewItem.title || "Announcement Title"}
+                      </span>
+                    </div>
+                    {previewItem.dismissible && (
+                      <button
+                        type="button"
+                        onClick={() => setPreviewItem(null)}
+                        className="text-slate-400 hover:text-white p-0.5"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                  </div>
+                  <div className="text-xs text-slate-200 leading-relaxed mb-3">
+                    <SafeMarkdown content={previewItem.message || "Announcement message text will appear here."} />
+                  </div>
+                  {previewItem.buttonLabel && (
+                    <span
+                      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold ${
+                        previewItem.type === "warning"
+                          ? "bg-amber-600 text-slate-950"
+                          : previewItem.type === "success"
+                          ? "bg-emerald-600 text-white"
+                          : "bg-indigo-600 text-white"
+                      }`}
+                    >
+                      <span>{previewItem.buttonLabel}</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </span>
+                  )}
+                </div>
+              )}
+            </div>
+
+            <div className="flex justify-end pt-2">
+              <button
+                onClick={() => setPreviewItem(null)}
+                className="px-4 py-2 rounded-xl bg-white/[0.08] hover:bg-white/[0.12] text-xs font-medium text-white transition-colors"
+              >
+                Close Preview
+              </button>
+            </div>
           </div>
         </div>
       )}
