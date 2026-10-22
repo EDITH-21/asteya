@@ -3,22 +3,26 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Layers, Rocket, Users, MessageSquare } from "lucide-react";
+import { Home, Layers, Rocket, Users, HelpCircle, MessageSquare } from "lucide-react";
 
 interface MobileBottomNavProps {
   onOpenContact: () => void;
   isModalOpen: boolean;
+  hasFaqs?: boolean;
+  hasVentures?: boolean;
 }
 
 export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
   onOpenContact,
   isModalOpen,
+  hasFaqs = false,
+  hasVentures = false,
 }) => {
   const pathname = usePathname();
   const [activeSection, setActiveSection] = useState<string>("");
   const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
 
-  // Detect when virtual keyboard opens by tracking input focus on mobile devices
+  // Detect virtual keyboard opening by listening to focusin/focusout on input fields
   useEffect(() => {
     const handleFocusIn = (e: FocusEvent) => {
       const target = e.target as HTMLElement | null;
@@ -76,9 +80,67 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
     return null;
   }
 
-  const isServicesActive = pathname === "/" && activeSection === "services";
+  const isHomeActive = pathname === "/" && !activeSection;
+  const isServicesActive = (pathname === "/" && activeSection === "services") || pathname.startsWith("/services");
   const isVenturesActive = pathname === "/" && activeSection === "ventures";
   const isAboutActive = pathname === "/about";
+  const isFaqActive = pathname === "/faq";
+
+  // Build items array: Home, Services, [Ventures], Our Team, [FAQ]
+  const baseItems: Array<{
+    id: string;
+    label: string;
+    href: string;
+    icon: React.ReactNode;
+    isActive: boolean;
+  }> = [
+    {
+      id: "home",
+      label: "Home",
+      href: "/",
+      icon: <Home className="w-5 h-5" />,
+      isActive: isHomeActive,
+    },
+    {
+      id: "services",
+      label: "Services",
+      href: "/#services",
+      icon: <Layers className="w-5 h-5" />,
+      isActive: isServicesActive,
+    },
+  ];
+
+  if (hasVentures) {
+    baseItems.push({
+      id: "ventures",
+      label: "Ventures",
+      href: "/#ventures",
+      icon: <Rocket className="w-5 h-5" />,
+      isActive: isVenturesActive,
+    });
+  }
+
+  baseItems.push({
+    id: "about",
+    label: "Our Team",
+    href: "/about",
+    icon: <Users className="w-5 h-5" />,
+    isActive: isAboutActive,
+  });
+
+  if (hasFaqs) {
+    baseItems.push({
+      id: "faq",
+      label: "FAQ",
+      href: "/faq",
+      icon: <HelpCircle className="w-5 h-5" />,
+      isActive: isFaqActive,
+    });
+  }
+
+  // Keep "Talk" only if it fits 5 items; otherwise drop it (header keeps Let's Talk)
+  const showTalk = baseItems.length < 5;
+  const totalItemCount = baseItems.length + (showTalk ? 1 : 0);
 
   return (
     <nav
@@ -88,58 +150,44 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
         paddingBottom: "env(safe-area-inset-bottom, 0px)",
       }}
     >
-      <div className="h-16 max-w-md mx-auto grid grid-cols-4 items-center px-1">
-        {/* 1. Services */}
-        <Link
-          href="/#services"
-          className={`flex flex-col items-center justify-center min-h-[48px] min-w-[48px] px-2 py-1 rounded-xl transition-all active:scale-95 ${
-            isServicesActive
-              ? "text-indigo-400 font-semibold"
-              : "text-slate-400 hover:text-white"
-          }`}
-        >
-          <Layers className={`w-5 h-5 ${isServicesActive ? "text-indigo-400" : "text-slate-400"}`} />
-          <span className="text-[10px] font-sans tracking-tight mt-1">Services</span>
-        </Link>
+      <div
+        className="h-16 max-w-md mx-auto grid items-center px-1"
+        style={{
+          gridTemplateColumns: `repeat(${totalItemCount}, minmax(0, 1fr))`,
+        }}
+      >
+        {baseItems.map((item) => (
+          <Link
+            key={item.id}
+            href={item.href}
+            className={`flex flex-col items-center justify-center min-h-[48px] min-w-[48px] px-1 py-1 rounded-xl transition-all active:scale-95 ${
+              item.isActive
+                ? "text-indigo-400 font-semibold"
+                : "text-slate-400 hover:text-white"
+            }`}
+          >
+            {React.cloneElement(item.icon as React.ReactElement<{ className?: string }>, {
+              className: `w-5 h-5 ${item.isActive ? "text-indigo-400" : "text-slate-400"}`,
+            })}
+            <span className="text-[10px] font-sans tracking-tight mt-1 whitespace-nowrap">
+              {item.label}
+            </span>
+          </Link>
+        ))}
 
-        {/* 2. Ventures */}
-        <Link
-          href="/#ventures"
-          className={`flex flex-col items-center justify-center min-h-[48px] min-w-[48px] px-2 py-1 rounded-xl transition-all active:scale-95 ${
-            isVenturesActive
-              ? "text-indigo-400 font-semibold"
-              : "text-slate-400 hover:text-white"
-          }`}
-        >
-          <Rocket className={`w-5 h-5 ${isVenturesActive ? "text-indigo-400" : "text-slate-400"}`} />
-          <span className="text-[10px] font-sans tracking-tight mt-1">Ventures</span>
-        </Link>
-
-        {/* 3. About */}
-        <Link
-          href="/about"
-          className={`flex flex-col items-center justify-center min-h-[48px] min-w-[48px] px-2 py-1 rounded-xl transition-all active:scale-95 ${
-            isAboutActive
-              ? "text-indigo-400 font-semibold"
-              : "text-slate-400 hover:text-white"
-          }`}
-        >
-          <Users className={`w-5 h-5 ${isAboutActive ? "text-indigo-400" : "text-slate-400"}`} />
-          <span className="text-[10px] font-sans tracking-tight mt-1">About</span>
-        </Link>
-
-        {/* 4. Talk (Opens Contact Modal) */}
-        <button
-          type="button"
-          onClick={onOpenContact}
-          className="flex flex-col items-center justify-center min-h-[48px] min-w-[48px] px-2 py-1 rounded-xl text-slate-400 hover:text-indigo-300 transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400"
-          aria-label="Open project inquiry form"
-        >
-          <MessageSquare className="w-5 h-5 text-indigo-400" />
-          <span className="text-[10px] font-sans font-medium tracking-tight mt-1 text-slate-300">
-            Talk
-          </span>
-        </button>
+        {showTalk && (
+          <button
+            type="button"
+            onClick={onOpenContact}
+            className="flex flex-col items-center justify-center min-h-[48px] min-w-[48px] px-1 py-1 rounded-xl text-slate-400 hover:text-indigo-300 transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400"
+            aria-label="Open project inquiry form"
+          >
+            <MessageSquare className="w-5 h-5 text-indigo-400" />
+            <span className="text-[10px] font-sans font-medium tracking-tight mt-1 text-slate-300">
+              Talk
+            </span>
+          </button>
+        )}
       </div>
     </nav>
   );

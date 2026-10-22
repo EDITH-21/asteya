@@ -127,6 +127,8 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({ content: initialCont
           <MobileBottomNav
             onOpenContact={handleOpenContact}
             isModalOpen={contactModalOpen}
+            hasFaqs={hasFaqs}
+            hasVentures={hasVentures}
           />
 
           {/* Interactive Contact & Inquiry Modal */}
