@@ -6,6 +6,7 @@ import { DETAILED_SERVICES } from "@/lib/services-data";
 import { CONTACT_CONFIG } from "@/lib/constants";
 import { getPublicSiteContent } from "@/lib/server/content";
 import { PublicLayout } from "@/components/layout/PublicLayout";
+import { getSiteUrl } from "@/lib/site-url";
 import {
   ArrowRight,
   CheckCircle2,
@@ -36,7 +37,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     };
   }
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://asteya.tech";
+  const siteUrl = getSiteUrl();
   const url = `${siteUrl}/services/${service.slug}`;
 
   return {

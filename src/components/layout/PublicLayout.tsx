@@ -122,7 +122,11 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({ content: initialCont
 
           {/* Interactive Contact & Inquiry Modal */}
           {contactModalOpen && (
-            <ContactModal isOpen={contactModalOpen} onClose={handleCloseContact} />
+            <ContactModal
+              isOpen={contactModalOpen}
+              onClose={handleCloseContact}
+              contactEmail={content.settings?.contactEmail}
+            />
           )}
         </div>
       </ContactModalContext.Provider>

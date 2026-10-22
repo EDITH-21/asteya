@@ -10,9 +10,9 @@ export interface NavItem {
  * Replace LinkedIn URL via NEXT_PUBLIC_LINKEDIN_URL or directly here.
  */
 export const CONTACT_CONFIG = {
-  email: process.env.NEXT_PUBLIC_CONTACT_EMAIL || "hello@asteya.tech",
-  instagram: "https://www.instagram.com/asteya.tech/",
-  linkedin: process.env.NEXT_PUBLIC_LINKEDIN_URL || "https://www.linkedin.com/company/asteya",
+  email: process.env.NEXT_PUBLIC_CONTACT_EMAIL || "hello@aadrut.com",
+  instagram: process.env.NEXT_PUBLIC_INSTAGRAM_URL || "",
+  linkedin: process.env.NEXT_PUBLIC_LINKEDIN_URL || "",
 };
 
 export const NAV_ITEMS: NavItem[] = [
@@ -105,8 +105,6 @@ export interface WhyAadrutItem {
   badge: string;
 }
 
-export type WhyAsteyaItem = WhyAadrutItem;
-
 export const WHY_AADRUT_ITEMS: WhyAadrutItem[] = [
   {
     number: "01",
@@ -133,8 +131,6 @@ export const WHY_AADRUT_ITEMS: WhyAadrutItem[] = [
     badge: "NEXT-GEN READY",
   },
 ];
-
-export const WHY_ASTEYA_ITEMS = WHY_AADRUT_ITEMS;
 
 export type TechDomainTheme = "indigo" | "cyan" | "violet";
 

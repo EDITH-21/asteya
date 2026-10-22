@@ -3,19 +3,22 @@ import type { Metadata } from "next";
 import { CONTACT_CONFIG } from "@/lib/constants";
 import { getPublicSiteContent } from "@/lib/server/content";
 import { PublicLayout } from "@/components/layout/PublicLayout";
+import { getSiteUrl } from "@/lib/site-url";
 
 export const revalidate = 60;
+
+const siteUrl = getSiteUrl();
 
 export const metadata: Metadata = {
   title: "Terms of Service | Aadrut",
   description: "Aadrut's terms and conditions governing the use of our website, consulting services, and digital products.",
   alternates: {
-    canonical: "https://asteya.tech/terms",
+    canonical: `${siteUrl}/terms`,
   },
   openGraph: {
     title: "Terms of Service | Aadrut",
     description: "Aadrut's terms and conditions governing the use of our website, consulting services, and digital products.",
-    url: "https://asteya.tech/terms",
+    url: `${siteUrl}/terms`,
     siteName: "Aadrut",
     type: "website",
   },
@@ -23,6 +26,7 @@ export const metadata: Metadata = {
 
 export default async function TermsPage() {
   const content = await getPublicSiteContent();
+  const contactEmail = content.settings?.contactEmail || process.env.NEXT_PUBLIC_CONTACT_EMAIL || "hello@aadrut.com";
 
   return (
     <PublicLayout content={content}>
@@ -73,8 +77,8 @@ export default async function TermsPage() {
               <h2 className="text-xl font-bold text-white tracking-tight">5. Inquiries &amp; Legal Notices</h2>
               <p>
                 For legal notices or questions regarding these Terms, contact our legal and leadership team directly at{" "}
-                <a href={`mailto:${CONTACT_CONFIG.email}`} className="text-indigo-400 hover:underline">
-                  {CONTACT_CONFIG.email}
+                <a href={`mailto:${contactEmail}`} className="text-indigo-400 hover:underline">
+                  {contactEmail}
                 </a>.
               </p>
             </section>

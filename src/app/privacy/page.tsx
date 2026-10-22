@@ -3,19 +3,22 @@ import type { Metadata } from "next";
 import { CONTACT_CONFIG } from "@/lib/constants";
 import { getPublicSiteContent } from "@/lib/server/content";
 import { PublicLayout } from "@/components/layout/PublicLayout";
+import { getSiteUrl } from "@/lib/site-url";
 
 export const revalidate = 60;
+
+const siteUrl = getSiteUrl();
 
 export const metadata: Metadata = {
   title: "Privacy Policy | Aadrut",
   description: "Aadrut's commitment to protecting user privacy, data security, and client confidentiality.",
   alternates: {
-    canonical: "https://asteya.tech/privacy",
+    canonical: `${siteUrl}/privacy`,
   },
   openGraph: {
     title: "Privacy Policy | Aadrut",
     description: "Aadrut's commitment to protecting user privacy, data security, and client confidentiality.",
-    url: "https://asteya.tech/privacy",
+    url: `${siteUrl}/privacy`,
     siteName: "Aadrut",
     type: "website",
   },
@@ -23,6 +26,7 @@ export const metadata: Metadata = {
 
 export default async function PrivacyPage() {
   const content = await getPublicSiteContent();
+  const contactEmail = content.settings?.contactEmail || process.env.NEXT_PUBLIC_CONTACT_EMAIL || "hello@aadrut.com";
 
   return (
     <PublicLayout content={content}>
@@ -78,8 +82,8 @@ export default async function PrivacyPage() {
               <h2 className="text-xl font-bold text-white tracking-tight">5. Contact &amp; Rights</h2>
               <p>
                 You may request access to, correction of, or deletion of your personal data at any time by contacting our engineering and leadership team at{" "}
-                <a href={`mailto:${CONTACT_CONFIG.email}`} className="text-indigo-400 hover:underline">
-                  {CONTACT_CONFIG.email}
+                <a href={`mailto:${contactEmail}`} className="text-indigo-400 hover:underline">
+                  {contactEmail}
                 </a>.
               </p>
             </section>

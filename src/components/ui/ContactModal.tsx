@@ -9,9 +9,11 @@ import { CONTACT_CONFIG } from "@/lib/constants";
 interface ContactModalProps {
   isOpen: boolean;
   onClose: () => void;
+  contactEmail?: string;
 }
 
-export const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) => {
+export const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose, contactEmail }) => {
+  const emailAddress = contactEmail || CONTACT_CONFIG.email;
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -243,11 +245,11 @@ export const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) =
                 <div className="pt-3 border-t border-white/[0.08] flex flex-wrap items-center justify-between gap-2 text-xs text-slate-400">
                   <span>Direct inquiries:</span>
                   <a
-                    href={`mailto:${CONTACT_CONFIG.email}`}
+                    href={`mailto:${emailAddress}`}
                     className="inline-flex items-center gap-1.5 text-indigo-300 hover:text-white transition-colors"
                   >
                     <Mail strokeWidth={1.75} className="w-3.5 h-3.5 text-indigo-400" />
-                    <span>{CONTACT_CONFIG.email}</span>
+                    <span>{emailAddress}</span>
                   </a>
                 </div>
               </form>

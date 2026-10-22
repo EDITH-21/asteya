@@ -1,8 +1,9 @@
 import type { MetadataRoute } from "next";
 import { DETAILED_SERVICES } from "@/lib/services-data";
+import { getSiteUrl } from "@/lib/site-url";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://asteya.tech";
+  const siteUrl = getSiteUrl();
   const now = new Date();
 
   const serviceUrls: MetadataRoute.Sitemap = Object.keys(DETAILED_SERVICES).map((slug) => ({

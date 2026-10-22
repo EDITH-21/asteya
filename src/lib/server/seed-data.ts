@@ -266,8 +266,8 @@ export const SEED_FAQS: FAQItem[] = [
  */
 export const SEED_SITE_SETTINGS: SiteSettings = {
   contactEmail: "hello@aadrut.com",
-  instagramUrl: "https://www.instagram.com/asteya.tech/",
-  linkedinUrl: "https://www.linkedin.com/company/asteya",
+  instagramUrl: "",
+  linkedinUrl: "",
   footerTagline: "Digital Products, Intelligent Solutions & Future Ventures.",
   maintenanceMode: false,
   showTestimonials: true,

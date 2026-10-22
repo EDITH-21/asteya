@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from "next";
 import { Inter, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import { SmoothScroll } from "@/components/ui/SmoothScroll";
+import { getSiteUrl } from "@/lib/site-url";
+import { getPublicSiteContent } from "@/lib/server/content";
 
 const inter = Inter({
   variable: "--font-sans",
@@ -15,7 +17,12 @@ const spaceGrotesk = Space_Grotesk({
   display: "swap",
 });
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://asteya.tech";
+const siteUrl = getSiteUrl();
+const contactEmail = process.env.NEXT_PUBLIC_CONTACT_EMAIL || "hello@aadrut.com";
+const socialSameAs = [
+  process.env.NEXT_PUBLIC_INSTAGRAM_URL,
+  process.env.NEXT_PUBLIC_LINKEDIN_URL,
+].filter(Boolean) as string[];
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -44,6 +51,14 @@ export const metadata: Metadata = {
     siteName: "Aadrut",
     locale: "en_US",
     type: "website",
+    images: [
+      {
+        url: `${siteUrl}/opengraph-image`,
+        width: 1200,
+        height: 630,
+        alt: "Aadrut | Digital Products, Intelligent Solutions & Future Ventures",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
@@ -51,6 +66,7 @@ export const metadata: Metadata = {
     description:
       "Aadrut builds high-performance web applications, custom digital solutions, brand design systems, and intelligent business automations for high-growth enterprises.",
     creator: "@aadrut",
+    images: [`${siteUrl}/opengraph-image`],
   },
   manifest: "/manifest.webmanifest",
   icons: {
@@ -71,71 +87,79 @@ export const viewport: Viewport = {
   maximumScale: 5,
 };
 
-const jsonLd = {
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "Organization",
-      "@id": `${siteUrl}/#organization`,
-      "name": "Aadrut",
-      "url": siteUrl,
-      "logo": {
-        "@type": "ImageObject",
-        "url": `${siteUrl}/aadrut-logo.png`,
-        "width": "272",
-        "height": "339",
-      },
-      "sameAs": [
-        "https://www.instagram.com/asteya.tech/",
-        process.env.NEXT_PUBLIC_LINKEDIN_URL || "https://www.linkedin.com/company/asteya",
-      ],
-      "contactPoint": {
-        "@type": "ContactPoint",
-        "email": process.env.NEXT_PUBLIC_CONTACT_EMAIL || "hello@asteya.tech",
-        "contactType": "sales & inquiries",
-      },
-    },
-    {
-      "@type": "WebSite",
-      "@id": `${siteUrl}/#website`,
-      "url": siteUrl,
-      "name": "Aadrut",
-      "description": "Digital Products, Intelligent Solutions & Future Ventures",
-      "publisher": {
-        "@id": `${siteUrl}/#organization`,
-      },
-      "inLanguage": "en-US",
-    },
-    {
-      "@type": "Service",
-      "serviceType": "Web Development",
-      "provider": {
-        "@id": `${siteUrl}/#organization`,
-      },
-      "description": "Modern, responsive, scalable websites and web applications built with Next.js, React, and TypeScript.",
-    },
-    {
-      "@type": "Service",
-      "serviceType": "Business Automation",
-      "provider": {
-        "@id": `${siteUrl}/#organization`,
-      },
-      "description": "Autonomous workflows, CRM integrations, and data pipelines that streamline operational productivity.",
-    },
-  ],
-};
-
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const content = await getPublicSiteContent();
+  const dynamicContactEmail =
+    content.settings?.contactEmail ||
+    process.env.NEXT_PUBLIC_CONTACT_EMAIL ||
+    "hello@aadrut.com";
+  const dynamicInstagram =
+    content.settings?.instagramUrl || process.env.NEXT_PUBLIC_INSTAGRAM_URL || "";
+  const dynamicLinkedin =
+    content.settings?.linkedinUrl || process.env.NEXT_PUBLIC_LINKEDIN_URL || "";
+  const dynamicSameAs = [dynamicInstagram, dynamicLinkedin].filter(Boolean) as string[];
+
+  const dynamicJsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": `${siteUrl}/#organization`,
+        "name": "Aadrut",
+        "url": siteUrl,
+        "logo": {
+          "@type": "ImageObject",
+          "url": `${siteUrl}/aadrut-logo.png`,
+          "width": "272",
+          "height": "339",
+        },
+        "sameAs": dynamicSameAs,
+        "contactPoint": {
+          "@type": "ContactPoint",
+          "email": dynamicContactEmail,
+          "contactType": "sales & inquiries",
+        },
+      },
+      {
+        "@type": "WebSite",
+        "@id": `${siteUrl}/#website`,
+        "url": siteUrl,
+        "name": "Aadrut",
+        "description": "Digital Products, Intelligent Solutions & Future Ventures",
+        "publisher": {
+          "@id": `${siteUrl}/#organization`,
+        },
+        "inLanguage": "en-US",
+      },
+      {
+        "@type": "Service",
+        "serviceType": "Web Development",
+        "provider": {
+          "@id": `${siteUrl}/#organization`,
+        },
+        "description": "Modern, responsive, scalable websites and web applications built with Next.js, React, and TypeScript.",
+      },
+      {
+        "@type": "Service",
+        "serviceType": "Business Automation",
+        "provider": {
+          "@id": `${siteUrl}/#organization`,
+        },
+        "description": "Autonomous workflows, CRM integrations, and data pipelines that streamline operational productivity.",
+      },
+    ],
+  };
+
   return (
     <html lang="en" className={`${inter.variable} ${spaceGrotesk.variable} dark`}>
       <head>
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(dynamicJsonLd).replace(/</g, "\\u003c") }}
         />
       </head>
       <body className="bg-[#05070b] text-[#f1f5f9] antialiased selection:bg-indigo-500/30 selection:text-white min-h-[100svh]">

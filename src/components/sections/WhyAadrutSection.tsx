@@ -10,9 +10,6 @@ export const WhyAadrutSection: React.FC = () => {
       id="why-aadrut"
       className="site-section relative w-full bg-[#05070b] border-t border-white/[0.04] overflow-hidden"
     >
-      {/* Anchor alias for backwards compatibility */}
-      <span id="why-asteya" className="sr-only" />
-
       {/* Ambient Lighting */}
       <div className="absolute top-1/3 left-0 w-[340px] sm:w-[500px] h-[340px] sm:h-[500px] bg-indigo-600/10 rounded-full blur-2xl sm:blur-[120px] pointer-events-none" />
 
@@ -78,5 +75,3 @@ export const WhyAadrutSection: React.FC = () => {
     </section>
   );
 };
-
-export const WhyAsteyaSection = WhyAadrutSection;

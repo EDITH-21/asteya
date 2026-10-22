@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { EnquiryCreateSchema } from "@/lib/server/validations";
-import { createEnquiry, initializeDatabase } from "@/lib/server/db";
+import { createEnquiry, getSiteSettings, initializeDatabase } from "@/lib/server/db";
 import { getClientIp } from "@/lib/server/auth";
 import { isAllowedOrigin } from "@/lib/server/origin";
 import { isRedisConfigured, redisRateLimit } from "@/lib/server/redis";
@@ -44,10 +44,12 @@ async function sendResendNotification(enquiry: {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) return;
 
+  const settings = await getSiteSettings().catch(() => null);
   const recipient =
     process.env.CONTACT_NOTIFICATION_EMAIL ||
+    settings?.contactEmail ||
     process.env.NEXT_PUBLIC_CONTACT_EMAIL ||
-    "hello@asteya.tech";
+    "hello@aadrut.com";
   const fromEmail = process.env.RESEND_FROM_EMAIL || "Aadrut Inquiries <onboarding@resend.dev>";
 
   // Strip CRLF to block header injection in Subject and Reply-To

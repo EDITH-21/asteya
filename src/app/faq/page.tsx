@@ -3,10 +3,12 @@ import type { Metadata } from "next";
 import { getPublicSiteContent } from "@/lib/server/content";
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import { FaqPageClient } from "@/components/pages/FaqPageClient";
+import { getSiteUrl } from "@/lib/site-url";
 
 export const revalidate = 60;
 
 export async function generateMetadata(): Promise<Metadata> {
+  const siteUrl = getSiteUrl();
   const title = "Frequently Asked Questions | Aadrut";
   const description =
     "Frequently asked questions about Aadrut's digital engineering services, technology ventures, engagement process, and client partnerships.";
@@ -15,12 +17,12 @@ export async function generateMetadata(): Promise<Metadata> {
     title,
     description,
     alternates: {
-      canonical: "https://asteya.tech/faq",
+      canonical: `${siteUrl}/faq`,
     },
     openGraph: {
       title,
       description,
-      url: "https://asteya.tech/faq",
+      url: `${siteUrl}/faq`,
       siteName: "Aadrut",
       locale: "en_US",
       type: "website",

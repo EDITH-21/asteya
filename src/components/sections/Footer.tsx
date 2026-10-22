@@ -54,9 +54,11 @@ export const Footer: React.FC<FooterProps> = ({
   hasFaqs = false,
   hasVentures = false,
 }) => {
-  const email = settings?.contactEmail || CONTACT_CONFIG.email;
-  const instagram = settings?.instagramUrl || CONTACT_CONFIG.instagram;
-  const linkedin = settings?.linkedinUrl || CONTACT_CONFIG.linkedin;
+  const email = settings?.contactEmail || process.env.NEXT_PUBLIC_CONTACT_EMAIL || CONTACT_CONFIG.email;
+  const rawInstagram = settings?.instagramUrl ?? process.env.NEXT_PUBLIC_INSTAGRAM_URL ?? CONTACT_CONFIG.instagram;
+  const rawLinkedin = settings?.linkedinUrl ?? process.env.NEXT_PUBLIC_LINKEDIN_URL ?? CONTACT_CONFIG.linkedin;
+  const instagram = (rawInstagram || "").trim();
+  const linkedin = (rawLinkedin || "").trim();
   const tagline = settings?.footerTagline || "IDEA ───── BUILD ───── EVOLVE";
 
   const handleContactClick = (e: React.MouseEvent) => {

@@ -25,7 +25,7 @@ const TechnologySection = dynamic(
 );
 
 const WhyAadrutSection = dynamic(
-  () => import("@/components/sections/WhyAsteyaSection").then((mod) => mod.WhyAadrutSection),
+  () => import("@/components/sections/WhyAadrutSection").then((mod) => mod.WhyAadrutSection),
   { ssr: true }
 );
 

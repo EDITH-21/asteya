@@ -3,10 +3,12 @@ import type { Metadata } from "next";
 import { getPublicSiteContent } from "@/lib/server/content";
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import { AboutPageClient } from "@/components/pages/AboutPageClient";
+import { getSiteUrl } from "@/lib/site-url";
 
 export const revalidate = 60;
 
 export async function generateMetadata(): Promise<Metadata> {
+  const siteUrl = getSiteUrl();
   const title = "About Aadrut | Aadrut";
   const description =
     "Aadrut is a technology company creating digital products, intelligent solutions, and ventures designed for the future.";
@@ -15,12 +17,12 @@ export async function generateMetadata(): Promise<Metadata> {
     title,
     description,
     alternates: {
-      canonical: "https://asteya.tech/about",
+      canonical: `${siteUrl}/about`,
     },
     openGraph: {
       title,
       description,
-      url: "https://asteya.tech/about",
+      url: `${siteUrl}/about`,
       siteName: "Aadrut",
       locale: "en_US",
       type: "website",
@@ -35,6 +37,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function AboutPage() {
+  const siteUrl = getSiteUrl();
   const content = await getPublicSiteContent();
   const publishedTeam = (content.team || []).filter((m) => m.published);
 
@@ -50,8 +53,8 @@ export default async function AboutPage() {
     "@context": "https://schema.org",
     "@type": "Organization",
     name: "Aadrut",
-    url: "https://asteya.tech",
-    logo: "https://asteya.tech/icon.png",
+    url: siteUrl,
+    logo: `${siteUrl}/icon.png`,
     description:
       content.about.headline ||
       "Aadrut engineers high-performance web applications, intelligent solutions, and modern technology ventures.",
@@ -67,7 +70,7 @@ export default async function AboutPage() {
       "@type": "Organization",
       name: "Aadrut",
     },
-    ...(member.photoUrl ? { image: `https://asteya.tech${member.photoUrl}` } : {}),
+    ...(member.photoUrl ? { image: `${siteUrl}${member.photoUrl}` } : {}),
     ...(member.linkedinUrl ? { sameAs: [member.linkedinUrl] } : {}),
   }));
 
